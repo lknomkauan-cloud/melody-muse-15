@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Music2,
   Piano,
+  Music,
 } from "lucide-react";
 import heroImage from "../assets/hero-music.png";
 
