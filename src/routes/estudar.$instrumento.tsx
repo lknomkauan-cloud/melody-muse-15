@@ -18,6 +18,7 @@ import {
   Music4,
   Wind,
 } from "lucide-react";
+import { HarmonicField } from "@/components/HarmonicField";
 
 type Section = {
   id: string;
@@ -631,6 +632,10 @@ function ApostilaPage() {
             ))}
           </ol>
         </nav>
+
+        <HarmonicField instrument={instrumento as "violao" | "piano" | "baixo" | "bateria" | "voz" | "violino" | "sax"} />
+
+
 
         {/* Conteúdo */}
         <div className="mt-10 space-y-10">
