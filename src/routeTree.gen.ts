@@ -16,6 +16,7 @@ import { Route as EscalasRouteImport } from './routes/escalas'
 import { Route as AcordesRouteImport } from './routes/acordes'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
+import { Route as EstudarInstrumentoRouteImport } from './routes/estudar.$instrumento'
 
 const QuizRoute = QuizRouteImport.update({
   id: '/quiz',
@@ -52,23 +53,30 @@ const SitemapXmlRoute = SitemapXmlRouteImport.update({
   path: '/sitemap/xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EstudarInstrumentoRoute = EstudarInstrumentoRouteImport.update({
+  id: '/$instrumento',
+  path: '/$instrumento',
+  getParentRoute: () => EstudarRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/acordes': typeof AcordesRoute
   '/escalas': typeof EscalasRoute
-  '/estudar': typeof EstudarRoute
+  '/estudar': typeof EstudarRouteWithChildren
   '/metronomo': typeof MetronomoRoute
   '/quiz': typeof QuizRoute
+  '/estudar/$instrumento': typeof EstudarInstrumentoRoute
   '/sitemap/xml': typeof SitemapXmlRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/acordes': typeof AcordesRoute
   '/escalas': typeof EscalasRoute
-  '/estudar': typeof EstudarRoute
+  '/estudar': typeof EstudarRouteWithChildren
   '/metronomo': typeof MetronomoRoute
   '/quiz': typeof QuizRoute
+  '/estudar/$instrumento': typeof EstudarInstrumentoRoute
   '/sitemap/xml': typeof SitemapXmlRoute
 }
 export interface FileRoutesById {
@@ -76,9 +84,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/acordes': typeof AcordesRoute
   '/escalas': typeof EscalasRoute
-  '/estudar': typeof EstudarRoute
+  '/estudar': typeof EstudarRouteWithChildren
   '/metronomo': typeof MetronomoRoute
   '/quiz': typeof QuizRoute
+  '/estudar/$instrumento': typeof EstudarInstrumentoRoute
   '/sitemap/xml': typeof SitemapXmlRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/estudar'
     | '/metronomo'
     | '/quiz'
+    | '/estudar/$instrumento'
     | '/sitemap/xml'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/estudar'
     | '/metronomo'
     | '/quiz'
+    | '/estudar/$instrumento'
     | '/sitemap/xml'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/estudar'
     | '/metronomo'
     | '/quiz'
+    | '/estudar/$instrumento'
     | '/sitemap/xml'
   fileRoutesById: FileRoutesById
 }
@@ -115,7 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AcordesRoute: typeof AcordesRoute
   EscalasRoute: typeof EscalasRoute
-  EstudarRoute: typeof EstudarRoute
+  EstudarRoute: typeof EstudarRouteWithChildren
   MetronomoRoute: typeof MetronomoRoute
   QuizRoute: typeof QuizRoute
   SitemapXmlRoute: typeof SitemapXmlRoute
@@ -172,14 +184,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapXmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/estudar/$instrumento': {
+      id: '/estudar/$instrumento'
+      path: '/$instrumento'
+      fullPath: '/estudar/$instrumento'
+      preLoaderRoute: typeof EstudarInstrumentoRouteImport
+      parentRoute: typeof EstudarRoute
+    }
   }
 }
+
+interface EstudarRouteChildren {
+  EstudarInstrumentoRoute: typeof EstudarInstrumentoRoute
+}
+
+const EstudarRouteChildren: EstudarRouteChildren = {
+  EstudarInstrumentoRoute: EstudarInstrumentoRoute,
+}
+
+const EstudarRouteWithChildren =
+  EstudarRoute._addFileChildren(EstudarRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcordesRoute: AcordesRoute,
   EscalasRoute: EscalasRoute,
-  EstudarRoute: EstudarRoute,
+  EstudarRoute: EstudarRouteWithChildren,
   MetronomoRoute: MetronomoRoute,
   QuizRoute: QuizRoute,
   SitemapXmlRoute: SitemapXmlRoute,
