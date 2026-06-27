@@ -115,7 +115,7 @@ function Header() {
 }
 
 function MobileNav({ navItems }: { navItems: { to: string; label: string }[] }) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="sm:hidden">
