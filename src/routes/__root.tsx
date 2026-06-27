@@ -81,19 +81,82 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
+function Header() {
+  const navItems = [
+    { to: "/", label: "Início" },
+    { to: "/quiz", label: "Quiz" },
+    { to: "/escalas", label: "Escalas" },
+    { to: "/acordes", label: "Acordes" },
+    { to: "/metronomo", label: "Metrônomo" },
+  ];
+
+  return (
+    <header className="fixed top-0 left-0 right-0 z-50 glass">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+        <Link to="/" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
+          <Music className="h-6 w-6 text-primary" />
+          <span className="font-display text-lg font-bold">Melodia</span>
+        </Link>
+        <nav className="hidden items-center gap-1 sm:flex">
+          {navItems.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              activeProps={{ className: "text-primary bg-primary/10" }}
+              className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+        <MobileNav navItems={navItems} />
+      </div>
+    </header>
+  );
+}
+
+function MobileNav({ navItems }: { navItems: { to: string; label: string }[] }) {
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <div className="sm:hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="rounded-md p-2 text-foreground hover:bg-muted"
+        aria-label="Menu"
+      >
+        {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </button>
+      {open && (
+        <div className="absolute left-0 right-0 top-16 border-t border-border glass">
+          <nav className="flex flex-col p-4 gap-1">
+            {navItems.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={() => setOpen(false)}
+                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Melodia — Estudo Musical" },
+      { name: "description", content: "App completo para estudar teoria musical, praticar com quizzes e usar ferramentas como metrônomo." },
+      { property: "og:title", content: "Melodia — Estudo Musical" },
+      { property: "og:description", content: "App completo para estudar teoria musical, praticar com quizzes e usar ferramentas como metrônomo." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
