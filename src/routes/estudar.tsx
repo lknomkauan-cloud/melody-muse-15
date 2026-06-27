@@ -7,6 +7,7 @@ import {
   Drum,
   Music2,
   Music4,
+  Wind,
   BookOpen,
   Waves,
   Layers,
@@ -15,6 +16,8 @@ import {
   Ear,
   Sparkles,
   ChevronRight,
+  FileText,
+  ExternalLink,
 } from "lucide-react";
 
 export const Route = createFileRoute("/estudar")({
@@ -37,12 +40,20 @@ export const Route = createFileRoute("/estudar")({
   component: EstudarPage,
 });
 
+type Resource = {
+  title: string;
+  type: "Apostila PDF" | "Acordes" | "Pentatônica" | "Escalas" | "Método" | "Vídeo";
+  url: string;
+  source: string;
+};
+
 type Instrument = {
   id: string;
   name: string;
   icon: typeof Guitar;
   description: string;
   specifics: string[];
+  resources: Resource[];
 };
 
 const instruments: Instrument[] = [
@@ -59,6 +70,13 @@ const instruments: Instrument[] = [
       "Técnicas: hammer-on, pull-off, slide, bending, tapping",
       "Leitura de cifras, tablaturas e partitura",
     ],
+    resources: [
+      { title: "Curso básico de violão popular (PDF)", type: "Apostila PDF", url: "https://www.ibel.org.br/download/ApostilaDeViolao.pdf", source: "IBEL" },
+      { title: "Apostila de Violão — Igreja nas Casas (PDF)", type: "Apostila PDF", url: "https://igrejanascasas.com/wp-content/uploads/2017/07/ApostilaViolao-1.pdf", source: "Igreja nas Casas" },
+      { title: "Escala Pentatônica — exercícios (PDF)", type: "Pentatônica", url: "https://www.cliqueapostilas.com.br/violao/escala-pentatonica", source: "Clique Apostilas" },
+      { title: "Violão e Guitarra: As Ferramentas do Aprendiz", type: "Método", url: "https://pdfcoffee.com/violao-pdf-free.html", source: "Domínio da Música" },
+      { title: "Manual Básico do Violão — Leandro Kasan", type: "Apostila PDF", url: "https://pt.scribd.com/document/551273751/Manual-Basico-do-Violao-Leandro-Kasan-2", source: "Scribd" },
+    ],
   },
   {
     id: "piano",
@@ -73,6 +91,13 @@ const instruments: Instrument[] = [
       "Leitura de partitura nas duas claves",
       "Sight reading e harmonização de melodias",
     ],
+    resources: [
+      { title: "Apostila Piano e Teclado — Eduardo Torres (PDF)", type: "Apostila PDF", url: "https://pdfcoffee.com/download/apostila-de-piano-e-teclado-19-pdf-free.html", source: "Piano Educato" },
+      { title: "Curso de Teclado completo (PDF)", type: "Apostila PDF", url: "http://www.conbcd.com.br/documents/CursodeTeclado.pdf", source: "CONBCD" },
+      { title: "Escalas e Acordes Fundamentais (PDF)", type: "Escalas", url: "https://epage.pub/doc/escalas-e-acordes-fundamentais-no-teclado-e-piano-y9l1klnnny", source: "ePage" },
+      { title: "Acordes no Piano/Teclado (PDF)", type: "Acordes", url: "https://www.cliqueapostilas.com.br/teoria-musical/acordes-no-piano-teclado", source: "Clique Apostilas" },
+      { title: "Pentatônicas no piano — guia visual", type: "Pentatônica", url: "https://www.pianoscales.org/pentatonic.html", source: "PianoScales" },
+    ],
   },
   {
     id: "baixo",
@@ -85,6 +110,12 @@ const instruments: Instrument[] = [
       "Groove em diferentes estilos (funk, samba, rock)",
       "Relação com bateria e harmonia",
       "Arpejos e modos sobre cifras",
+    ],
+    resources: [
+      { title: "Apostila de Baixo — Projeto São Tiago (PDF)", type: "Apostila PDF", url: "https://www.projetosaotiago.ong.br/assets/uploads/diversos/99/Apostila%20de%20Baixo%20-%2027.01.pdf", source: "Projeto São Tiago" },
+      { title: "Apostilas de Baixo (coletânea)", type: "Apostila PDF", url: "https://www.cliqueapostilas.com.br/baixo", source: "Clique Apostilas" },
+      { title: "Pentatônicas no Baixo — Studybass", type: "Pentatônica", url: "https://www.studybass.com/lessons/pentatonic-bass-patterns/the-minor-pentatonic-scale/", source: "Studybass" },
+      { title: "Acordes e arpejos no contrabaixo", type: "Acordes", url: "https://www.cifraclub.com.br/aulas/baixo/", source: "Cifra Club" },
     ],
   },
   {
@@ -99,6 +130,12 @@ const instruments: Instrument[] = [
       "Viradas e fills criativos",
       "Leitura rítmica e clave",
     ],
+    resources: [
+      { title: "Apostila de Bateria (PDF)", type: "Apostila PDF", url: "https://pt.slideshare.net/slideshow/apostila-bateria/59477189", source: "Slideshare" },
+      { title: "40 Rudimentos PAS (PDF oficial)", type: "Método", url: "https://www.pas.org/docs/default-source/standards-files/pas-international-drum-rudiments.pdf", source: "PAS" },
+      { title: "Apostilas de Bateria (coletânea)", type: "Apostila PDF", url: "https://www.cliqueapostilas.com.br/bateria", source: "Clique Apostilas" },
+      { title: "Leitura rítmica — Stick Control (referência)", type: "Método", url: "https://archive.org/details/stick-control-for-the-snare-drummer", source: "Archive.org" },
+    ],
   },
   {
     id: "voz",
@@ -111,6 +148,11 @@ const instruments: Instrument[] = [
       "Registros: peito, mista, cabeça, belting",
       "Afinação e percepção interválica",
       "Dicção, fraseado e interpretação",
+    ],
+    resources: [
+      { title: "Apostila de Canto — Cássia Cotrim (PDF)", type: "Apostila PDF", url: "https://pdfcoffee.com/apostila-de-canto-pdf-free.html", source: "PDFCoffee" },
+      { title: "Apostila de Canto Popular Básico (PDF)", type: "Apostila PDF", url: "https://pt.scribd.com/document/375184579/Apostila-Canto-Popular-Nivel-Basico-Val-Klay-pdf", source: "Scribd" },
+      { title: "Vocalizes e aquecimento — pentatônicas", type: "Pentatônica", url: "https://www.cliqueapostilas.com.br/canto", source: "Clique Apostilas" },
     ],
   },
   {
@@ -125,8 +167,37 @@ const instruments: Instrument[] = [
       "Escalas e arpejos em todas as tonalidades",
       "Leitura de partitura e ornamentos",
     ],
+    resources: [
+      { title: "Estudando Violino em Casa — Lyrio Bernardi Jr. (PDF)", type: "Apostila PDF", url: "https://www.cliqueapostilas.com.br/violino/estudando-violino-em-casa", source: "Clique Apostilas" },
+      { title: "Suzuki Violin Method Vol. 1 (referência)", type: "Método", url: "https://archive.org/details/suzuki-violin-method-vol-01", source: "Archive.org" },
+      { title: "Escalas e arpejos — Carl Flesch (referência)", type: "Escalas", url: "https://imslp.org/wiki/Scale_System_(Flesch%2C_Carl)", source: "IMSLP" },
+      { title: "Pentatônicas no violino — guia", type: "Pentatônica", url: "https://violinspiration.com/violin-scales/", source: "Violinspiration" },
+    ],
+  },
+  {
+    id: "sax",
+    name: "Saxofone",
+    icon: Wind,
+    description: "Sopro expressivo — embocadura, articulação e fraseado.",
+    specifics: [
+      "Embocadura, respiração e apoio diafragmático",
+      "Tipos: soprano, alto, tenor e barítono (transposição)",
+      "Articulação: staccato, legato, ghost notes, growl",
+      "Escalas maiores, menores e modos em todas as tonalidades",
+      "Pentatônicas e blues para improvisação",
+      "Fraseado jazzístico e vocabulário bebop",
+    ],
+    resources: [
+      { title: "Método de Iniciação ao Saxofone — Ivan Meyer Vol.1 (PDF)", type: "Apostila PDF", url: "https://pt.scribd.com/document/43805404/Ivan-Meyer-Metodo-de-Iniciacao-Ao-Saxofone-Vol-1", source: "Scribd" },
+      { title: "Apostila de Saxofone — Ivan Meyer (104 págs.)", type: "Apostila PDF", url: "https://www.cliqueapostilas.com.br/saxofone/apostila-de-saxofone", source: "Clique Apostilas" },
+      { title: "Método de Iniciação de Sax (PDF curto)", type: "Método", url: "https://www.cliqueapostilas.com.br/saxofone/metodo-de-iniciacao-de-sax", source: "Clique Apostilas" },
+      { title: "Escalas Pentatônicas para Saxofone — L. E. López", type: "Pentatônica", url: "https://pdfcoffee.com/escalas-para-improvisar-escalas-pentatonicas-lelt-pdf-free.html", source: "PDFCoffee" },
+      { title: "Escalas para Saxofone (gráfico PDF)", type: "Escalas", url: "https://tomplay.com/pt/tools/scales/saxophone", source: "Tomplay" },
+      { title: "Acordes e arpejos para sax — referência", type: "Acordes", url: "https://www.saxstation.com/saxophone-scales.html", source: "Sax Station" },
+    ],
   },
 ];
+
 
 type Topic = {
   id: string;
@@ -284,7 +355,7 @@ function EstudarPage() {
           <h2 className="font-display text-xl font-semibold text-foreground">
             1. Escolha seu instrumento
           </h2>
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
             {instruments.map((inst) => {
               const Icon = inst.icon;
               const active = selected === inst.id;
@@ -337,6 +408,42 @@ function EstudarPage() {
                     </li>
                   ))}
                 </ul>
+
+                <div className="mt-6 border-t border-primary/20 pt-5">
+                  <h4 className="flex items-center gap-2 font-display text-sm font-semibold uppercase tracking-wider text-primary">
+                    <FileText className="h-4 w-4" />
+                    Apostilas, acordes e pentatônicas
+                  </h4>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Materiais gratuitos curados na web — PDFs, métodos e referências.
+                  </p>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                    {current.resources.map((r) => (
+                      <a
+                        key={r.url}
+                        href={r.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex items-start justify-between gap-3 rounded-lg border border-border bg-background/60 p-3 transition-all hover:border-primary/50 hover:bg-primary/5"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-primary">
+                              {r.type}
+                            </span>
+                            <span className="truncate text-[11px] text-muted-foreground">
+                              {r.source}
+                            </span>
+                          </div>
+                          <p className="mt-1.5 text-sm font-medium text-foreground line-clamp-2">
+                            {r.title}
+                          </p>
+                        </div>
+                        <ExternalLink className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
