@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { ChevronDown, Layers } from "lucide-react";
 
 // ---------- Music theory helpers ----------
@@ -127,7 +127,7 @@ function Fretboard({ tuning, stringNames, notes, rootPc, useFlat, frets = 5 }: F
       ))}
       {/* notes */}
       {tuning.map((openPc, sIdx) => {
-        const dots: JSX.Element[] = [];
+        const dots: ReactElement[] = [];
         for (let f = 0; f <= frets; f++) {
           const pc = (openPc + f) % 12;
           if (notes.includes(pc)) {
