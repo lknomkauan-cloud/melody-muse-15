@@ -355,7 +355,7 @@ function EstudarPage() {
           <h2 className="font-display text-xl font-semibold text-foreground">
             1. Escolha seu instrumento
           </h2>
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
             {instruments.map((inst) => {
               const Icon = inst.icon;
               const active = selected === inst.id;
