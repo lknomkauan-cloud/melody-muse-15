@@ -88,7 +88,9 @@ function Header() {
     { to: "/escalas", label: "Escalas" },
     { to: "/acordes", label: "Acordes" },
     { to: "/metronomo", label: "Metrônomo" },
+    { to: "/agentes-ia", label: "Agentes IA" },
   ];
+
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass">
