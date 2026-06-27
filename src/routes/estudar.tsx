@@ -397,6 +397,15 @@ function EstudarPage() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   {current.description}
                 </p>
+                <Link
+                  to="/estudar/$instrumento"
+                  params={{ instrumento: current.id }}
+                  className="mt-4 inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/15 px-4 py-2 text-sm font-semibold text-primary transition-all hover:bg-primary/25 hover:shadow-[0_0_25px_-8px_hsl(var(--primary))]"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  Abrir apostila completa de {current.name}
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
                 <ul className="mt-4 grid gap-2 sm:grid-cols-2">
                   {current.specifics.map((s) => (
                     <li
