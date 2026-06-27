@@ -9,38 +9,129 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as QuizRouteImport } from './routes/quiz'
+import { Route as MetronomoRouteImport } from './routes/metronomo'
+import { Route as EscalasRouteImport } from './routes/escalas'
+import { Route as AcordesRouteImport } from './routes/acordes'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
 
+const QuizRoute = QuizRouteImport.update({
+  id: '/quiz',
+  path: '/quiz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MetronomoRoute = MetronomoRouteImport.update({
+  id: '/metronomo',
+  path: '/metronomo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EscalasRoute = EscalasRouteImport.update({
+  id: '/escalas',
+  path: '/escalas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AcordesRoute = AcordesRouteImport.update({
+  id: '/acordes',
+  path: '/acordes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapXmlRoute = SitemapXmlRouteImport.update({
+  id: '/sitemap/xml',
+  path: '/sitemap/xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/acordes': typeof AcordesRoute
+  '/escalas': typeof EscalasRoute
+  '/metronomo': typeof MetronomoRoute
+  '/quiz': typeof QuizRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/acordes': typeof AcordesRoute
+  '/escalas': typeof EscalasRoute
+  '/metronomo': typeof MetronomoRoute
+  '/quiz': typeof QuizRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/acordes': typeof AcordesRoute
+  '/escalas': typeof EscalasRoute
+  '/metronomo': typeof MetronomoRoute
+  '/quiz': typeof QuizRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/acordes'
+    | '/escalas'
+    | '/metronomo'
+    | '/quiz'
+    | '/sitemap/xml'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/acordes' | '/escalas' | '/metronomo' | '/quiz' | '/sitemap/xml'
+  id:
+    | '__root__'
+    | '/'
+    | '/acordes'
+    | '/escalas'
+    | '/metronomo'
+    | '/quiz'
+    | '/sitemap/xml'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AcordesRoute: typeof AcordesRoute
+  EscalasRoute: typeof EscalasRoute
+  MetronomoRoute: typeof MetronomoRoute
+  QuizRoute: typeof QuizRoute
+  SitemapXmlRoute: typeof SitemapXmlRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/quiz': {
+      id: '/quiz'
+      path: '/quiz'
+      fullPath: '/quiz'
+      preLoaderRoute: typeof QuizRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/metronomo': {
+      id: '/metronomo'
+      path: '/metronomo'
+      fullPath: '/metronomo'
+      preLoaderRoute: typeof MetronomoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/escalas': {
+      id: '/escalas'
+      path: '/escalas'
+      fullPath: '/escalas'
+      preLoaderRoute: typeof EscalasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/acordes': {
+      id: '/acordes'
+      path: '/acordes'
+      fullPath: '/acordes'
+      preLoaderRoute: typeof AcordesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +139,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap/xml': {
+      id: '/sitemap/xml'
+      path: '/sitemap/xml'
+      fullPath: '/sitemap/xml'
+      preLoaderRoute: typeof SitemapXmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AcordesRoute: AcordesRoute,
+  EscalasRoute: EscalasRoute,
+  MetronomoRoute: MetronomoRoute,
+  QuizRoute: QuizRoute,
+  SitemapXmlRoute: SitemapXmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
