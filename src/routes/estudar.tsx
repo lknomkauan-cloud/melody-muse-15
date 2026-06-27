@@ -7,6 +7,7 @@ import {
   Drum,
   Music2,
   Music4,
+  Wind,
   BookOpen,
   Waves,
   Layers,
@@ -15,6 +16,8 @@ import {
   Ear,
   Sparkles,
   ChevronRight,
+  FileText,
+  ExternalLink,
 } from "lucide-react";
 
 export const Route = createFileRoute("/estudar")({
