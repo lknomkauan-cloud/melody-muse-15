@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as MetronomoRouteImport } from './routes/metronomo'
+import { Route as EstudarRouteImport } from './routes/estudar'
 import { Route as EscalasRouteImport } from './routes/escalas'
 import { Route as AcordesRouteImport } from './routes/acordes'
 import { Route as IndexRouteImport } from './routes/index'
@@ -24,6 +25,11 @@ const QuizRoute = QuizRouteImport.update({
 const MetronomoRoute = MetronomoRouteImport.update({
   id: '/metronomo',
   path: '/metronomo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EstudarRoute = EstudarRouteImport.update({
+  id: '/estudar',
+  path: '/estudar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EscalasRoute = EscalasRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/acordes': typeof AcordesRoute
   '/escalas': typeof EscalasRoute
+  '/estudar': typeof EstudarRoute
   '/metronomo': typeof MetronomoRoute
   '/quiz': typeof QuizRoute
   '/sitemap/xml': typeof SitemapXmlRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/acordes': typeof AcordesRoute
   '/escalas': typeof EscalasRoute
+  '/estudar': typeof EstudarRoute
   '/metronomo': typeof MetronomoRoute
   '/quiz': typeof QuizRoute
   '/sitemap/xml': typeof SitemapXmlRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/acordes': typeof AcordesRoute
   '/escalas': typeof EscalasRoute
+  '/estudar': typeof EstudarRoute
   '/metronomo': typeof MetronomoRoute
   '/quiz': typeof QuizRoute
   '/sitemap/xml': typeof SitemapXmlRoute
@@ -78,16 +87,25 @@ export interface FileRouteTypes {
     | '/'
     | '/acordes'
     | '/escalas'
+    | '/estudar'
     | '/metronomo'
     | '/quiz'
     | '/sitemap/xml'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/acordes' | '/escalas' | '/metronomo' | '/quiz' | '/sitemap/xml'
+  to:
+    | '/'
+    | '/acordes'
+    | '/escalas'
+    | '/estudar'
+    | '/metronomo'
+    | '/quiz'
+    | '/sitemap/xml'
   id:
     | '__root__'
     | '/'
     | '/acordes'
     | '/escalas'
+    | '/estudar'
     | '/metronomo'
     | '/quiz'
     | '/sitemap/xml'
@@ -97,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AcordesRoute: typeof AcordesRoute
   EscalasRoute: typeof EscalasRoute
+  EstudarRoute: typeof EstudarRoute
   MetronomoRoute: typeof MetronomoRoute
   QuizRoute: typeof QuizRoute
   SitemapXmlRoute: typeof SitemapXmlRoute
@@ -116,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/metronomo'
       fullPath: '/metronomo'
       preLoaderRoute: typeof MetronomoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/estudar': {
+      id: '/estudar'
+      path: '/estudar'
+      fullPath: '/estudar'
+      preLoaderRoute: typeof EstudarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/escalas': {
@@ -153,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcordesRoute: AcordesRoute,
   EscalasRoute: EscalasRoute,
+  EstudarRoute: EstudarRoute,
   MetronomoRoute: MetronomoRoute,
   QuizRoute: QuizRoute,
   SitemapXmlRoute: SitemapXmlRoute,

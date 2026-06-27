@@ -83,6 +83,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 function Header() {
   const navItems = [
     { to: "/", label: "Início" },
+    { to: "/estudar", label: "Estudar" },
     { to: "/quiz", label: "Quiz" },
     { to: "/escalas", label: "Escalas" },
     { to: "/acordes", label: "Acordes" },
