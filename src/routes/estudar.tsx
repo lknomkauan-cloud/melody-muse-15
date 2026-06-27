@@ -408,6 +408,42 @@ function EstudarPage() {
                     </li>
                   ))}
                 </ul>
+
+                <div className="mt-6 border-t border-primary/20 pt-5">
+                  <h4 className="flex items-center gap-2 font-display text-sm font-semibold uppercase tracking-wider text-primary">
+                    <FileText className="h-4 w-4" />
+                    Apostilas, acordes e pentatônicas
+                  </h4>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Materiais gratuitos curados na web — PDFs, métodos e referências.
+                  </p>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                    {current.resources.map((r) => (
+                      <a
+                        key={r.url}
+                        href={r.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex items-start justify-between gap-3 rounded-lg border border-border bg-background/60 p-3 transition-all hover:border-primary/50 hover:bg-primary/5"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-primary">
+                              {r.type}
+                            </span>
+                            <span className="truncate text-[11px] text-muted-foreground">
+                              {r.source}
+                            </span>
+                          </div>
+                          <p className="mt-1.5 text-sm font-medium text-foreground line-clamp-2">
+                            {r.title}
+                          </p>
+                        </div>
+                        <ExternalLink className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
