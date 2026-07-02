@@ -18,7 +18,9 @@ import "@fontsource/dm-sans/700.css";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { Music, Menu, X } from "lucide-react";
+import { Music, Menu, X, LogOut, User as UserIcon } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   return (
@@ -81,6 +83,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 function Header() {
+  const { user } = useAuth();
   const navItems = [
     { to: "/", label: "Início" },
     { to: "/estudar", label: "Estudar" },
@@ -91,6 +94,10 @@ function Header() {
     { to: "/agentes-ia", label: "Agentes IA" },
   ];
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass">
@@ -110,14 +117,29 @@ function Header() {
               {item.label}
             </Link>
           ))}
+          {user ? (
+            <div className="ml-2 flex items-center gap-2 border-l border-border pl-3">
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground max-w-[160px] truncate">
+                <UserIcon className="h-3.5 w-3.5" />
+                {user.email}
+              </span>
+              <button onClick={handleSignOut} className="rounded-md p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted" aria-label="Sair">
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <Link to="/auth" className="ml-2 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
+              Entrar
+            </Link>
+          )}
         </nav>
-        <MobileNav navItems={navItems} />
+        <MobileNav navItems={navItems} user={user} onSignOut={handleSignOut} />
       </div>
     </header>
   );
 }
 
-function MobileNav({ navItems }: { navItems: { to: string; label: string }[] }) {
+function MobileNav({ navItems, user, onSignOut }: { navItems: { to: string; label: string }[]; user: ReturnType<typeof useAuth>["user"]; onSignOut: () => void }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -142,6 +164,17 @@ function MobileNav({ navItems }: { navItems: { to: string; label: string }[] }) 
                 {item.label}
               </Link>
             ))}
+            <div className="mt-2 border-t border-border pt-2">
+              {user ? (
+                <button onClick={() => { onSignOut(); setOpen(false); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground">
+                  <LogOut className="h-4 w-4" /> Sair ({user.email})
+                </button>
+              ) : (
+                <Link to="/auth" onClick={() => setOpen(false)} className="block rounded-md bg-primary px-3 py-2 text-center text-sm font-medium text-primary-foreground">
+                  Entrar / Criar conta
+                </Link>
+              )}
+            </div>
           </nav>
         </div>
       )}
