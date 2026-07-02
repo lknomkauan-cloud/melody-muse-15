@@ -159,6 +159,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Melodia — Estudo Musical" },
       { property: "og:description", content: "App completo para estudar teoria musical, praticar com quizzes e usar ferramentas como metrônomo." },
       { property: "og:type", content: "website" },
+      { name: "twitter:title", content: "Melodia — Estudo Musical" },
+      { name: "twitter:description", content: "App completo para estudar teoria musical, praticar com quizzes e usar ferramentas como metrônomo." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b039dd2f-2fe6-4d1b-b5cf-cfcabafd91fa/id-preview-525a281c--266fafba-352b-44c0-b421-3dfd740bb333.lovable.app-1782534620845.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b039dd2f-2fe6-4d1b-b5cf-cfcabafd91fa/id-preview-525a281c--266fafba-352b-44c0-b421-3dfd740bb333.lovable.app-1782534620845.png" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       {
