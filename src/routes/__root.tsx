@@ -21,6 +21,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Music, Menu, X, LogOut, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 
 function NotFoundComponent() {
   return (
@@ -91,9 +92,9 @@ function Header() {
     { to: "/escalas", label: "Escalas" },
     { to: "/acordes", label: "Acordes" },
     { to: "/metronomo", label: "Metrônomo" },
-    { to: "/agentes-ia", label: "Agentes IA" },
     ...(isAdmin ? [{ to: "/admin", label: "Painel do Adm" }] : []),
   ];
+
 
 
   const handleSignOut = async () => {
@@ -233,9 +234,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Header />
+      <AnnouncementBanner />
       <div className="pt-16">
         <Outlet />
       </div>
     </QueryClientProvider>
   );
 }
+
