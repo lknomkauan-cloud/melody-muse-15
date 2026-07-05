@@ -106,6 +106,57 @@ export function EarCoach({
   );
 }
 
+/* -------------------- Permissão do microfone (Android/APK) -------------------- */
+function MicPermissionButton() {
+  const [state, setState] = useState<"unknown" | "granted" | "denied" | "prompt">("unknown");
+  const [msg, setMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        // Permissions API pode não existir no WebView antigo
+        const perms = (navigator as Navigator & { permissions?: { query: (d: { name: PermissionName }) => Promise<PermissionStatus> } }).permissions;
+        if (perms?.query) {
+          const s = await perms.query({ name: "microphone" as PermissionName });
+          if (!cancelled) setState(s.state as typeof state);
+          s.onchange = () => { if (!cancelled) setState(s.state as typeof state); };
+        }
+      } catch { /* ignore */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const request = async () => {
+    setMsg(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((t) => t.stop());
+      setState("granted");
+      setMsg("Microfone liberado ✅");
+    } catch (e) {
+      setState("denied");
+      setMsg(describeMicError(e));
+    }
+  };
+
+  if (state === "granted") {
+    return <span className="text-xs text-emerald-500 font-medium">🎤 Mic ok</span>;
+  }
+  return (
+    <div className="flex flex-col items-end gap-1">
+      <button
+        onClick={request}
+        className="inline-flex items-center gap-1.5 rounded-md border border-primary/40 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/20"
+      >
+        <Mic className="h-3.5 w-3.5" />
+        {state === "denied" ? "Mic bloqueado — tentar de novo" : "Permitir microfone"}
+      </button>
+      {msg && <span className="max-w-[240px] text-right text-[10px] text-muted-foreground whitespace-pre-wrap">{msg}</span>}
+    </div>
+  );
+}
+
 /* -------------------- 1) Afinador ao vivo -------------------- */
 type PitchState = { freq: number; note: ReturnType<typeof freqToNote> } | null;
 
