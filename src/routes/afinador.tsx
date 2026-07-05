@@ -694,7 +694,7 @@ function AfinadorPage() {
         {/* Lista de notas / cordas / tambores */}
         <div className="rounded-2xl border border-border bg-card p-5">
           <div className="mb-3 text-sm font-medium text-muted-foreground">
-            Referências de afinação — toque para travar a nota alvo
+            Aperte uma nota para <span className="text-primary">ouvir o som correto</span> e travar como alvo do afinador.
           </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             <button
@@ -712,16 +712,19 @@ function AfinadorPage() {
             {instrumento.notas.map((nota, idx) => (
               <button
                 key={idx}
-                onClick={() => setNotaAlvoIdx(idx)}
+                onClick={() => { setNotaAlvoIdx(idx); tocarReferencia(nota.freq); }}
                 className={cn(
-                  "rounded-xl border px-3 py-3 text-left transition-all",
+                  "group rounded-xl border px-3 py-3 text-left transition-all",
                   notaAlvoIdx === idx
                     ? "border-primary/50 bg-primary/10"
                     : "border-border bg-card hover:bg-muted",
                 )}
               >
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="font-display text-lg font-bold">{nota.nome}</span>
+                  <span className="font-display text-lg font-bold flex items-center gap-1.5">
+                    {nota.nome}
+                    <Volume2 className="h-3 w-3 text-primary/70 group-hover:text-primary" />
+                  </span>
                   <span className="text-[10px] tabular-nums text-muted-foreground">{nota.freq.toFixed(1)}Hz</span>
                 </div>
                 {nota.dica && <div className="mt-0.5 text-[10px] text-muted-foreground">{nota.dica}</div>}
