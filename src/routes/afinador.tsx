@@ -368,9 +368,9 @@ const INSTRUMENTOS: Instrumento[] = [
   {
     id: "bateria",
     label: "Bateria",
-    descricao: "Alturas típicas para cada tambor (aproximadas)",
+    descricao: "Alturas típicas para cada tambor — variações por estilo musical",
     dicaGeral:
-      "Bata no centro do tambor a ~2cm da borda. Ajuste as porcas em cruz para equalizar. As notas são referência — cada baterista escolhe seu timbre.",
+      "Bata no centro do tambor a ~2cm da borda. Aperte as porcas em cruz para equalizar. Cada estilo tem uma pegada de afinação diferente.",
     notas: [
       n("G2", "Bumbo 22\" — grave e cheio"),
       n("E3", "Tom 12\" — médio-agudo"),
@@ -380,7 +380,118 @@ const INSTRUMENTOS: Instrumento[] = [
       n("D3", "Caixa (aro batedeira) — brilhante"),
       n("G3", "Caixa (aro esteira) — corte agudo"),
     ],
+    variacoes: [
+      {
+        id: "rock",
+        label: "Rock",
+        descricao: "Peles médias, bumbo grave e cheio, caixa cortante — pegada de rock clássico e hard rock",
+        notas: [
+          n("G2", "Bumbo 22\" — grave, batida seca"),
+          n("F3", "Tom 12\" — médio-agudo, ataque forte"),
+          n("D3", "Tom 13\" — médio"),
+          n("A2", "Surdo 16\" — médio-grave"),
+          n("F2", "Surdo 18\" — grave e cheio"),
+          n("E4", "Caixa — corte agudo e cortante"),
+          n("A4", "Chimbal (hi-hat) — brilhante"),
+        ],
+      },
+      {
+        id: "metal",
+        label: "Metal",
+        descricao: "Peles bem apertadas, bumbo curto e clicky, tons agudos, caixa aguda — metal moderno e progressivo",
+        notas: [
+          n("A2", "Bumbo 22\" — apertado, ataque de clique"),
+          n("A3", "Tom 10\" — bem agudo"),
+          n("G3", "Tom 12\" — agudo"),
+          n("E3", "Tom 13\" — médio-agudo"),
+          n("C3", "Surdo 16\" — médio"),
+          n("A2", "Surdo 18\" — médio-grave"),
+          n("G4", "Caixa — apertada e aguda"),
+        ],
+      },
+      {
+        id: "jazz",
+        label: "Jazz",
+        descricao: "Peles soltas, bumbo pequeno e afinado alto, tons ressonantes — bebop, swing, samba-jazz",
+        notas: [
+          n("C3", "Bumbo 18\" — afinado alto, ressonante"),
+          n("D4", "Tom 10\" — canta com ressonância"),
+          n("A3", "Tom 12\" — médio-agudo, longo sustain"),
+          n("D3", "Surdo 14\" — médio, aberto"),
+          n("B2", "Surdo 16\" — grave, ressonante"),
+          n("F4", "Caixa (aro batedeira) — brilhante e sensível"),
+          n("B4", "Caixa (rimshot cross-stick) — clicky"),
+        ],
+      },
+      {
+        id: "samba",
+        label: "Samba / MPB",
+        descricao: "Peles com afinação média-alta, surdos graves marcantes — samba, pagode, MPB",
+        notas: [
+          n("F2", "Bumbo 20\" — grave e curto"),
+          n("D3", "Repique / Tom 10\" — agudo cortante"),
+          n("B2", "Tom 12\" — médio"),
+          n("A2", "Surdo 16\" — grave (surdo de resposta)"),
+          n("E2", "Surdo 20\" — bem grave (surdo de primeira)"),
+          n("F4", "Caixa — sensível e brilhante"),
+          n("D5", "Tamborim / caixa aguda"),
+        ],
+      },
+      {
+        id: "funk",
+        label: "Funk / Groove",
+        descricao: "Bumbo médio pontual, caixa muito seca e cortante, tons agudos — funk, soul, R&B",
+        notas: [
+          n("A2", "Bumbo 22\" — médio-grave, pontual"),
+          n("A3", "Tom 10\" — agudo, staccato"),
+          n("F3", "Tom 12\" — médio-agudo"),
+          n("C3", "Surdo 14\" — médio"),
+          n("F#4", "Caixa — bem apertada (piccolo feel)"),
+          n("C5", "Cowbell / campana"),
+        ],
+      },
+      {
+        id: "gospel",
+        label: "Gospel / Contemporâneo",
+        descricao: "Bumbo profundo com click, tons afinados em intervalos musicais, caixa balanceada",
+        notas: [
+          n("F2", "Bumbo 22\" — profundo com ataque marcado"),
+          n("G3", "Tom 10\" — agudo"),
+          n("E3", "Tom 12\" — quarta abaixo"),
+          n("C3", "Tom 13\" — quinta abaixo"),
+          n("A2", "Surdo 16\" — grave, ressonante"),
+          n("E4", "Caixa 14\" — corte médio-agudo"),
+        ],
+      },
+      {
+        id: "acustica-aberta",
+        label: "Acústica aberta",
+        descricao: "Sem abafamento, sustain longo — folk, blues, rock acústico, gravação vintage",
+        notas: [
+          n("E2", "Bumbo 22\" — muito aberto e ressonante"),
+          n("D3", "Tom 12\" — sustain longo"),
+          n("A2", "Tom 13\" — grave e ressonante"),
+          n("F2", "Surdo 16\" — cheio"),
+          n("C2", "Surdo 18\" — bem grave e aberto"),
+          n("D4", "Caixa — aberta, canta"),
+        ],
+      },
+      {
+        id: "eletronica",
+        label: "Estúdio / Eletrônica",
+        descricao: "Peles bem controladas, ataque curto — pop, indie, produção moderna, gatilho de sampler",
+        notas: [
+          n("C2", "Bumbo 22\" — subgrave, curto (estilo 808)"),
+          n("G3", "Tom 10\" — agudo, seco"),
+          n("D3", "Tom 12\" — médio, controlado"),
+          n("A2", "Tom 14\" — médio-grave"),
+          n("E4", "Caixa — snap curto"),
+          n("A4", "Rimshot / clap agudo"),
+        ],
+      },
+    ],
   },
+
 ];
 
 // ============================================================================
