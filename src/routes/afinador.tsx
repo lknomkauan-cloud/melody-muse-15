@@ -864,7 +864,7 @@ function AfinadorPage() {
             {instrumento.notas.map((nota, idx) => (
               <button
                 key={idx}
-                onClick={() => { setNotaAlvoIdx(idx); tocarReferencia(nota.freq, nota.nome); }}
+                onClick={() => { setNotaAlvoIdx(idx); tocarReferencia(nota.freq, nota.nome, nota.dica); }}
                 className={cn(
                   "group rounded-xl border px-3 py-3 text-left transition-all",
                   notaAlvoIdx === idx
