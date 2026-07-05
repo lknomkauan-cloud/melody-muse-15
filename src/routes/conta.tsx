@@ -76,7 +76,7 @@ function ContaPage() {
   const isTeacher = role === "teacher";
   const displayName = fullName || user.email?.split("@")[0] || "Usuário";
   const initials = displayName.slice(0, 2).toUpperCase();
-  const roleLabel = isAdmin ? "Administrador" : isTeacher ? "Professor" : "Aluno";
+  const roleLabel = isAdmin && isTeacher ? "Professor e administrador" : isAdmin ? "Administrador" : isTeacher ? "Professor" : "Aluno";
   const RoleIcon = isAdmin ? Sparkles : isTeacher ? Music : GraduationCap;
 
   return (

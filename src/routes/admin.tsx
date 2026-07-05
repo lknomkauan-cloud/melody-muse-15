@@ -169,14 +169,14 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
     rolesByUser.set(r.user_id, arr);
   });
 
-  const toggleAdmin = async (userId: string, makeAdmin: boolean) => {
+  const toggleRole = async (userId: string, role: "admin" | "teacher", makeRole: boolean) => {
     setBusy(true); setMsg(null);
-    if (makeAdmin) {
-      const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: "admin" });
-      setMsg(error ? `Erro: ${error.message}` : "Admin concedido.");
+    if (makeRole) {
+      const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
+      setMsg(error ? `Erro: ${error.message}` : role === "admin" ? "Admin concedido." : "Professor concedido.");
     } else {
-      const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", "admin");
-      setMsg(error ? `Erro: ${error.message}` : "Admin removido.");
+      const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", role);
+      setMsg(error ? `Erro: ${error.message}` : role === "admin" ? "Admin removido." : "Professor removido.");
     }
     await load();
   };
@@ -216,6 +216,7 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
             {profiles.map((p) => {
               const userRoles = rolesByUser.get(p.id) ?? [];
               const isAdm = userRoles.includes("admin");
+              const isTeacher = userRoles.includes("teacher");
               return (
                 <tr key={p.id} className="border-t border-border">
                   <td className="px-4 py-2">{p.full_name || <span className="text-muted-foreground">—</span>}</td>
@@ -233,7 +234,7 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
                     <div className="inline-flex gap-1">
                       {isAdm ? (
                         <button
-                          onClick={() => toggleAdmin(p.id, false)}
+                          onClick={() => toggleRole(p.id, "admin", false)}
                           disabled={busy || p.id === currentUserId}
                           className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs hover:bg-accent disabled:opacity-40"
                           title={p.id === currentUserId ? "Você não pode remover a si mesmo" : "Remover admin"}
@@ -242,11 +243,28 @@ function UsersTab({ currentUserId }: { currentUserId: string }) {
                         </button>
                       ) : (
                         <button
-                          onClick={() => toggleAdmin(p.id, true)}
+                          onClick={() => toggleRole(p.id, "admin", true)}
                           disabled={busy}
                           className="inline-flex items-center gap-1 rounded-md bg-primary px-2 py-1 text-xs text-primary-foreground hover:bg-primary/90"
                         >
                           <ShieldCheck className="h-3 w-3" /> Tornar admin
+                        </button>
+                      )}
+                      {isTeacher ? (
+                        <button
+                          onClick={() => toggleRole(p.id, "teacher", false)}
+                          disabled={busy}
+                          className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs hover:bg-accent disabled:opacity-40"
+                        >
+                          <ShieldOff className="h-3 w-3" /> Remover professor
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => toggleRole(p.id, "teacher", true)}
+                          disabled={busy}
+                          className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs hover:bg-accent disabled:opacity-40"
+                        >
+                          <ShieldCheck className="h-3 w-3" /> Tornar professor
                         </button>
                       )}
                       <button
