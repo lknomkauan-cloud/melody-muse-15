@@ -15,6 +15,7 @@ import { Route as EstudarRouteImport } from './routes/estudar'
 import { Route as EscalasRouteImport } from './routes/escalas'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AgentesIaRouteImport } from './routes/agentes-ia'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AcordesRouteImport } from './routes/acordes'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
@@ -50,6 +51,11 @@ const AgentesIaRoute = AgentesIaRouteImport.update({
   path: '/agentes-ia',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AcordesRoute = AcordesRouteImport.update({
   id: '/acordes',
   path: '/acordes',
@@ -74,6 +80,7 @@ const EstudarInstrumentoRoute = EstudarInstrumentoRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/acordes': typeof AcordesRoute
+  '/admin': typeof AdminRoute
   '/agentes-ia': typeof AgentesIaRoute
   '/auth': typeof AuthRoute
   '/escalas': typeof EscalasRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/acordes': typeof AcordesRoute
+  '/admin': typeof AdminRoute
   '/agentes-ia': typeof AgentesIaRoute
   '/auth': typeof AuthRoute
   '/escalas': typeof EscalasRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/acordes': typeof AcordesRoute
+  '/admin': typeof AdminRoute
   '/agentes-ia': typeof AgentesIaRoute
   '/auth': typeof AuthRoute
   '/escalas': typeof EscalasRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/acordes'
+    | '/admin'
     | '/agentes-ia'
     | '/auth'
     | '/escalas'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/acordes'
+    | '/admin'
     | '/agentes-ia'
     | '/auth'
     | '/escalas'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/acordes'
+    | '/admin'
     | '/agentes-ia'
     | '/auth'
     | '/escalas'
@@ -150,6 +162,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AcordesRoute: typeof AcordesRoute
+  AdminRoute: typeof AdminRoute
   AgentesIaRoute: typeof AgentesIaRoute
   AuthRoute: typeof AuthRoute
   EscalasRoute: typeof EscalasRoute
@@ -203,6 +216,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgentesIaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/acordes': {
       id: '/acordes'
       path: '/acordes'
@@ -248,6 +268,7 @@ const EstudarRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcordesRoute: AcordesRoute,
+  AdminRoute: AdminRoute,
   AgentesIaRoute: AgentesIaRoute,
   AuthRoute: AuthRoute,
   EscalasRoute: EscalasRoute,
