@@ -494,7 +494,35 @@ function AfinadorPage() {
   useEffect(() => () => parar(), [parar]);
 
   // Reset target ao trocar instrumento
-  useEffect(() => { setNotaAlvoIdx(null); }, [instrumentoId]);
+  useEffect(() => { setNotaAlvoIdx(null); setVariacaoId(null); }, [instrumentoId]);
+  useEffect(() => { setNotaAlvoIdx(null); }, [variacaoId]);
+
+  // Tocador de referência (oscilador)
+  const tomCtxRef = useRef<AudioContext | null>(null);
+  const tocarReferencia = useCallback((freq: number) => {
+    try {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (!tomCtxRef.current) tomCtxRef.current = new AudioCtx();
+      const ctx = tomCtxRef.current;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      // envelope suave
+      const now = ctx.currentTime;
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.25, now + 0.02);
+      gain.gain.setValueAtTime(0.25, now + 1.6);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 2.05);
+    } catch {
+      // ignore
+    }
+  }, []);
+  useEffect(() => () => { tomCtxRef.current?.close(); }, []);
 
   // Determina a nota mais próxima da freq atual dentro do instrumento (modo auto)
   const alvo = useMemo(() => {
