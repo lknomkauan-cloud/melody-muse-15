@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { BookOpen, ChevronDown, ChevronUp, Music2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { InstrumentDiagram } from "@/components/InstrumentDiagram";
 
 export const Route = createFileRoute("/escalas")({
   head: () => ({
@@ -79,6 +80,7 @@ const INSTRUMENTS = [
   { id: "piano", label: "Piano" },
   { id: "sax", label: "Sax" },
   { id: "violino", label: "Violino" },
+  { id: "bateria", label: "Bateria" },
 ] as const;
 type InstrumentId = typeof INSTRUMENTS[number]["id"];
 
@@ -102,6 +104,8 @@ function instrumentTip(inst: InstrumentId, modeRoot: string, pentSemis: number[]
       const notas = pentSemis.map((s) => transpose(modeRoot, s)).join(" – ");
       return `Notas: ${notas}. Em 1ª posição, escolha a corda cuja tônica fique acessível (G, D, A ou E). Use cordas soltas quando coincidirem com as notas da pentatônica e mantenha o arco firme entre cordas.`;
     }
+    case "bateria":
+      return `A bateria não produz alturas definidas. Use a tônica ${modeRoot} como referência de pulso: marque o tempo 1 no bumbo e crie levadas que ressaltem os graus ${intervals} através de acentos no prato de condução ou tom-tons.`;
   }
 }
 
@@ -242,6 +246,12 @@ function EscalasPage() {
                                     <span className="font-display text-base font-bold text-primary">{n}</span>
                                   </div>
                                 ))}
+                              </div>
+                              <div className="mb-4 rounded-lg bg-card/60 p-3">
+                                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                  Desenho no {INSTRUMENTS.find(i => i.id === instrument)?.label}
+                                </span>
+                                <InstrumentDiagram instrument={instrument} root={modeRoot} pentSemis={m.pentSemis} />
                               </div>
                               <div className="rounded-lg bg-card/60 p-3 text-sm leading-relaxed">
                                 <span className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">
