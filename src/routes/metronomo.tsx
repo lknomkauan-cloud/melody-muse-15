@@ -251,6 +251,34 @@ function MetronomoPage() {
           </div>
         </div>
 
+        {/* Tap tempo */}
+        <div className="mb-6 rounded-2xl border border-border bg-card p-5 text-center">
+          <div className="mb-3 text-sm font-medium text-muted-foreground">
+            Tap tempo — bata no ritmo desejado
+          </div>
+          <button
+            onClick={handleTap}
+            onKeyDown={(e) => {
+              if (e.key === " " || e.key === "Enter") {
+                e.preventDefault();
+                handleTap();
+              }
+            }}
+            className={cn(
+              "inline-flex h-20 w-full items-center justify-center gap-3 rounded-2xl border-2 border-dashed font-display text-lg font-bold transition-all",
+              tapFlash
+                ? "border-primary bg-primary/20 scale-[0.98] glow-primary"
+                : "border-border bg-muted/40 hover:bg-muted",
+            )}
+          >
+            <Hand className="h-6 w-6" />
+            TAP
+          </button>
+          <div className="mt-2 text-xs text-muted-foreground">
+            Toque pelo menos 2 vezes. O BPM se ajusta automaticamente.
+          </div>
+        </div>
+
         {/* Presets */}
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
           {presetTempos.map((p) => (
