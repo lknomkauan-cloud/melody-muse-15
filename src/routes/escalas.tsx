@@ -225,8 +225,14 @@ function EscalasContent({
                 {i.label}
               </button>
             ))}
-          </div>
         </div>
+
+        <InstrumentCoach
+          instrumentId={instrument}
+          instrumentLabel={INSTRUMENTS.find(i => i.id === instrument)?.label ?? instrument}
+        />
+
+
 
         <div className="space-y-3">
           {SCALE_TYPES.map((scale, idx) => {
