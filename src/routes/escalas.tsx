@@ -4,6 +4,7 @@ import { BookOpen, ChevronDown, ChevronUp, Music2, Youtube, Zap } from "lucide-r
 import { cn } from "@/lib/utils";
 import { InstrumentDiagram } from "@/components/InstrumentDiagram";
 import { EarCoach } from "@/components/EarCoach";
+import { InstrumentCoach } from "@/components/InstrumentCoach";
 import { CagedShapes } from "@/components/CagedShapes";
 import { ImprovisationMethodology } from "@/components/ImprovisationMethodology";
 
