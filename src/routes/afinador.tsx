@@ -500,87 +500,132 @@ function AfinadorPage() {
   // Tocador de referência com samples REAIS do instrumento (Tone.js Sampler)
   const tomCtxRef = useRef<AudioContext | null>(null);
   const samplerCacheRef = useRef<Map<string, { sampler: { triggerAttackRelease: (n: string | number, d: string | number) => void }; ready: Promise<unknown> }>>(new Map());
-  const noiseCtxRef = useRef<AudioContext | null>(null);
 
-  const tocarBateria = useCallback((freq: number) => {
-    try {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (!noiseCtxRef.current) noiseCtxRef.current = new AudioCtx();
-      const ctx = noiseCtxRef.current;
-      const now = ctx.currentTime;
-      // corpo do tambor (pitch envelope)
-      const osc = ctx.createOscillator();
-      const oscGain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(freq * 2.2, now);
-      osc.frequency.exponentialRampToValueAtTime(Math.max(35, freq), now + 0.12);
-      oscGain.gain.setValueAtTime(0.9, now);
-      oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
-      osc.connect(oscGain).connect(ctx.destination);
-      // ataque (pele batendo) — ruído filtrado
-      const bufSize = Math.floor(ctx.sampleRate * 0.06);
-      const noiseBuf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-      const data = noiseBuf.getChannelData(0);
-      for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
-      const noise = ctx.createBufferSource();
-      noise.buffer = noiseBuf;
-      const nFilter = ctx.createBiquadFilter();
-      nFilter.type = "bandpass";
-      nFilter.frequency.value = freq * 4;
-      const nGain = ctx.createGain();
-      nGain.gain.setValueAtTime(0.4, now);
-      nGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-      noise.connect(nFilter).connect(nGain).connect(ctx.destination);
-      osc.start(now); osc.stop(now + 0.95);
-      noise.start(now); noise.stop(now + 0.1);
-    } catch { /* ignore */ }
+  // Cache de samples de bateria (AudioBuffers) para pitch-shift via playbackRate
+  const drumCtxRef = useRef<AudioContext | null>(null);
+  const drumBuffersRef = useRef<Map<string, AudioBuffer>>(new Map());
+  const drumLoadingRef = useRef<Map<string, Promise<AudioBuffer>>>(new Map());
+
+  const DRUM_BASE = "https://tonejs.github.io/audio/drum-samples/acoustic-kit/";
+  const carregarDrum = useCallback(async (nome: string): Promise<AudioBuffer> => {
+    if (drumBuffersRef.current.has(nome)) return drumBuffersRef.current.get(nome)!;
+    if (drumLoadingRef.current.has(nome)) return drumLoadingRef.current.get(nome)!;
+    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!drumCtxRef.current) drumCtxRef.current = new AudioCtx();
+    const ctx = drumCtxRef.current;
+    const p = (async () => {
+      const res = await fetch(`${DRUM_BASE}${nome}.mp3`);
+      const arr = await res.arrayBuffer();
+      const buf = await ctx.decodeAudioData(arr);
+      drumBuffersRef.current.set(nome, buf);
+      return buf;
+    })();
+    drumLoadingRef.current.set(nome, p);
+    return p;
   }, []);
 
+  // Mapa: cada nota da bateria → qual sample tocar e sua "nota base" (pitch intrínseco aproximado)
+  // playbackRate = alvoFreq / baseFreq (2x = 1 oitava acima)
+  const bateriaMap = useCallback((dica?: string): { sample: string; baseFreq: number } => {
+    const d = (dica ?? "").toLowerCase();
+    if (d.includes("bumbo")) return { sample: "kick", baseFreq: 65 };        // ~C2
+    if (d.includes("surdo 18") || d.includes('18"')) return { sample: "tom3", baseFreq: 82 };  // ~E2
+    if (d.includes("surdo 16") || d.includes('16"')) return { sample: "tom2", baseFreq: 110 }; // ~A2
+    if (d.includes("tom 13") || d.includes('13"')) return { sample: "tom2", baseFreq: 131 };  // ~C3
+    if (d.includes("tom 12") || d.includes('12"') || d.includes("tom")) return { sample: "tom1", baseFreq: 165 }; // ~E3
+    if (d.includes("esteira") || d.includes("chimbal") || d.includes("hi-hat") || d.includes("hihat")) return { sample: "hihat", baseFreq: 400 };
+    if (d.includes("caixa") || d.includes("snare")) return { sample: "snare", baseFreq: 200 }; // ~G3
+    return { sample: "tom1", baseFreq: 165 };
+  }, []);
+
+  const tocarBateriaSample = useCallback(async (freq: number, dica?: string) => {
+    try {
+      const { sample, baseFreq } = bateriaMap(dica);
+      const buf = await carregarDrum(sample);
+      const ctx = drumCtxRef.current!;
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.playbackRate.value = Math.max(0.25, Math.min(4, freq / baseFreq));
+      const gain = ctx.createGain();
+      gain.gain.value = 0.9;
+      src.connect(gain).connect(ctx.destination);
+      src.start();
+    } catch { /* ignore */ }
+  }, [bateriaMap, carregarDrum]);
+
   const SAMPLER_CONFIG = useMemo<Record<string, { baseUrl: string; urls: Record<string, string> }>>(() => ({
+    // Violão acústico — todos os samples confirmados no CDN
     violao: {
       baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-acoustic/",
       urls: {
-        A2: "A2.mp3", A3: "A3.mp3", A4: "A4.mp3", A5: "A5.mp3",
+        A2: "A2.mp3", A3: "A3.mp3", A4: "A4.mp3",
+        "A#2": "As2.mp3", "A#3": "As3.mp3", "A#4": "As4.mp3",
+        B2: "B2.mp3", B3: "B3.mp3", B4: "B4.mp3",
+        C3: "C3.mp3", C4: "C4.mp3", C5: "C5.mp3",
         "C#3": "Cs3.mp3", "C#4": "Cs4.mp3", "C#5": "Cs5.mp3",
-        E2: "E2.mp3", E3: "E3.mp3", E4: "E4.mp3", E5: "E5.mp3",
-        G2: "G2.mp3", G3: "G3.mp3", G4: "G4.mp3", G5: "G5.mp3",
+        D2: "D2.mp3", D3: "D3.mp3", D4: "D4.mp3", D5: "D5.mp3",
+        "D#2": "Ds2.mp3", "D#3": "Ds3.mp3", "D#4": "Ds4.mp3",
+        E2: "E2.mp3", E3: "E3.mp3", E4: "E4.mp3",
+        F2: "F2.mp3", F3: "F3.mp3", F4: "F4.mp3",
+        "F#2": "Fs2.mp3", "F#3": "Fs3.mp3", "F#4": "Fs4.mp3",
+        G2: "G2.mp3", G3: "G3.mp3", G4: "G4.mp3",
+        "G#2": "Gs2.mp3", "G#3": "Gs3.mp3", "G#4": "Gs4.mp3",
       },
     },
+    // Guitarra elétrica — apenas os arquivos que EXISTEM no CDN (evita 404 que quebra o Sampler)
     guitarra: {
       baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-electric/",
       urls: {
-        A2: "A2.mp3", A3: "A3.mp3", A4: "A4.mp3", A5: "A5.mp3",
-        "C#3": "Cs3.mp3", "C#4": "Cs4.mp3", "C#5": "Cs5.mp3",
-        E2: "E2.mp3", E3: "E3.mp3", E4: "E4.mp3",
-        "F#2": "Fs2.mp3", "F#3": "Fs3.mp3", "F#4": "Fs4.mp3", "F#5": "Fs5.mp3",
+        "C#2": "Cs2.mp3",
+        E2: "E2.mp3",
+        "F#2": "Fs2.mp3",
+        A2: "A2.mp3",
+        C3: "C3.mp3",
+        "D#3": "Ds3.mp3",
+        "F#3": "Fs3.mp3",
+        A3: "A3.mp3",
+        C4: "C4.mp3",
+        "D#4": "Ds4.mp3",
+        "F#4": "Fs4.mp3",
+        A4: "A4.mp3",
+        C5: "C5.mp3",
+        "D#5": "Ds5.mp3",
+        "F#5": "Fs5.mp3",
+        A5: "A5.mp3",
+        C6: "C6.mp3",
       },
     },
+    // Baixo elétrico — apenas arquivos existentes (sem A1, o Sampler pitch-shifta a partir de Cs1/E1)
     baixo: {
       baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/bass-electric/",
       urls: {
-        A1: "A1.mp3", A2: "A2.mp3", A3: "A3.mp3", A4: "A4.mp3",
-        "C#1": "Cs1.mp3", "C#2": "Cs2.mp3", "C#3": "Cs3.mp3", "C#4": "Cs4.mp3", "C#5": "Cs5.mp3",
-        E1: "E1.mp3", E2: "E2.mp3", E3: "E3.mp3", E4: "E4.mp3",
-        G1: "G1.mp3", G2: "G2.mp3", G3: "G3.mp3", G4: "G4.mp3",
+        "C#1": "Cs1.mp3", E1: "E1.mp3", G1: "G1.mp3", "A#1": "As1.mp3",
+        "C#2": "Cs2.mp3", E2: "E2.mp3", G2: "G2.mp3", "A#2": "As2.mp3",
+        "C#3": "Cs3.mp3", E3: "E3.mp3", G3: "G3.mp3", "A#3": "As3.mp3",
+        "C#4": "Cs4.mp3", E4: "E4.mp3", G4: "G4.mp3", "A#4": "As4.mp3",
+        "C#5": "Cs5.mp3",
       },
     },
     violino: {
       baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/violin/",
       urls: {
-        A3: "A3.mp3", A4: "A4.mp3", A5: "A5.mp3", A6: "A6.mp3",
-        C4: "C4.mp3", C5: "C5.mp3", C6: "C6.mp3", C7: "C7.mp3",
-        E4: "E4.mp3", E5: "E5.mp3", E6: "E6.mp3",
-        G4: "G4.mp3", G5: "G5.mp3", G6: "G6.mp3",
+        G3: "G3.mp3", A3: "A3.mp3", C4: "C4.mp3", E4: "E4.mp3", G4: "G4.mp3",
+        A4: "A4.mp3", C5: "C5.mp3", E5: "E5.mp3", G5: "G5.mp3",
+        A5: "A5.mp3", C6: "C6.mp3", E6: "E6.mp3", G6: "G6.mp3",
+        A6: "A6.mp3", C7: "C7.mp3",
       },
     },
     sax: {
       baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/saxophone/",
       urls: {
-        A3: "A3.mp3", A4: "A4.mp3", A5: "A5.mp3",
-        C4: "C4.mp3", C5: "C5.mp3", C6: "C6.mp3",
-        "D#4": "Ds4.mp3", "D#5": "Ds5.mp3",
-        F3: "F3.mp3", F4: "F4.mp3", F5: "F5.mp3",
-        "G#3": "Gs3.mp3", "G#4": "Gs4.mp3", "G#5": "Gs5.mp3",
+        D3: "D3.mp3", "D#3": "Ds3.mp3", E3: "E3.mp3", F3: "F3.mp3", "F#3": "Fs3.mp3",
+        G3: "G3.mp3", "G#3": "Gs3.mp3", "A#3": "As3.mp3", B3: "B3.mp3",
+        "C#4": "Cs4.mp3", D4: "D4.mp3", "D#4": "Ds4.mp3", E4: "E4.mp3", F4: "F4.mp3",
+        "F#4": "Fs4.mp3", G4: "G4.mp3", "G#4": "Gs4.mp3", A4: "A4.mp3",
+        "A#4": "As4.mp3", B4: "B4.mp3", C4: "C4.mp3",
+        "C#5": "Cs5.mp3", D5: "D5.mp3", "D#5": "Ds5.mp3", E5: "E5.mp3",
+        F5: "F5.mp3", "F#5": "Fs5.mp3", G5: "G5.mp3", "G#5": "Gs5.mp3", A5: "A5.mp3",
+        C5: "C5.mp3",
       },
     },
   }), []);
@@ -604,8 +649,8 @@ function AfinadorPage() {
     return entry.sampler;
   }, [SAMPLER_CONFIG]);
 
-  const tocarReferencia = useCallback(async (freq: number, nomeNota?: string) => {
-    if (instrumentoBase.id === "bateria") { tocarBateria(freq); return; }
+  const tocarReferencia = useCallback(async (freq: number, nomeNota?: string, dica?: string) => {
+    if (instrumentoBase.id === "bateria") { await tocarBateriaSample(freq, dica); return; }
     try {
       const sampler = await getSampler(instrumentoBase.id);
       if (sampler) { sampler.triggerAttackRelease(nomeNota ?? freq, 2); return; }
@@ -627,8 +672,9 @@ function AfinadorPage() {
       osc.connect(gain); gain.connect(ctx.destination);
       osc.start(now); osc.stop(now + 2.05);
     } catch { /* ignore */ }
-  }, [instrumentoBase.id, getSampler, tocarBateria]);
-  useEffect(() => () => { tomCtxRef.current?.close(); noiseCtxRef.current?.close(); }, []);
+  }, [instrumentoBase.id, getSampler, tocarBateriaSample]);
+  useEffect(() => () => { tomCtxRef.current?.close(); drumCtxRef.current?.close(); }, []);
+
 
   // Determina a nota mais próxima da freq atual dentro do instrumento (modo auto)
   const alvo = useMemo(() => {
