@@ -106,17 +106,27 @@ export function EarCoach({
 /* -------------------- 1) Afinador ao vivo -------------------- */
 type PitchState = { freq: number; note: ReturnType<typeof freqToNote> } | null;
 
+function isAndroidWebView(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  return /Android/i.test(ua) && /(; wv\)|Version\/[\d.]+ Chrome\/[\d.]+ Mobile)/i.test(ua) && !/CriOS|FxiOS/i.test(ua);
+}
+
 function describeMicError(e: unknown): string {
+  const apkHint = isAndroidWebView()
+    ? "\n\nNo APK: verifique se o app tem a permissão de microfone ligada em Configurações → Apps → (este app) → Permissões → Microfone. O APK também precisa ter RECORD_AUDIO no AndroidManifest e liberar RESOURCE_AUDIO_CAPTURE no onPermissionRequest do WebView."
+    : "";
   if (e instanceof Error) {
     if (e.name === "NotAllowedError" || e.name === "SecurityError")
-      return "Permissão do microfone negada. Toque no cadeado ao lado do endereço e permita o microfone.";
-    if (e.name === "NotFoundError") return "Nenhum microfone encontrado no dispositivo.";
-    if (e.name === "NotReadableError") return "Microfone em uso por outro app. Feche e tente novamente.";
+      return "Permissão do microfone negada." + (isAndroidWebView() ? apkHint : " Toque no cadeado ao lado do endereço e permita o microfone.");
+    if (e.name === "NotFoundError") return "Nenhum microfone encontrado no dispositivo." + apkHint;
+    if (e.name === "NotReadableError") return "Microfone em uso por outro app. Feche e tente novamente." + apkHint;
     if (e.name === "OverconstrainedError") return "Microfone não suporta as configurações pedidas.";
-    return e.message || "Erro ao acessar o microfone";
+    return (e.message || "Erro ao acessar o microfone") + apkHint;
   }
-  return "Erro ao acessar o microfone";
+  return "Erro ao acessar o microfone" + apkHint;
 }
+
 
 function usePitchEngine() {
   const [pitch, setPitch] = useState<PitchState>(null);
