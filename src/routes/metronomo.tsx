@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Play, Pause, Timer, Volume2, VolumeX } from "lucide-react";
+import { Play, Pause, Timer, Volume2, VolumeX, Hand } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/metronomo")({
