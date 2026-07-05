@@ -109,7 +109,7 @@ function Header() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
           <Music className="h-6 w-6 text-primary" />
-          <span className="font-display text-lg font-bold">Melodia</span>
+          <span className="font-display text-lg font-bold">Notes for Life</span>
         </Link>
         <nav className="hidden items-center gap-1 sm:flex">
           {navItems.map((item) => (
@@ -211,12 +211,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Melodia — Estudo Musical" },
+      { title: "Notes for Life" },
       { name: "description", content: "App completo para estudar teoria musical, praticar com quizzes e usar ferramentas como metrônomo." },
-      { property: "og:title", content: "Melodia — Estudo Musical" },
+      { property: "og:title", content: "Notes for Life" },
       { property: "og:description", content: "App completo para estudar teoria musical, praticar com quizzes e usar ferramentas como metrônomo." },
       { property: "og:type", content: "website" },
-      { name: "twitter:title", content: "Melodia — Estudo Musical" },
+      { name: "twitter:title", content: "Notes for Life" },
       { name: "twitter:description", content: "App completo para estudar teoria musical, praticar com quizzes e usar ferramentas como metrônomo." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b039dd2f-2fe6-4d1b-b5cf-cfcabafd91fa/id-preview-525a281c--266fafba-352b-44c0-b421-3dfd740bb333.lovable.app-1782534620845.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b039dd2f-2fe6-4d1b-b5cf-cfcabafd91fa/id-preview-525a281c--266fafba-352b-44c0-b421-3dfd740bb333.lovable.app-1782534620845.png" },
