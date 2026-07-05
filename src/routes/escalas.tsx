@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { BookOpen, ChevronDown, ChevronUp, Music2, Youtube } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, Music2, Youtube, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { InstrumentDiagram } from "@/components/InstrumentDiagram";
 import { EarCoach } from "@/components/EarCoach";
 import { CagedShapes } from "@/components/CagedShapes";
+import { ImprovisationMethodology } from "@/components/ImprovisationMethodology";
 
 export const Route = createFileRoute("/escalas")({
   head: () => ({
@@ -116,11 +117,12 @@ function EscalasPage() {
   const [expanded, setExpanded] = useState<Set<number>>(new Set([0]));
   const [activeMode, setActiveMode] = useState<string | null>(null);
   const [instrument, setInstrument] = useState<InstrumentId>("violao");
+  const [tab, setTab] = useState<"escalas" | "improvisar">("escalas");
 
   return (
     <div className="min-h-screen px-4 py-8">
       <div className="mx-auto max-w-4xl">
-        <div className="mb-8">
+        <div className="mb-6">
           <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
             <BookOpen className="h-4 w-4" />
             Referência
@@ -129,10 +131,68 @@ function EscalasPage() {
           <p className="mt-2 text-muted-foreground">Escolha a tônica, abra a escala e clique nos modos gregos para ver a pentatônica modal aplicada ao seu instrumento.</p>
         </div>
 
-        {/* Seletor de tônica */}
-        <div className="mb-4 rounded-2xl border border-border bg-card p-4">
-          <label className="mb-3 block text-sm font-medium text-muted-foreground">Tônica</label>
-          <div className="flex flex-wrap gap-2">
+        {/* Tabs principais */}
+        <div className="mb-6 flex flex-wrap gap-2 border-b border-border">
+          <button
+            onClick={() => setTab("escalas")}
+            className={cn(
+              "inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-all -mb-px",
+              tab === "escalas" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <BookOpen className="h-4 w-4" /> Escalas &amp; Modos
+          </button>
+          <button
+            onClick={() => setTab("improvisar")}
+            className={cn(
+              "inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-all -mb-px",
+              tab === "improvisar" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <Zap className="h-4 w-4" /> Como Improvisar
+          </button>
+        </div>
+
+        {tab === "improvisar" ? (
+          <ImprovisationMethodology />
+        ) : (
+          <EscalasContent
+            selectedTonic={selectedTonic}
+            setSelectedTonic={setSelectedTonic}
+            instrument={instrument}
+            setInstrument={setInstrument}
+            expanded={expanded}
+            setExpanded={setExpanded}
+            activeMode={activeMode}
+            setActiveMode={setActiveMode}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+type EscalasContentProps = {
+  selectedTonic: string;
+  setSelectedTonic: (v: string) => void;
+  instrument: InstrumentId;
+  setInstrument: (v: InstrumentId) => void;
+  expanded: Set<number>;
+  setExpanded: (v: Set<number>) => void;
+  activeMode: string | null;
+  setActiveMode: (v: string | null) => void;
+};
+
+function EscalasContent({
+  selectedTonic, setSelectedTonic, instrument, setInstrument,
+  expanded, setExpanded, activeMode, setActiveMode,
+}: EscalasContentProps) {
+  return (
+    <>
+      {/* Seletor de tônica */}
+      <div className="mb-4 rounded-2xl border border-border bg-card p-4">
+        <label className="mb-3 block text-sm font-medium text-muted-foreground">Tônica</label>
+        <div className="flex flex-wrap gap-2">
             {TONALITIES.map((t) => (
               <button
                 key={t}
