@@ -104,6 +104,8 @@ function instrumentTip(inst: InstrumentId, modeRoot: string, pentSemis: number[]
       const notas = pentSemis.map((s) => transpose(modeRoot, s)).join(" – ");
       return `Notas: ${notas}. Em 1ª posição, escolha a corda cuja tônica fique acessível (G, D, A ou E). Use cordas soltas quando coincidirem com as notas da pentatônica e mantenha o arco firme entre cordas.`;
     }
+    case "bateria":
+      return `A bateria não produz alturas definidas. Use a tônica ${modeRoot} como referência de pulso: marque o tempo 1 no bumbo e crie levadas que ressaltem os graus ${intervals} através de acentos no prato de condução ou tom-tons.`;
   }
 }
 
