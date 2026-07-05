@@ -231,9 +231,9 @@ function usePitchEngine() {
 
       // Estabilização: precisa ver a mesma nota várias vezes seguidas
       // antes de confirmar, e segura o valor por um tempo mínimo.
-      const STABLE_FRAMES = 4;      // ~4 leituras iguais para confirmar
-      const HOLD_MS = 700;          // segura a nota exibida por 700ms
-      const SAMPLE_MS = 90;         // amostra a cada ~90ms (mais lento que rAF)
+      const STABLE_FRAMES = 7;      // exige mais leituras iguais para confirmar
+      const HOLD_MS = 1500;         // segura a nota exibida por 1,5s
+      const SAMPLE_MS = 120;        // amostra mais espaçada, ~120ms
       let candidateName: string | null = null;
       let candidateCount = 0;
       let lastCommit: { name: string; at: number } | null = null;
@@ -360,9 +360,9 @@ function GuidedExercise({ pentatonicNotes, tonic }: { pentatonicNotes: string[];
     if (!on || !pitch?.note) { sustainRef.current = { name: null, since: 0 }; return; }
     const target = sequence[idx];
     const now = performance.now();
-    // exige que a nota seja sustentada por pelo menos 600ms antes de contar
-    const SUSTAIN_MS = 600;
-    const COOLDOWN_MS = 500;
+    // exige que a nota seja sustentada por pelo menos 1,5s antes de contar
+    const SUSTAIN_MS = 1500;
+    const COOLDOWN_MS = 1000;
     if (sustainRef.current.name !== pitch.note.name) {
       sustainRef.current = { name: pitch.note.name, since: now };
       return;
