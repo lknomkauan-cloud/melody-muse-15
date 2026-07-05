@@ -589,9 +589,32 @@ function AfinadorPage() {
           ))}
         </div>
 
-        {/* Descrição do instrumento */}
+        {/* Variações do instrumento */}
+        {instrumentoBase.variacoes && instrumentoBase.variacoes.length > 0 && (
+          <div className="mb-4 rounded-2xl border border-border bg-card p-4">
+            <div className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Variação</div>
+            <div className="flex flex-wrap gap-2">
+              {instrumentoBase.variacoes.map((v) => (
+                <button
+                  key={v.id}
+                  onClick={() => setVariacaoId(v.id)}
+                  className={cn(
+                    "rounded-lg border px-3 py-1.5 text-xs font-medium transition-all",
+                    (variacao?.id === v.id)
+                      ? "border-primary/50 bg-primary/10 text-foreground"
+                      : "border-border bg-muted/30 text-muted-foreground hover:bg-muted",
+                  )}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Descrição do instrumento / variação */}
         <div className="mb-6 rounded-2xl border border-border bg-card p-4">
-          <div className="text-sm font-medium">{instrumento.descricao}</div>
+          <div className="text-sm font-medium">{variacao?.descricao ?? instrumento.descricao}</div>
           {instrumento.dicaGeral && (
             <div className="mt-2 flex items-start gap-2 text-xs text-muted-foreground">
               <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
