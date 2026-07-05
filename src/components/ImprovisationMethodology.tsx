@@ -491,12 +491,135 @@ const METHODS: InstrumentMethod[] = [
         ),
       },
       {
-        title: "6. Referências",
-        icon: Ear,
+        title: "6. Estudando outros ritmos e gêneros",
+        icon: Layers,
         content: (
-          <p><strong>Elvin Jones</strong> (polirritmia), <strong>Tony Williams</strong> (jazz moderno), <strong>Steve Gadd</strong> (groove), <strong>Vinnie Colaiuta</strong> (fusion), <strong>Jojo Mayer</strong> (drum'n'bass). Brasil: <strong>Zé Eduardo Nazário</strong>, <strong>Robertinho Silva</strong>, <strong>Kiko Freitas</strong>.</p>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">
+              Baterista completo transita por vários idiomas. Cada gênero tem uma <strong>célula rítmica assinatura</strong>, um andamento típico e uma pegada de mão/pé. Estude na ordem: (1) ouça 5 gravações referência, (2) toque a levada básica lenta com metrônomo, (3) acelere até o BPM real, (4) improvise variações mantendo o esqueleto.
+            </p>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              <RhythmCard
+                name="Frevo"
+                bpm="120–160"
+                pattern="Caixa em colcheias contínuas com acentos no 1 e 3; bumbo marca 1 e 3; surdo faz respostas sincopadas."
+                tips="Estude marchinha de Recife e Nação Pernambuco. Referências: Nilton Freitas, Cassiano Costa. Braço solto — é resistência de 40 minutos."
+                refs="Frevo de bloco: 'Vassourinhas'. Frevo-canção: Alceu Valença."
+              />
+              <RhythmCard
+                name="Axé"
+                bpm="100–120"
+                pattern="Timbal + surdo simulados na bateria: bumbo em 1 e 3, caixa/agogô no contratempo, chimbal em semicolcheias abertas."
+                tips="Junte samba-reggae com groove pop. Estude Chiclete com Banana, Ivete, Timbalada."
+                refs="Neguinho do Samba criou o samba-reggae — base do axé moderno."
+              />
+              <RhythmCard
+                name="Rock"
+                bpm="90–160"
+                pattern="Backbeat clássico: bumbo em 1 e 3, caixa em 2 e 4, chimbal em colcheias. Variações em 8 e 16."
+                tips="John Bonham (Zeppelin), Neil Peart (Rush), Dave Grohl. Trabalhe pé direito rápido e ghost notes na caixa."
+                refs="Estude 'Rock and Roll' (Bonham), 'Tom Sawyer' (Peart)."
+              />
+              <RhythmCard
+                name="Funk Americano"
+                bpm="90–110"
+                pattern="Ghost notes densas na caixa entre 2 e 4, bumbo sincopado, chimbal em 16 avos com aberturas curtas."
+                tips="Referências: Clyde Stubblefield ('Funky Drummer'), Zigaboo Modeliste (Meters), Bernard Purdie (Purdie Shuffle)."
+                refs="Toque com metrônomo em 8º nota — precisão de 16 é tudo."
+              />
+              <RhythmCard
+                name="Trap"
+                bpm="60–80 (140 double-time)"
+                pattern="Bumbo 808 sincopado, caixa/clap no 3, chimbal em rolls de 16, 32 e tercinas (hi-hat rolls)."
+                tips="Estude programação primeiro (FL Studio/Ableton) para entender a lógica, depois transporte pra bateria acústica ou híbrida com pads."
+                refs="Referências: Travis Scott, Metro Boomin. Baterista ao vivo: Aaron Spears, Anika Nilles."
+              />
+              <RhythmCard
+                name="Dubstep"
+                bpm="140 (half-time feel a 70)"
+                pattern="Bumbo no 1, caixa no 3 (half-time), wobbles/FX no lugar do chimbal. Subdivisão em 16 com espaço entre golpes."
+                tips="Bateria acústica no dubstep é sobre <em>peso e espaço</em>. Menos notas, mais impacto. Referência: KJ Sawka, Jojo Mayer (drum'n'bass é primo)."
+                refs="Ouça Skrillex, Excision — traduza os drops para tambores."
+              />
+              <RhythmCard
+                name="Jazz"
+                bpm="80–300+"
+                pattern="Condução no ride: 1 - 2 e - 3 - 4 e (swing feel), chimbal com pé em 2 e 4, caixa e bumbo fazem 'comping' (respostas sincopadas)."
+                tips="Estude os 4 livros essenciais: Ted Reed 'Syncopation', Jim Chapin, John Riley 'The Art of Bop Drumming', Alan Dawson."
+                refs="Elvin Jones, Tony Williams, Philly Joe Jones, Max Roach. BR: Edison Machado (inventou 'samba no prato')."
+              />
+              <RhythmCard
+                name="Blues"
+                bpm="60–140"
+                pattern="Shuffle (tercina com nota do meio omitida) no ride ou chimbal; bumbo em 1 e 3, caixa em 2 e 4. Variação: 12/8 slow blues."
+                tips="Sinta o 'lay back' — atrase de leve a caixa. Estude Fred Below, S.P. Leary, Chris Layton (Stevie Ray)."
+                refs="'Pride and Joy' (SRV), 'The Thrill Is Gone' (B.B. King)."
+              />
+              <RhythmCard
+                name="Valsa"
+                bpm="60–180 (3/4)"
+                pattern="Compasso ternário: bumbo no 1, caixa/chimbal em 2 e 3. Valsa vienense é rápida; valsa brasileira (chorinho) é mais lenta e cantada."
+                tips="Trabalhe independência para não 'quadrar' o 3/4. Estude também 6/8 (dobra do 3/4) — muito usado em baladas."
+                refs="Valsa jazz: 'My Favorite Things' (Coltrane/Elvin Jones)."
+              />
+              <RhythmCard
+                name="Salsa"
+                bpm="150–220"
+                pattern="Clave 2-3 ou 3-2 é a lei. Bateria toca cascara no aro do tom, campana no bumbo, caixa faz 'abanico' nos breaks. Chimbal em 2 e 4."
+                tips="Aprenda a clave <strong>antes</strong> de qualquer levada. Se perder a clave, perde a música. Estude Tito Puente, Giovanni Hidalgo, Horacio 'El Negro' Hernández."
+                refs="Songo (Changuito) é a ponte entre salsa e funk."
+              />
+              <RhythmCard
+                name="Samba (bônus BR)"
+                bpm="90–130"
+                pattern="Bumbo em semicolcheias '1 e-a 2 e-a', caixa/chimbal em telecoteco, aro (rim) fazendo a partida-alta."
+                tips="Samba no prato (Edison Machado): condução no prato em vez do chimbal — abriu o samba-jazz. Estude Milton Banana, Robertinho Silva."
+                refs="'Águas de Março' (Elis/Jobim), 'Samba de Uma Nota Só'."
+              />
+              <RhythmCard
+                name="Reggae"
+                bpm="60–90"
+                pattern="One drop: bumbo e caixa juntos no 3 (não no 1!). Chimbal em colcheias com abertura no ‘e’ do 2."
+                tips="Toque <strong>atrás do tempo</strong> — bem lay back. Referências: Sly Dunbar, Carlton Barrett (Bob Marley), Style Scott."
+                refs="Steppers (bumbo em todos os tempos) e rockers (bumbo em 1 e 3) são variações."
+              />
+              <RhythmCard
+                name="Bossa Nova"
+                bpm="120–160"
+                pattern="Vassourinha (brushes) ou baqueta leve: caixa faz o padrão de clave brasileira; bumbo suave em 1 e 3+meio; chimbal em colcheias."
+                tips="Menos é mais. Toque como se fosse violão de João Gilberto. Estude Milton Banana, Edison Machado, Dom Um Romão."
+                refs="'Desafinado', 'Corcovado' — ouça 100x antes de tocar."
+              />
+              <RhythmCard
+                name="Metal"
+                bpm="120–240+"
+                pattern="Blast beat (caixa e bumbo alternando em 16), double bass contínuo, china cymbal para ênfases, breakdowns sincopados."
+                tips="Trabalhe pedal duplo com metrônomo do 60 ao 200. Referências: Gene Hoglan, Thomas Lang, Aquiles Priester (BR), Eloy Casagrande (BR)."
+                refs="Estude Sepultura, Meshuggah (polirritmia), Tool (compassos ímpares)."
+              />
+            </div>
+
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm">
+              <p className="font-semibold text-primary mb-1">Rotina sugerida (30 min/dia por gênero)</p>
+              <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                <li>5 min: audição ativa da referência (batendo o pé, cantando a levada).</li>
+                <li>10 min: levada básica com metrônomo, do BPM lento (60%) até o original.</li>
+                <li>10 min: variações e viradas dentro do estilo, mantendo o pulso e a assinatura do gênero.</li>
+                <li>5 min: play-along com a gravação original — grave-se e compare.</li>
+              </ol>
+            </div>
+          </div>
         ),
       },
+      {
+        title: "7. Referências",
+        icon: Ear,
+        content: (
+          <p><strong>Elvin Jones</strong> (polirritmia), <strong>Tony Williams</strong> (jazz moderno), <strong>Steve Gadd</strong> (groove), <strong>Vinnie Colaiuta</strong> (fusion), <strong>Jojo Mayer</strong> (drum'n'bass). Brasil: <strong>Zé Eduardo Nazário</strong>, <strong>Robertinho Silva</strong>, <strong>Kiko Freitas</strong>, <strong>Edison Machado</strong>, <strong>Milton Banana</strong>.</p>
+        ),
+      },
+
     ],
   },
 ];
