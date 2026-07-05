@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
   Music2, Bot, Search, ExternalLink, Sparkles, Mic, Brain, Code2,
@@ -6,19 +5,16 @@ import {
   Briefcase, Palette, MessageSquare, Wrench,
 } from "lucide-react";
 
-export const Route = createFileRoute("/agentes-ia")({
-  component: AgentesIA,
-  head: () => ({
-    meta: [
-      { title: "Agentes de IA — Melodia" },
-      { name: "description", content: "Catálogo de agentes e ferramentas de IA — focados em música e além: composição, transcrição, mixagem, escrita, código, imagem, vídeo e mais." },
-      { property: "og:title", content: "Agentes de IA — Melodia" },
-      { property: "og:description", content: "Catálogo de agentes de IA para música, produtividade, criação, código e pesquisa." },
-    ],
-  }),
-});
-
 type Agent = {
+  name: string;
+  desc: string;
+  url: string;
+  tag: string;
+  free?: boolean;
+};
+
+type Category = {
+
   name: string;
   desc: string;
   url: string;
@@ -284,7 +280,7 @@ const categories: Category[] = [
   },
 ];
 
-function AgentesIA() {
+export default function AgentesIAView() {
   const [query, setQuery] = useState("");
   const [activeCat, setActiveCat] = useState<string>("all");
 
