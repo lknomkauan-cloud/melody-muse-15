@@ -154,7 +154,7 @@ function Header() {
   );
 }
 
-function MobileNav({ navItems, user, onSignOut }: { navItems: { to: string; label: string }[]; user: ReturnType<typeof useAuth>["user"]; onSignOut: () => void }) {
+function MobileNav({ navItems, user, onSignOut, avatarUrl, initials }: { navItems: { to: string; label: string }[]; user: ReturnType<typeof useAuth>["user"]; onSignOut: () => void; avatarUrl: string | null; initials: string }) {
   const [open, setOpen] = useState(false);
 
   return (
