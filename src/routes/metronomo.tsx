@@ -41,6 +41,25 @@ function MetronomoPage() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const beatCountRef = useRef(0);
+  const tapsRef = useRef<number[]>([]);
+  const [tapFlash, setTapFlash] = useState(false);
+
+  const handleTap = useCallback(() => {
+    const now = performance.now();
+    const taps = tapsRef.current;
+    // reset se o último tap foi há mais de 2s
+    if (taps.length && now - taps[taps.length - 1] > 2000) taps.length = 0;
+    taps.push(now);
+    if (taps.length > 6) taps.shift();
+    if (taps.length >= 2) {
+      const intervalos = taps.slice(1).map((t, i) => t - taps[i]);
+      const media = intervalos.reduce((a, b) => a + b, 0) / intervalos.length;
+      const novoBpm = Math.round(60000 / media);
+      if (novoBpm >= 40 && novoBpm <= 240) setBpm(novoBpm);
+    }
+    setTapFlash(true);
+    setTimeout(() => setTapFlash(false), 120);
+  }, []);
 
   const figura = FIGURAS.find((f) => f.id === figuraId) ?? FIGURAS[1];
   const subdivisoesPorCompasso = Math.max(1, Math.round(4 * figura.porBatida));
