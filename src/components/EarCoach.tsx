@@ -248,10 +248,9 @@ function LiveTuner({ pentatonicNotes, tonic }: { pentatonicNotes: string[]; toni
 /* -------------------- 2) Exercício guiado -------------------- */
 function GuidedExercise({ pentatonicNotes, tonic }: { pentatonicNotes: string[]; tonic: string }) {
   const sequence = [...pentatonicNotes, pentatonicNotes[0]]; // sobe até oitava
-  const [on, setOn] = useState(false);
   const [idx, setIdx] = useState(0);
   const [hits, setHits] = useState<Array<"ok" | "off">>([]);
-  const { pitch, error } = useMicPitch(on);
+  const { pitch, error, on, start, stop } = usePitchEngine();
   const lastMatchRef = useRef<number>(0);
 
   useEffect(() => {
@@ -279,7 +278,7 @@ function GuidedExercise({ pentatonicNotes, tonic }: { pentatonicNotes: string[];
     <div>
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <button
-          onClick={() => { setOn((v) => !v); }}
+          onClick={on ? stop : start}
           className={cn(
             "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all",
             on ? "bg-destructive text-destructive-foreground" : "bg-primary text-primary-foreground",
