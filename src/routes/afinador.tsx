@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/afinador")({
   head: () => ({
     meta: [
-      { title: "Afinador — Melodia" },
+      { title: "Afinador — Notes for Life" },
       { name: "description", content: "Afinador cromático com reconhecimento de voz para violão, guitarra, baixo, violino, sax e bateria." },
-      { property: "og:title", content: "Afinador — Melodia" },
+      { property: "og:title", content: "Afinador — Notes for Life" },
       { property: "og:description", content: "Afinador cromático com microfone para vários instrumentos." },
     ],
   }),

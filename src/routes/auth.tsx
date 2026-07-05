@@ -13,8 +13,8 @@ import { z } from "zod";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Entrar ou criar conta — Melodia" },
-      { name: "description", content: "Crie sua conta de aluno ou professor no Melodia e acompanhe seus estudos musicais." },
+      { title: "Entrar ou criar conta — Notes for Life" },
+      { name: "description", content: "Crie sua conta de aluno ou professor no Notes for Life e acompanhe seus estudos musicais." },
     ],
   }),
   component: AuthPage,
@@ -99,7 +99,7 @@ function AuthPage() {
         <div className="mb-8 text-center">
           <div className="inline-flex items-center gap-2 text-primary mb-3">
             <Music className="h-8 w-8" />
-            <span className="font-display text-2xl font-bold">Melodia</span>
+            <span className="font-display text-2xl font-bold">Notes for Life</span>
           </div>
           <h1 className="font-display text-3xl font-bold text-foreground">Bem-vindo</h1>
           <p className="mt-2 text-sm text-muted-foreground">

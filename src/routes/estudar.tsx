@@ -23,13 +23,13 @@ import {
 export const Route = createFileRoute("/estudar")({
   head: () => ({
     meta: [
-      { title: "Estudar — Melodia" },
+      { title: "Estudar — Notes for Life" },
       {
         name: "description",
         content:
           "Centro de estudos musicais: escolha seu instrumento e explore teoria, técnica, harmonia, ritmo, percepção auditiva e improvisação.",
       },
-      { property: "og:title", content: "Estudar — Melodia" },
+      { property: "og:title", content: "Estudar — Notes for Life" },
       {
         property: "og:description",
         content:
