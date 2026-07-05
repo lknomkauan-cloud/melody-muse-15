@@ -4,6 +4,7 @@ import { BookOpen, ChevronDown, ChevronUp, Music2, Youtube, Zap } from "lucide-r
 import { cn } from "@/lib/utils";
 import { InstrumentDiagram } from "@/components/InstrumentDiagram";
 import { EarCoach } from "@/components/EarCoach";
+import { InstrumentCoach } from "@/components/InstrumentCoach";
 import { CagedShapes } from "@/components/CagedShapes";
 import { ImprovisationMethodology } from "@/components/ImprovisationMethodology";
 
@@ -227,7 +228,13 @@ function EscalasContent({
           </div>
         </div>
 
+        <InstrumentCoach
+          instrumentId={instrument}
+          instrumentLabel={INSTRUMENTS.find(i => i.id === instrument)?.label ?? instrument}
+        />
+
         <div className="space-y-3">
+
           {SCALE_TYPES.map((scale, idx) => {
             const notes = getScaleNotes(selectedTonic, scale.pattern);
             const isOpen = expanded.has(idx);
