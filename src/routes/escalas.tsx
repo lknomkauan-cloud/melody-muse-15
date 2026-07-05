@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { BookOpen, ChevronDown, ChevronUp, Music2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { InstrumentDiagram } from "@/components/InstrumentDiagram";
 
 export const Route = createFileRoute("/escalas")({
   head: () => ({
