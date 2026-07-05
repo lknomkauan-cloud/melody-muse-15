@@ -66,9 +66,12 @@ export function EarCoach({
   const [tab, setTab] = useState<"tuner" | "exercise" | "ai">("tuner");
   return (
     <div className="mt-4 rounded-xl border border-primary/30 bg-gradient-to-br from-primary/5 to-transparent p-4">
-      <div className="mb-3 flex items-center gap-2">
-        <Mic className="h-4 w-4 text-primary" />
-        <span className="text-sm font-semibold">Coach de Ouvido — {modeName} ({tonic})</span>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Mic className="h-4 w-4 text-primary" />
+          <span className="text-sm font-semibold">Coach de Ouvido — {modeName} ({tonic})</span>
+        </div>
+        <MicPermissionButton />
       </div>
       <div className="mb-3 flex flex-wrap gap-1.5">
         {[
