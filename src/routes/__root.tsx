@@ -181,9 +181,17 @@ function MobileNav({ navItems, user, onSignOut, avatarUrl, initials }: { navItem
             ))}
             <div className="mt-2 border-t border-border pt-2">
               {user ? (
-                <button onClick={() => { onSignOut(); setOpen(false); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground">
-                  <LogOut className="h-4 w-4" /> Sair ({user.email})
-                </button>
+                <>
+                  <Link to="/conta" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-muted">
+                    <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[10px] font-bold text-primary">
+                      {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : (initials || <UserIcon className="h-3.5 w-3.5" />)}
+                    </span>
+                    Minha conta
+                  </Link>
+                  <button onClick={() => { onSignOut(); setOpen(false); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground">
+                    <LogOut className="h-4 w-4" /> Sair
+                  </button>
+                </>
               ) : (
                 <Link to="/auth" onClick={() => setOpen(false)} className="block rounded-md bg-primary px-3 py-2 text-center text-sm font-medium text-primary-foreground">
                   Entrar / Criar conta
