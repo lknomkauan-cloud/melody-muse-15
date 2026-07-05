@@ -15,14 +15,35 @@ export const Route = createFileRoute("/metronomo")({
   component: MetronomoPage,
 });
 
+type Figura = {
+  id: string;
+  nome: string;
+  simbolo: string;
+  porBatida: number; // subdivisões por tempo (semínima = 1)
+  descricao: string;
+};
+
+const FIGURAS: Figura[] = [
+  { id: "minima", nome: "Mínima", simbolo: "𝅗𝅥", porBatida: 0.5, descricao: "2 tempos por nota" },
+  { id: "seminima", nome: "Semínima", simbolo: "♩", porBatida: 1, descricao: "1 nota por tempo" },
+  { id: "colcheia", nome: "Colcheia", simbolo: "♪", porBatida: 2, descricao: "2 notas por tempo" },
+  { id: "semicolcheia", nome: "Semicolcheia", simbolo: "𝅘𝅥𝅯", porBatida: 4, descricao: "4 notas por tempo" },
+  { id: "fusa", nome: "Fusa", simbolo: "𝅘𝅥𝅰", porBatida: 8, descricao: "8 notas por tempo" },
+  { id: "trinado", nome: "Tercina", simbolo: "♪³", porBatida: 3, descricao: "3 notas por tempo" },
+];
+
 function MetronomoPage() {
   const [bpm, setBpm] = useState(100);
+  const [figuraId, setFiguraId] = useState<string>("seminima");
   const [isPlaying, setIsPlaying] = useState(false);
   const [beat, setBeat] = useState(0);
   const [muted, setMuted] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const beatCountRef = useRef(0);
+
+  const figura = FIGURAS.find((f) => f.id === figuraId) ?? FIGURAS[1];
+  const subdivisoesPorCompasso = Math.max(1, Math.round(4 * figura.porBatida));
 
   const playClick = useCallback(
     (accent: boolean) => {
@@ -48,14 +69,15 @@ function MetronomoPage() {
   );
 
   const tick = useCallback(() => {
-    beatCountRef.current = (beatCountRef.current + 1) % 4;
+    beatCountRef.current = (beatCountRef.current + 1) % subdivisoesPorCompasso;
     setBeat(beatCountRef.current);
     playClick(beatCountRef.current === 0);
-  }, [playClick]);
+  }, [playClick, subdivisoesPorCompasso]);
+
+  const intervaloMs = (60 / bpm) * 1000 / figura.porBatida;
 
   const start = useCallback(() => {
     if (intervalRef.current) return;
-    // Initialize audio context on user gesture
     if (!audioCtxRef.current) {
       try {
         audioCtxRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
@@ -63,11 +85,11 @@ function MetronomoPage() {
         // ignore
       }
     }
+    beatCountRef.current = -1;
     tick();
-    const ms = (60 / bpm) * 1000;
-    intervalRef.current = setInterval(tick, ms);
+    intervalRef.current = setInterval(tick, intervaloMs);
     setIsPlaying(true);
-  }, [bpm, tick]);
+  }, [intervaloMs, tick]);
 
   const stop = useCallback(() => {
     if (intervalRef.current) {
@@ -94,11 +116,9 @@ function MetronomoPage() {
   useEffect(() => {
     if (isPlaying && intervalRef.current) {
       clearInterval(intervalRef.current);
-      intervalRef.current = null;
-      const ms = (60 / bpm) * 1000;
-      intervalRef.current = setInterval(tick, ms);
+      intervalRef.current = setInterval(tick, intervaloMs);
     }
-  }, [bpm, isPlaying, tick]);
+  }, [intervaloMs, isPlaying, tick]);
 
   const presetTempos = [
     { label: "Largo", bpm: 50 },
@@ -108,6 +128,8 @@ function MetronomoPage() {
     { label: "Allegro", bpm: 130 },
     { label: "Presto", bpm: 170 },
   ];
+
+  const dots = Array.from({ length: Math.min(subdivisoesPorCompasso, 16) }, (_, i) => i);
 
   return (
     <div className="min-h-screen px-4 py-8">
@@ -123,15 +145,13 @@ function MetronomoPage() {
 
         {/* Display */}
         <div className="mb-6 rounded-3xl border border-border bg-card p-8 text-center">
-          <div className="mb-6 flex items-center justify-center gap-4">
-            {[0, 1, 2, 3].map((i) => (
+          <div className="mb-6 flex flex-wrap items-center justify-center gap-3">
+            {dots.map((i) => (
               <div
                 key={i}
                 className={cn(
-                  "h-4 w-4 rounded-full transition-all duration-150",
-                  beat === i
-                    ? "bg-primary scale-125 glow-primary"
-                    : "bg-muted",
+                  "h-3 w-3 rounded-full transition-all duration-150",
+                  beat === i ? "bg-primary scale-125 glow-primary" : "bg-muted",
                 )}
               />
             ))}
@@ -140,7 +160,10 @@ function MetronomoPage() {
           <div className="font-display text-7xl font-bold tabular-nums tracking-tight">
             {bpm}
           </div>
-          <div className="mt-1 text-sm text-muted-foreground">BPM</div>
+          <div className="mt-1 text-sm text-muted-foreground">
+            BPM · <span className="text-2xl align-middle">{figura.simbolo}</span> {figura.nome}
+          </div>
+          <div className="mt-1 text-xs text-muted-foreground">{figura.descricao}</div>
 
           <div className="mt-6 flex items-center justify-center gap-4">
             <button
@@ -161,6 +184,29 @@ function MetronomoPage() {
             >
               {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
             </button>
+          </div>
+        </div>
+
+        {/* Figuras rítmicas */}
+        <div className="mb-6 rounded-2xl border border-border bg-card p-5">
+          <div className="mb-3 text-sm font-medium text-muted-foreground">Figura rítmica (subdivisão)</div>
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+            {FIGURAS.map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setFiguraId(f.id)}
+                className={cn(
+                  "rounded-xl border px-2 py-3 text-center transition-all",
+                  figuraId === f.id
+                    ? "border-primary/50 bg-primary/10"
+                    : "border-border bg-card hover:bg-muted",
+                )}
+                title={f.descricao}
+              >
+                <div className="text-2xl leading-none">{f.simbolo}</div>
+                <div className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">{f.nome}</div>
+              </button>
+            ))}
           </div>
         </div>
 
