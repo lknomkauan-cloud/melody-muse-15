@@ -497,9 +497,120 @@ function AfinadorPage() {
   useEffect(() => { setNotaAlvoIdx(null); setVariacaoId(null); }, [instrumentoId]);
   useEffect(() => { setNotaAlvoIdx(null); }, [variacaoId]);
 
-  // Tocador de referência (oscilador)
+  // Tocador de referência com samples REAIS do instrumento (Tone.js Sampler)
   const tomCtxRef = useRef<AudioContext | null>(null);
-  const tocarReferencia = useCallback((freq: number) => {
+  const samplerCacheRef = useRef<Map<string, { sampler: { triggerAttackRelease: (n: string | number, d: string | number) => void }; ready: Promise<unknown> }>>(new Map());
+  const noiseCtxRef = useRef<AudioContext | null>(null);
+
+  const tocarBateria = useCallback((freq: number) => {
+    try {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (!noiseCtxRef.current) noiseCtxRef.current = new AudioCtx();
+      const ctx = noiseCtxRef.current;
+      const now = ctx.currentTime;
+      // corpo do tambor (pitch envelope)
+      const osc = ctx.createOscillator();
+      const oscGain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq * 2.2, now);
+      osc.frequency.exponentialRampToValueAtTime(Math.max(35, freq), now + 0.12);
+      oscGain.gain.setValueAtTime(0.9, now);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+      osc.connect(oscGain).connect(ctx.destination);
+      // ataque (pele batendo) — ruído filtrado
+      const bufSize = Math.floor(ctx.sampleRate * 0.06);
+      const noiseBuf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      const data = noiseBuf.getChannelData(0);
+      for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+      const noise = ctx.createBufferSource();
+      noise.buffer = noiseBuf;
+      const nFilter = ctx.createBiquadFilter();
+      nFilter.type = "bandpass";
+      nFilter.frequency.value = freq * 4;
+      const nGain = ctx.createGain();
+      nGain.gain.setValueAtTime(0.4, now);
+      nGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      noise.connect(nFilter).connect(nGain).connect(ctx.destination);
+      osc.start(now); osc.stop(now + 0.95);
+      noise.start(now); noise.stop(now + 0.1);
+    } catch { /* ignore */ }
+  }, []);
+
+  const SAMPLER_CONFIG = useMemo<Record<string, { baseUrl: string; urls: Record<string, string> }>>(() => ({
+    violao: {
+      baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-acoustic/",
+      urls: {
+        A2: "A2.mp3", A3: "A3.mp3", A4: "A4.mp3", A5: "A5.mp3",
+        "C#3": "Cs3.mp3", "C#4": "Cs4.mp3", "C#5": "Cs5.mp3",
+        E2: "E2.mp3", E3: "E3.mp3", E4: "E4.mp3", E5: "E5.mp3",
+        G2: "G2.mp3", G3: "G3.mp3", G4: "G4.mp3", G5: "G5.mp3",
+      },
+    },
+    guitarra: {
+      baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-electric/",
+      urls: {
+        A2: "A2.mp3", A3: "A3.mp3", A4: "A4.mp3", A5: "A5.mp3",
+        "C#3": "Cs3.mp3", "C#4": "Cs4.mp3", "C#5": "Cs5.mp3",
+        E2: "E2.mp3", E3: "E3.mp3", E4: "E4.mp3",
+        "F#2": "Fs2.mp3", "F#3": "Fs3.mp3", "F#4": "Fs4.mp3", "F#5": "Fs5.mp3",
+      },
+    },
+    baixo: {
+      baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/bass-electric/",
+      urls: {
+        A1: "A1.mp3", A2: "A2.mp3", A3: "A3.mp3", A4: "A4.mp3",
+        "C#1": "Cs1.mp3", "C#2": "Cs2.mp3", "C#3": "Cs3.mp3", "C#4": "Cs4.mp3", "C#5": "Cs5.mp3",
+        E1: "E1.mp3", E2: "E2.mp3", E3: "E3.mp3", E4: "E4.mp3",
+        G1: "G1.mp3", G2: "G2.mp3", G3: "G3.mp3", G4: "G4.mp3",
+      },
+    },
+    violino: {
+      baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/violin/",
+      urls: {
+        A3: "A3.mp3", A4: "A4.mp3", A5: "A5.mp3", A6: "A6.mp3",
+        C4: "C4.mp3", C5: "C5.mp3", C6: "C6.mp3", C7: "C7.mp3",
+        E4: "E4.mp3", E5: "E5.mp3", E6: "E6.mp3",
+        G4: "G4.mp3", G5: "G5.mp3", G6: "G6.mp3",
+      },
+    },
+    sax: {
+      baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/saxophone/",
+      urls: {
+        A3: "A3.mp3", A4: "A4.mp3", A5: "A5.mp3",
+        C4: "C4.mp3", C5: "C5.mp3", C6: "C6.mp3",
+        "D#4": "Ds4.mp3", "D#5": "Ds5.mp3",
+        F3: "F3.mp3", F4: "F4.mp3", F5: "F5.mp3",
+        "G#3": "Gs3.mp3", "G#4": "Gs4.mp3", "G#5": "Gs5.mp3",
+      },
+    },
+  }), []);
+
+  const getSampler = useCallback(async (instId: string) => {
+    const cfg = SAMPLER_CONFIG[instId];
+    if (!cfg) return null;
+    const cache = samplerCacheRef.current;
+    if (!cache.has(instId)) {
+      const Tone = await import("tone");
+      await Tone.start();
+      const sampler = new Tone.Sampler({
+        urls: cfg.urls,
+        baseUrl: cfg.baseUrl,
+        release: 1.2,
+      }).toDestination();
+      cache.set(instId, { sampler: sampler as unknown as { triggerAttackRelease: (n: string | number, d: string | number) => void }, ready: Tone.loaded() });
+    }
+    const entry = cache.get(instId)!;
+    await entry.ready;
+    return entry.sampler;
+  }, [SAMPLER_CONFIG]);
+
+  const tocarReferencia = useCallback(async (freq: number, nomeNota?: string) => {
+    if (instrumentoBase.id === "bateria") { tocarBateria(freq); return; }
+    try {
+      const sampler = await getSampler(instrumentoBase.id);
+      if (sampler) { sampler.triggerAttackRelease(nomeNota ?? freq, 2); return; }
+    } catch { /* fallback */ }
+    // Fallback oscilador
     try {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!tomCtxRef.current) tomCtxRef.current = new AudioCtx();
@@ -508,21 +619,16 @@ function AfinadorPage() {
       const gain = ctx.createGain();
       osc.type = "sine";
       osc.frequency.value = freq;
-      // envelope suave
       const now = ctx.currentTime;
       gain.gain.setValueAtTime(0, now);
       gain.gain.linearRampToValueAtTime(0.25, now + 0.02);
       gain.gain.setValueAtTime(0.25, now + 1.6);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 2.05);
-    } catch {
-      // ignore
-    }
-  }, []);
-  useEffect(() => () => { tomCtxRef.current?.close(); }, []);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(now); osc.stop(now + 2.05);
+    } catch { /* ignore */ }
+  }, [instrumentoBase.id, getSampler, tocarBateria]);
+  useEffect(() => () => { tomCtxRef.current?.close(); noiseCtxRef.current?.close(); }, []);
 
   // Determina a nota mais próxima da freq atual dentro do instrumento (modo auto)
   const alvo = useMemo(() => {
@@ -712,7 +818,7 @@ function AfinadorPage() {
             {instrumento.notas.map((nota, idx) => (
               <button
                 key={idx}
-                onClick={() => { setNotaAlvoIdx(idx); tocarReferencia(nota.freq); }}
+                onClick={() => { setNotaAlvoIdx(idx); tocarReferencia(nota.freq, nota.nome); }}
                 className={cn(
                   "group rounded-xl border px-3 py-3 text-left transition-all",
                   notaAlvoIdx === idx
