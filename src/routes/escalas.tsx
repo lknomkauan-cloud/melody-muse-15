@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { InstrumentDiagram } from "@/components/InstrumentDiagram";
 import { EarCoach } from "@/components/EarCoach";
 import { InstrumentCoach } from "@/components/InstrumentCoach";
+import { DrumStudio } from "@/components/DrumStudio";
 import { CagedShapes } from "@/components/CagedShapes";
 import { ImprovisationMethodology } from "@/components/ImprovisationMethodology";
 
@@ -233,7 +234,11 @@ function EscalasContent({
           instrumentLabel={INSTRUMENTS.find(i => i.id === instrument)?.label ?? instrument}
         />
 
+        {instrument === "bateria" ? (
+          <DrumStudio />
+        ) : (
         <div className="space-y-3">
+
 
           {SCALE_TYPES.map((scale, idx) => {
             const notes = getScaleNotes(selectedTonic, scale.pattern);
@@ -285,7 +290,7 @@ function EscalasContent({
                     )}
 
 
-                    {scale.hasModes && (
+                    {scale.hasModes && instrument !== "sax" && (
                       <div className="mt-5">
                         <div className="mb-2 flex items-center gap-2">
                           <Music2 className="h-4 w-4 text-primary" />
@@ -370,7 +375,9 @@ function EscalasContent({
             );
           })}
         </div>
+        )}
     </>
+
   );
 }
 
