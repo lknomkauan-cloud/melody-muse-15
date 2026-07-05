@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Mic, MicOff, Radio, Info } from "lucide-react";
+import { Mic, MicOff, Radio, Info, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/afinador")({
@@ -20,11 +20,13 @@ export const Route = createFileRoute("/afinador")({
 // ============================================================================
 
 type Nota = { nome: string; freq: number; nota: string; oitava: number; dica?: string };
+type Variacao = { id: string; label: string; notas: Nota[]; descricao?: string };
 type Instrumento = {
   id: string;
   label: string;
   descricao: string;
   notas: Nota[];
+  variacoes?: Variacao[];
   dicaGeral?: string;
 };
 
@@ -70,11 +72,99 @@ const INSTRUMENTOS: Instrumento[] = [
       n("B3", "2ª corda"),
       n("E4", "1ª corda (mais aguda)"),
     ],
+    variacoes: [
+      {
+        id: "padrao",
+        label: "Padrão (6 cordas)",
+        descricao: "E A D G B E — afinação universal",
+        notas: [
+          n("E2", "6ª corda"), n("A2", "5ª corda"), n("D3", "4ª corda"),
+          n("G3", "3ª corda"), n("B3", "2ª corda"), n("E4", "1ª corda"),
+        ],
+      },
+      {
+        id: "drop-d",
+        label: "Drop D",
+        descricao: "6ª corda um tom abaixo — usada em rock, metal e MPB",
+        notas: [
+          n("D2", "6ª corda (Drop D)"), n("A2", "5ª corda"), n("D3", "4ª corda"),
+          n("G3", "3ª corda"), n("B3", "2ª corda"), n("E4", "1ª corda"),
+        ],
+      },
+      {
+        id: "dadgad",
+        label: "DADGAD",
+        descricao: "Afinação modal — folk, celta e fingerstyle",
+        notas: [
+          n("D2", "6ª corda"), n("A2", "5ª corda"), n("D3", "4ª corda"),
+          n("G3", "3ª corda"), n("A3", "2ª corda"), n("D4", "1ª corda"),
+        ],
+      },
+      {
+        id: "meio-tom",
+        label: "Meio tom abaixo (Eb)",
+        descricao: "Eb Ab Db Gb Bb Eb — usada por Hendrix, SRV, Guns N' Roses",
+        notas: [
+          n("D#2", "6ª"), n("G#2", "5ª"), n("C#3", "4ª"),
+          n("F#3", "3ª"), n("A#3", "2ª"), n("D#4", "1ª"),
+        ],
+      },
+      {
+        id: "7-cordas",
+        label: "7 cordas",
+        descricao: "Padrão brasileiro (samba/choro): C E A D G B E — 7ª corda em Dó grave",
+        notas: [
+          n("C2", "7ª corda (Dó grave — samba/choro)"),
+          n("E2", "6ª corda"), n("A2", "5ª corda"), n("D3", "4ª corda"),
+          n("G3", "3ª corda"), n("B3", "2ª corda"), n("E4", "1ª corda"),
+        ],
+      },
+      {
+        id: "12-cordas",
+        label: "12 cordas",
+        descricao: "Cada corda tem uma dupla — as 4 mais graves em oitava, as 2 agudas em uníssono",
+        notas: [
+          n("E2", "6ª (grave)"), n("E3", "6ª (oitava aguda)"),
+          n("A2", "5ª (grave)"), n("A3", "5ª (oitava aguda)"),
+          n("D3", "4ª (grave)"), n("D4", "4ª (oitava aguda)"),
+          n("G3", "3ª (grave)"), n("G4", "3ª (oitava aguda)"),
+          n("B3", "2ª (uníssono)"), n("B3", "2ª (uníssono)"),
+          n("E4", "1ª (uníssono)"), n("E4", "1ª (uníssono)"),
+        ],
+      },
+      {
+        id: "nashville",
+        label: "Nashville (high-strung)",
+        descricao: "Igual às cordas agudas do 12 cordas — usada em gravações country/pop",
+        notas: [
+          n("E3", "6ª aguda"), n("A3", "5ª aguda"), n("D4", "4ª aguda"),
+          n("G4", "3ª aguda"), n("B3", "2ª"), n("E4", "1ª"),
+        ],
+      },
+      {
+        id: "open-g",
+        label: "Open G",
+        descricao: "D G D G B D — Keith Richards, slide, blues",
+        notas: [
+          n("D2", "6ª"), n("G2", "5ª"), n("D3", "4ª"),
+          n("G3", "3ª"), n("B3", "2ª"), n("D4", "1ª"),
+        ],
+      },
+      {
+        id: "open-d",
+        label: "Open D",
+        descricao: "D A D F# A D — slide, blues, folk",
+        notas: [
+          n("D2", "6ª"), n("A2", "5ª"), n("D3", "4ª"),
+          n("F#3", "3ª"), n("A3", "2ª"), n("D4", "1ª"),
+        ],
+      },
+    ],
   },
   {
     id: "guitarra",
     label: "Guitarra",
-    descricao: "Padrão E A D G B E — mesma da violão",
+    descricao: "Padrão E A D G B E — várias afinações usadas em estilos diferentes",
     dicaGeral: "Use o captador da ponte com volume médio. Evite palhetada muito forte.",
     notas: [
       n("E2", "6ª corda"),
@@ -84,17 +174,170 @@ const INSTRUMENTOS: Instrumento[] = [
       n("B3", "2ª corda"),
       n("E4", "1ª corda"),
     ],
+    variacoes: [
+      {
+        id: "padrao",
+        label: "Padrão (6 cordas)",
+        descricao: "E A D G B E",
+        notas: [
+          n("E2", "6ª"), n("A2", "5ª"), n("D3", "4ª"),
+          n("G3", "3ª"), n("B3", "2ª"), n("E4", "1ª"),
+        ],
+      },
+      {
+        id: "drop-d",
+        label: "Drop D",
+        descricao: "6ª em Ré — rock, grunge",
+        notas: [
+          n("D2", "6ª (Drop D)"), n("A2", "5ª"), n("D3", "4ª"),
+          n("G3", "3ª"), n("B3", "2ª"), n("E4", "1ª"),
+        ],
+      },
+      {
+        id: "drop-c",
+        label: "Drop C",
+        descricao: "C G C F A D — metal moderno",
+        notas: [
+          n("C2", "6ª"), n("G2", "5ª"), n("C3", "4ª"),
+          n("F3", "3ª"), n("A3", "2ª"), n("D4", "1ª"),
+        ],
+      },
+      {
+        id: "eb",
+        label: "Meio tom abaixo (Eb)",
+        descricao: "Eb Ab Db Gb Bb Eb",
+        notas: [
+          n("D#2", "6ª"), n("G#2", "5ª"), n("C#3", "4ª"),
+          n("F#3", "3ª"), n("A#3", "2ª"), n("D#4", "1ª"),
+        ],
+      },
+      {
+        id: "d-standard",
+        label: "D Standard",
+        descricao: "Um tom abaixo — hard rock, doom",
+        notas: [
+          n("D2", "6ª"), n("G2", "5ª"), n("C3", "4ª"),
+          n("F3", "3ª"), n("A3", "2ª"), n("D4", "1ª"),
+        ],
+      },
+      {
+        id: "7-cordas",
+        label: "7 cordas",
+        descricao: "B E A D G B E — Steve Vai, metal progressivo",
+        notas: [
+          n("B1", "7ª corda (Si grave)"),
+          n("E2", "6ª"), n("A2", "5ª"), n("D3", "4ª"),
+          n("G3", "3ª"), n("B3", "2ª"), n("E4", "1ª"),
+        ],
+      },
+      {
+        id: "8-cordas",
+        label: "8 cordas",
+        descricao: "F# B E A D G B E — djent, metal extremo",
+        notas: [
+          n("F#1", "8ª corda"), n("B1", "7ª"),
+          n("E2", "6ª"), n("A2", "5ª"), n("D3", "4ª"),
+          n("G3", "3ª"), n("B3", "2ª"), n("E4", "1ª"),
+        ],
+      },
+      {
+        id: "open-e",
+        label: "Open E",
+        descricao: "E B E G# B E — slide blues",
+        notas: [
+          n("E2", "6ª"), n("B2", "5ª"), n("E3", "4ª"),
+          n("G#3", "3ª"), n("B3", "2ª"), n("E4", "1ª"),
+        ],
+      },
+    ],
   },
   {
     id: "baixo",
-    label: "Baixo (4 cordas)",
-    descricao: "Afinação padrão E A D G — uma oitava abaixo do violão",
+    label: "Baixo",
+    descricao: "Variações de 4, 5 e 6 cordas + afinações alternativas",
     dicaGeral: "Toque próximo ao captador do braço para som mais limpo pro afinador.",
     notas: [
-      n("E1", "4ª corda (mais grave)"),
-      n("A1", "3ª corda"),
-      n("D2", "2ª corda"),
-      n("G2", "1ª corda (mais aguda)"),
+      n("E1", "4ª corda"), n("A1", "3ª corda"),
+      n("D2", "2ª corda"), n("G2", "1ª corda"),
+    ],
+    variacoes: [
+      {
+        id: "4-cordas",
+        label: "4 cordas (padrão)",
+        descricao: "E A D G — afinação universal",
+        notas: [
+          n("E1", "4ª corda (mais grave)"),
+          n("A1", "3ª corda"),
+          n("D2", "2ª corda"),
+          n("G2", "1ª corda (mais aguda)"),
+        ],
+      },
+      {
+        id: "5-cordas",
+        label: "5 cordas",
+        descricao: "B E A D G — Si grave extra, muito usado no gospel, jazz, funk",
+        notas: [
+          n("B0", "5ª corda (Si grave)"),
+          n("E1", "4ª"), n("A1", "3ª"),
+          n("D2", "2ª"), n("G2", "1ª"),
+        ],
+      },
+      {
+        id: "6-cordas",
+        label: "6 cordas",
+        descricao: "B E A D G C — extensão aguda extra",
+        notas: [
+          n("B0", "6ª (Si grave)"),
+          n("E1", "5ª"), n("A1", "4ª"),
+          n("D2", "3ª"), n("G2", "2ª"),
+          n("C3", "1ª (Dó agudo)"),
+        ],
+      },
+      {
+        id: "drop-d",
+        label: "Drop D (4c)",
+        descricao: "D A D G — rock, metal",
+        notas: [
+          n("D1", "4ª (Drop D)"),
+          n("A1", "3ª"), n("D2", "2ª"), n("G2", "1ª"),
+        ],
+      },
+      {
+        id: "meio-tom",
+        label: "Meio tom abaixo (Eb)",
+        descricao: "Eb Ab Db Gb — combina com guitarra em Eb",
+        notas: [
+          n("D#1", "4ª"), n("G#1", "3ª"),
+          n("C#2", "2ª"), n("F#2", "1ª"),
+        ],
+      },
+      {
+        id: "tenor",
+        label: "Baixo Tenor",
+        descricao: "A D G C — uma quarta acima do padrão, som mais brilhante",
+        notas: [
+          n("A1", "4ª"), n("D2", "3ª"),
+          n("G2", "2ª"), n("C3", "1ª"),
+        ],
+      },
+      {
+        id: "fretless",
+        label: "Fretless (4c)",
+        descricao: "Mesma afinação padrão — ouça bem cada nota, sem trastes é preciso",
+        notas: [
+          n("E1", "4ª"), n("A1", "3ª"),
+          n("D2", "2ª"), n("G2", "1ª"),
+        ],
+      },
+      {
+        id: "contra",
+        label: "Contrabaixo acústico",
+        descricao: "E A D G — mesma afinação em oitava, notação em clave de Fá",
+        notas: [
+          n("E1", "4ª"), n("A1", "3ª"),
+          n("D2", "2ª"), n("G2", "1ª"),
+        ],
+      },
     ],
   },
   {
@@ -186,7 +429,13 @@ function detectarPitch(buffer: Float32Array, sampleRate: number): number | null 
 
 function AfinadorPage() {
   const [instrumentoId, setInstrumentoId] = useState<string>("violao");
-  const instrumento = INSTRUMENTOS.find((i) => i.id === instrumentoId) ?? INSTRUMENTOS[0];
+  const instrumentoBase = INSTRUMENTOS.find((i) => i.id === instrumentoId) ?? INSTRUMENTOS[0];
+  const [variacaoId, setVariacaoId] = useState<string | null>(null);
+  const variacao = instrumentoBase.variacoes?.find((v) => v.id === variacaoId)
+    ?? instrumentoBase.variacoes?.[0]
+    ?? null;
+  const notasAtivas = variacao?.notas ?? instrumentoBase.notas;
+  const instrumento = { ...instrumentoBase, notas: notasAtivas };
 
   const [ativo, setAtivo] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -245,7 +494,35 @@ function AfinadorPage() {
   useEffect(() => () => parar(), [parar]);
 
   // Reset target ao trocar instrumento
-  useEffect(() => { setNotaAlvoIdx(null); }, [instrumentoId]);
+  useEffect(() => { setNotaAlvoIdx(null); setVariacaoId(null); }, [instrumentoId]);
+  useEffect(() => { setNotaAlvoIdx(null); }, [variacaoId]);
+
+  // Tocador de referência (oscilador)
+  const tomCtxRef = useRef<AudioContext | null>(null);
+  const tocarReferencia = useCallback((freq: number) => {
+    try {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (!tomCtxRef.current) tomCtxRef.current = new AudioCtx();
+      const ctx = tomCtxRef.current;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      // envelope suave
+      const now = ctx.currentTime;
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.25, now + 0.02);
+      gain.gain.setValueAtTime(0.25, now + 1.6);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 2.05);
+    } catch {
+      // ignore
+    }
+  }, []);
+  useEffect(() => () => { tomCtxRef.current?.close(); }, []);
 
   // Determina a nota mais próxima da freq atual dentro do instrumento (modo auto)
   const alvo = useMemo(() => {
@@ -312,9 +589,32 @@ function AfinadorPage() {
           ))}
         </div>
 
-        {/* Descrição do instrumento */}
+        {/* Variações do instrumento */}
+        {instrumentoBase.variacoes && instrumentoBase.variacoes.length > 0 && (
+          <div className="mb-4 rounded-2xl border border-border bg-card p-4">
+            <div className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Variação</div>
+            <div className="flex flex-wrap gap-2">
+              {instrumentoBase.variacoes.map((v) => (
+                <button
+                  key={v.id}
+                  onClick={() => setVariacaoId(v.id)}
+                  className={cn(
+                    "rounded-lg border px-3 py-1.5 text-xs font-medium transition-all",
+                    (variacao?.id === v.id)
+                      ? "border-primary/50 bg-primary/10 text-foreground"
+                      : "border-border bg-muted/30 text-muted-foreground hover:bg-muted",
+                  )}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Descrição do instrumento / variação */}
         <div className="mb-6 rounded-2xl border border-border bg-card p-4">
-          <div className="text-sm font-medium">{instrumento.descricao}</div>
+          <div className="text-sm font-medium">{variacao?.descricao ?? instrumento.descricao}</div>
           {instrumento.dicaGeral && (
             <div className="mt-2 flex items-start gap-2 text-xs text-muted-foreground">
               <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
@@ -394,7 +694,7 @@ function AfinadorPage() {
         {/* Lista de notas / cordas / tambores */}
         <div className="rounded-2xl border border-border bg-card p-5">
           <div className="mb-3 text-sm font-medium text-muted-foreground">
-            Referências de afinação — toque para travar a nota alvo
+            Aperte uma nota para <span className="text-primary">ouvir o som correto</span> e travar como alvo do afinador.
           </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             <button
@@ -412,16 +712,19 @@ function AfinadorPage() {
             {instrumento.notas.map((nota, idx) => (
               <button
                 key={idx}
-                onClick={() => setNotaAlvoIdx(idx)}
+                onClick={() => { setNotaAlvoIdx(idx); tocarReferencia(nota.freq); }}
                 className={cn(
-                  "rounded-xl border px-3 py-3 text-left transition-all",
+                  "group rounded-xl border px-3 py-3 text-left transition-all",
                   notaAlvoIdx === idx
                     ? "border-primary/50 bg-primary/10"
                     : "border-border bg-card hover:bg-muted",
                 )}
               >
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="font-display text-lg font-bold">{nota.nome}</span>
+                  <span className="font-display text-lg font-bold flex items-center gap-1.5">
+                    {nota.nome}
+                    <Volume2 className="h-3 w-3 text-primary/70 group-hover:text-primary" />
+                  </span>
                   <span className="text-[10px] tabular-nums text-muted-foreground">{nota.freq.toFixed(1)}Hz</span>
                 </div>
                 {nota.dica && <div className="mt-0.5 text-[10px] text-muted-foreground">{nota.dica}</div>}
