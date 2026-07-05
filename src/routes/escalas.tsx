@@ -83,6 +83,7 @@ const INSTRUMENTS = [
   { id: "guitarra", label: "Guitarra" },
   { id: "baixo", label: "Baixo" },
   { id: "piano", label: "Piano" },
+  { id: "teclado", label: "Teclado" },
   { id: "sax", label: "Sax" },
   { id: "violino", label: "Violino" },
   { id: "bateria", label: "Bateria" },
