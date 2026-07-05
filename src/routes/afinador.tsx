@@ -429,7 +429,13 @@ function detectarPitch(buffer: Float32Array, sampleRate: number): number | null 
 
 function AfinadorPage() {
   const [instrumentoId, setInstrumentoId] = useState<string>("violao");
-  const instrumento = INSTRUMENTOS.find((i) => i.id === instrumentoId) ?? INSTRUMENTOS[0];
+  const instrumentoBase = INSTRUMENTOS.find((i) => i.id === instrumentoId) ?? INSTRUMENTOS[0];
+  const [variacaoId, setVariacaoId] = useState<string | null>(null);
+  const variacao = instrumentoBase.variacoes?.find((v) => v.id === variacaoId)
+    ?? instrumentoBase.variacoes?.[0]
+    ?? null;
+  const notasAtivas = variacao?.notas ?? instrumentoBase.notas;
+  const instrumento = { ...instrumentoBase, notas: notasAtivas };
 
   const [ativo, setAtivo] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
