@@ -514,12 +514,12 @@ export const Route = createFileRoute("/estudar/$instrumento")({
     const name = data?.name ?? "Apostila";
     return {
       meta: [
-        { title: `Apostila completa de ${name} — Notes for Life` },
+        { title: `Apostila completa de ${name} — Solando` },
         {
           name: "description",
           content: `Apostila completa de teoria musical para ${name}: modos gregos, harmonia, campo harmônico, melodia, tríades, tétrades, empréstimo modal, escalas menores e mais.`,
         },
-        { property: "og:title", content: `Apostila de ${name} — Notes for Life` },
+        { property: "og:title", content: `Apostila de ${name} — Solando` },
       ],
     };
   },
