@@ -4,6 +4,7 @@ import { BookOpen, ChevronDown, ChevronUp, Music2, Youtube } from "lucide-react"
 import { cn } from "@/lib/utils";
 import { InstrumentDiagram } from "@/components/InstrumentDiagram";
 import { EarCoach } from "@/components/EarCoach";
+import { CagedShapes } from "@/components/CagedShapes";
 
 export const Route = createFileRoute("/escalas")({
   head: () => ({
