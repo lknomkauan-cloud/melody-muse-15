@@ -72,11 +72,99 @@ const INSTRUMENTOS: Instrumento[] = [
       n("B3", "2ª corda"),
       n("E4", "1ª corda (mais aguda)"),
     ],
+    variacoes: [
+      {
+        id: "padrao",
+        label: "Padrão (6 cordas)",
+        descricao: "E A D G B E — afinação universal",
+        notas: [
+          n("E2", "6ª corda"), n("A2", "5ª corda"), n("D3", "4ª corda"),
+          n("G3", "3ª corda"), n("B3", "2ª corda"), n("E4", "1ª corda"),
+        ],
+      },
+      {
+        id: "drop-d",
+        label: "Drop D",
+        descricao: "6ª corda um tom abaixo — usada em rock, metal e MPB",
+        notas: [
+          n("D2", "6ª corda (Drop D)"), n("A2", "5ª corda"), n("D3", "4ª corda"),
+          n("G3", "3ª corda"), n("B3", "2ª corda"), n("E4", "1ª corda"),
+        ],
+      },
+      {
+        id: "dadgad",
+        label: "DADGAD",
+        descricao: "Afinação modal — folk, celta e fingerstyle",
+        notas: [
+          n("D2", "6ª corda"), n("A2", "5ª corda"), n("D3", "4ª corda"),
+          n("G3", "3ª corda"), n("A3", "2ª corda"), n("D4", "1ª corda"),
+        ],
+      },
+      {
+        id: "meio-tom",
+        label: "Meio tom abaixo (Eb)",
+        descricao: "Eb Ab Db Gb Bb Eb — usada por Hendrix, SRV, Guns N' Roses",
+        notas: [
+          n("D#2", "6ª"), n("G#2", "5ª"), n("C#3", "4ª"),
+          n("F#3", "3ª"), n("A#3", "2ª"), n("D#4", "1ª"),
+        ],
+      },
+      {
+        id: "7-cordas",
+        label: "7 cordas",
+        descricao: "Padrão brasileiro (samba/choro): C E A D G B E — 7ª corda em Dó grave",
+        notas: [
+          n("C2", "7ª corda (Dó grave — samba/choro)"),
+          n("E2", "6ª corda"), n("A2", "5ª corda"), n("D3", "4ª corda"),
+          n("G3", "3ª corda"), n("B3", "2ª corda"), n("E4", "1ª corda"),
+        ],
+      },
+      {
+        id: "12-cordas",
+        label: "12 cordas",
+        descricao: "Cada corda tem uma dupla — as 4 mais graves em oitava, as 2 agudas em uníssono",
+        notas: [
+          n("E2", "6ª (grave)"), n("E3", "6ª (oitava aguda)"),
+          n("A2", "5ª (grave)"), n("A3", "5ª (oitava aguda)"),
+          n("D3", "4ª (grave)"), n("D4", "4ª (oitava aguda)"),
+          n("G3", "3ª (grave)"), n("G4", "3ª (oitava aguda)"),
+          n("B3", "2ª (uníssono)"), n("B3", "2ª (uníssono)"),
+          n("E4", "1ª (uníssono)"), n("E4", "1ª (uníssono)"),
+        ],
+      },
+      {
+        id: "nashville",
+        label: "Nashville (high-strung)",
+        descricao: "Igual às cordas agudas do 12 cordas — usada em gravações country/pop",
+        notas: [
+          n("E3", "6ª aguda"), n("A3", "5ª aguda"), n("D4", "4ª aguda"),
+          n("G4", "3ª aguda"), n("B3", "2ª"), n("E4", "1ª"),
+        ],
+      },
+      {
+        id: "open-g",
+        label: "Open G",
+        descricao: "D G D G B D — Keith Richards, slide, blues",
+        notas: [
+          n("D2", "6ª"), n("G2", "5ª"), n("D3", "4ª"),
+          n("G3", "3ª"), n("B3", "2ª"), n("D4", "1ª"),
+        ],
+      },
+      {
+        id: "open-d",
+        label: "Open D",
+        descricao: "D A D F# A D — slide, blues, folk",
+        notas: [
+          n("D2", "6ª"), n("A2", "5ª"), n("D3", "4ª"),
+          n("F#3", "3ª"), n("A3", "2ª"), n("D4", "1ª"),
+        ],
+      },
+    ],
   },
   {
     id: "guitarra",
     label: "Guitarra",
-    descricao: "Padrão E A D G B E — mesma da violão",
+    descricao: "Padrão E A D G B E — várias afinações usadas em estilos diferentes",
     dicaGeral: "Use o captador da ponte com volume médio. Evite palhetada muito forte.",
     notas: [
       n("E2", "6ª corda"),
@@ -86,17 +174,170 @@ const INSTRUMENTOS: Instrumento[] = [
       n("B3", "2ª corda"),
       n("E4", "1ª corda"),
     ],
+    variacoes: [
+      {
+        id: "padrao",
+        label: "Padrão (6 cordas)",
+        descricao: "E A D G B E",
+        notas: [
+          n("E2", "6ª"), n("A2", "5ª"), n("D3", "4ª"),
+          n("G3", "3ª"), n("B3", "2ª"), n("E4", "1ª"),
+        ],
+      },
+      {
+        id: "drop-d",
+        label: "Drop D",
+        descricao: "6ª em Ré — rock, grunge",
+        notas: [
+          n("D2", "6ª (Drop D)"), n("A2", "5ª"), n("D3", "4ª"),
+          n("G3", "3ª"), n("B3", "2ª"), n("E4", "1ª"),
+        ],
+      },
+      {
+        id: "drop-c",
+        label: "Drop C",
+        descricao: "C G C F A D — metal moderno",
+        notas: [
+          n("C2", "6ª"), n("G2", "5ª"), n("C3", "4ª"),
+          n("F3", "3ª"), n("A3", "2ª"), n("D4", "1ª"),
+        ],
+      },
+      {
+        id: "eb",
+        label: "Meio tom abaixo (Eb)",
+        descricao: "Eb Ab Db Gb Bb Eb",
+        notas: [
+          n("D#2", "6ª"), n("G#2", "5ª"), n("C#3", "4ª"),
+          n("F#3", "3ª"), n("A#3", "2ª"), n("D#4", "1ª"),
+        ],
+      },
+      {
+        id: "d-standard",
+        label: "D Standard",
+        descricao: "Um tom abaixo — hard rock, doom",
+        notas: [
+          n("D2", "6ª"), n("G2", "5ª"), n("C3", "4ª"),
+          n("F3", "3ª"), n("A3", "2ª"), n("D4", "1ª"),
+        ],
+      },
+      {
+        id: "7-cordas",
+        label: "7 cordas",
+        descricao: "B E A D G B E — Steve Vai, metal progressivo",
+        notas: [
+          n("B1", "7ª corda (Si grave)"),
+          n("E2", "6ª"), n("A2", "5ª"), n("D3", "4ª"),
+          n("G3", "3ª"), n("B3", "2ª"), n("E4", "1ª"),
+        ],
+      },
+      {
+        id: "8-cordas",
+        label: "8 cordas",
+        descricao: "F# B E A D G B E — djent, metal extremo",
+        notas: [
+          n("F#1", "8ª corda"), n("B1", "7ª"),
+          n("E2", "6ª"), n("A2", "5ª"), n("D3", "4ª"),
+          n("G3", "3ª"), n("B3", "2ª"), n("E4", "1ª"),
+        ],
+      },
+      {
+        id: "open-e",
+        label: "Open E",
+        descricao: "E B E G# B E — slide blues",
+        notas: [
+          n("E2", "6ª"), n("B2", "5ª"), n("E3", "4ª"),
+          n("G#3", "3ª"), n("B3", "2ª"), n("E4", "1ª"),
+        ],
+      },
+    ],
   },
   {
     id: "baixo",
-    label: "Baixo (4 cordas)",
-    descricao: "Afinação padrão E A D G — uma oitava abaixo do violão",
+    label: "Baixo",
+    descricao: "Variações de 4, 5 e 6 cordas + afinações alternativas",
     dicaGeral: "Toque próximo ao captador do braço para som mais limpo pro afinador.",
     notas: [
-      n("E1", "4ª corda (mais grave)"),
-      n("A1", "3ª corda"),
-      n("D2", "2ª corda"),
-      n("G2", "1ª corda (mais aguda)"),
+      n("E1", "4ª corda"), n("A1", "3ª corda"),
+      n("D2", "2ª corda"), n("G2", "1ª corda"),
+    ],
+    variacoes: [
+      {
+        id: "4-cordas",
+        label: "4 cordas (padrão)",
+        descricao: "E A D G — afinação universal",
+        notas: [
+          n("E1", "4ª corda (mais grave)"),
+          n("A1", "3ª corda"),
+          n("D2", "2ª corda"),
+          n("G2", "1ª corda (mais aguda)"),
+        ],
+      },
+      {
+        id: "5-cordas",
+        label: "5 cordas",
+        descricao: "B E A D G — Si grave extra, muito usado no gospel, jazz, funk",
+        notas: [
+          n("B0", "5ª corda (Si grave)"),
+          n("E1", "4ª"), n("A1", "3ª"),
+          n("D2", "2ª"), n("G2", "1ª"),
+        ],
+      },
+      {
+        id: "6-cordas",
+        label: "6 cordas",
+        descricao: "B E A D G C — extensão aguda extra",
+        notas: [
+          n("B0", "6ª (Si grave)"),
+          n("E1", "5ª"), n("A1", "4ª"),
+          n("D2", "3ª"), n("G2", "2ª"),
+          n("C3", "1ª (Dó agudo)"),
+        ],
+      },
+      {
+        id: "drop-d",
+        label: "Drop D (4c)",
+        descricao: "D A D G — rock, metal",
+        notas: [
+          n("D1", "4ª (Drop D)"),
+          n("A1", "3ª"), n("D2", "2ª"), n("G2", "1ª"),
+        ],
+      },
+      {
+        id: "meio-tom",
+        label: "Meio tom abaixo (Eb)",
+        descricao: "Eb Ab Db Gb — combina com guitarra em Eb",
+        notas: [
+          n("D#1", "4ª"), n("G#1", "3ª"),
+          n("C#2", "2ª"), n("F#2", "1ª"),
+        ],
+      },
+      {
+        id: "tenor",
+        label: "Baixo Tenor",
+        descricao: "A D G C — uma quarta acima do padrão, som mais brilhante",
+        notas: [
+          n("A1", "4ª"), n("D2", "3ª"),
+          n("G2", "2ª"), n("C3", "1ª"),
+        ],
+      },
+      {
+        id: "fretless",
+        label: "Fretless (4c)",
+        descricao: "Mesma afinação padrão — ouça bem cada nota, sem trastes é preciso",
+        notas: [
+          n("E1", "4ª"), n("A1", "3ª"),
+          n("D2", "2ª"), n("G2", "1ª"),
+        ],
+      },
+      {
+        id: "contra",
+        label: "Contrabaixo acústico",
+        descricao: "E A D G — mesma afinação em oitava, notação em clave de Fá",
+        notas: [
+          n("E1", "4ª"), n("A1", "3ª"),
+          n("D2", "2ª"), n("G2", "1ª"),
+        ],
+      },
     ],
   },
   {
