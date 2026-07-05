@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/metronomo")({
   head: () => ({
     meta: [
-      { title: "Metrônomo — Notes for Life" },
+      { title: "Metrônomo — Solando" },
       { name: "description", content: "Metrônomo digital ajustável de 40 a 240 BPM para praticar com precisão." },
-      { property: "og:title", content: "Metrônomo — Notes for Life" },
+      { property: "og:title", content: "Metrônomo — Solando" },
       { property: "og:description", content: "Metrônomo digital ajustável de 40 a 240 BPM." },
     ],
   }),
