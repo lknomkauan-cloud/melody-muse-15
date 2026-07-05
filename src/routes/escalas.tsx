@@ -80,6 +80,7 @@ const INSTRUMENTS = [
   { id: "piano", label: "Piano" },
   { id: "sax", label: "Sax" },
   { id: "violino", label: "Violino" },
+  { id: "bateria", label: "Bateria" },
 ] as const;
 type InstrumentId = typeof INSTRUMENTS[number]["id"];
 
