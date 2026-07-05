@@ -252,6 +252,7 @@ function EscalasPage() {
                                   Desenho no {INSTRUMENTS.find(i => i.id === instrument)?.label}
                                 </span>
                                 <InstrumentDiagram instrument={instrument} root={modeRoot} pentSemis={m.pentSemis} />
+                                <ModeVideoLinks modeName={m.name} modeRoot={modeRoot} instrumentLabel={INSTRUMENTS.find(i => i.id === instrument)?.label ?? ""} />
                               </div>
                               <div className="rounded-lg bg-card/60 p-3 text-sm leading-relaxed">
                                 <span className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">
