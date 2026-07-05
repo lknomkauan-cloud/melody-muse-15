@@ -360,9 +360,9 @@ function GuidedExercise({ pentatonicNotes, tonic }: { pentatonicNotes: string[];
     if (!on || !pitch?.note) { sustainRef.current = { name: null, since: 0 }; return; }
     const target = sequence[idx];
     const now = performance.now();
-    // exige que a nota seja sustentada por pelo menos 600ms antes de contar
-    const SUSTAIN_MS = 600;
-    const COOLDOWN_MS = 500;
+    // exige que a nota seja sustentada por pelo menos 1,5s antes de contar
+    const SUSTAIN_MS = 1500;
+    const COOLDOWN_MS = 1000;
     if (sustainRef.current.name !== pitch.note.name) {
       sustainRef.current = { name: pitch.note.name, since: now };
       return;
