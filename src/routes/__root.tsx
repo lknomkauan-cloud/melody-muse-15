@@ -83,7 +83,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 function Header() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navItems = [
     { to: "/", label: "Início" },
     { to: "/estudar", label: "Estudar" },
@@ -92,7 +92,9 @@ function Header() {
     { to: "/acordes", label: "Acordes" },
     { to: "/metronomo", label: "Metrônomo" },
     { to: "/agentes-ia", label: "Agentes IA" },
+    ...(isAdmin ? [{ to: "/admin", label: "Painel do Adm" }] : []),
   ];
+
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
