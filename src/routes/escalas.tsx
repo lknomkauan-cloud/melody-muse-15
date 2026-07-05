@@ -254,6 +254,13 @@ function EscalasPage() {
                                   Desenho no {INSTRUMENTS.find(i => i.id === instrument)?.label}
                                 </span>
                                 <InstrumentDiagram instrument={instrument} root={modeRoot} pentSemis={m.pentSemis} />
+                                {(instrument === "guitarra" || instrument === "violao" || instrument === "baixo") && (
+                                  <CagedShapes
+                                    root={modeRoot}
+                                    pentSemis={m.pentSemis}
+                                    instrument={instrument as "guitarra" | "violao" | "baixo"}
+                                  />
+                                )}
                                 <ModeVideoLinks modeName={m.name} modeRoot={modeRoot} instrumentLabel={INSTRUMENTS.find(i => i.id === instrument)?.label ?? ""} />
                                 <EarCoach
                                   tonic={modeRoot}
