@@ -476,19 +476,7 @@ const INSTRUMENTOS: Instrumento[] = [
           n("D4", "Caixa — aberta, canta"),
         ],
       },
-      {
-        id: "eletronica",
-        label: "Estúdio / Eletrônica",
-        descricao: "Peles bem controladas, ataque curto — pop, indie, produção moderna, gatilho de sampler",
-        notas: [
-          n("C2", "Bumbo 22\" — subgrave, curto (estilo 808)"),
-          n("G3", "Tom 10\" — agudo, seco"),
-          n("D3", "Tom 12\" — médio, controlado"),
-          n("A2", "Tom 14\" — médio-grave"),
-          n("E4", "Caixa — snap curto"),
-          n("A4", "Rimshot / clap agudo"),
-        ],
-      },
+
     ],
   },
 
