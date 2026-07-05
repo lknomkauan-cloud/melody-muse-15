@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Play, Pause, Timer, Volume2, VolumeX } from "lucide-react";
+import { Play, Pause, Timer, Volume2, VolumeX, Hand } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/metronomo")({
@@ -41,6 +41,25 @@ function MetronomoPage() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const beatCountRef = useRef(0);
+  const tapsRef = useRef<number[]>([]);
+  const [tapFlash, setTapFlash] = useState(false);
+
+  const handleTap = useCallback(() => {
+    const now = performance.now();
+    const taps = tapsRef.current;
+    // reset se o último tap foi há mais de 2s
+    if (taps.length && now - taps[taps.length - 1] > 2000) taps.length = 0;
+    taps.push(now);
+    if (taps.length > 6) taps.shift();
+    if (taps.length >= 2) {
+      const intervalos = taps.slice(1).map((t, i) => t - taps[i]);
+      const media = intervalos.reduce((a, b) => a + b, 0) / intervalos.length;
+      const novoBpm = Math.round(60000 / media);
+      if (novoBpm >= 40 && novoBpm <= 240) setBpm(novoBpm);
+    }
+    setTapFlash(true);
+    setTimeout(() => setTapFlash(false), 120);
+  }, []);
 
   const figura = FIGURAS.find((f) => f.id === figuraId) ?? FIGURAS[1];
   const subdivisoesPorCompasso = Math.max(1, Math.round(4 * figura.porBatida));
@@ -229,6 +248,34 @@ function MetronomoPage() {
             <button onClick={() => setBpm(Math.max(40, bpm - 1))} className="rounded-md bg-muted px-3 py-1 text-sm font-medium hover:bg-muted/80">-1</button>
             <button onClick={() => setBpm(Math.min(240, bpm + 1))} className="rounded-md bg-muted px-3 py-1 text-sm font-medium hover:bg-muted/80">+1</button>
             <button onClick={() => setBpm(Math.min(240, bpm + 5))} className="rounded-md bg-muted px-3 py-1 text-sm font-medium hover:bg-muted/80">+5</button>
+          </div>
+        </div>
+
+        {/* Tap tempo */}
+        <div className="mb-6 rounded-2xl border border-border bg-card p-5 text-center">
+          <div className="mb-3 text-sm font-medium text-muted-foreground">
+            Tap tempo — bata no ritmo desejado
+          </div>
+          <button
+            onClick={handleTap}
+            onKeyDown={(e) => {
+              if (e.key === " " || e.key === "Enter") {
+                e.preventDefault();
+                handleTap();
+              }
+            }}
+            className={cn(
+              "inline-flex h-20 w-full items-center justify-center gap-3 rounded-2xl border-2 border-dashed font-display text-lg font-bold transition-all",
+              tapFlash
+                ? "border-primary bg-primary/20 scale-[0.98] glow-primary"
+                : "border-border bg-muted/40 hover:bg-muted",
+            )}
+          >
+            <Hand className="h-6 w-6" />
+            TAP
+          </button>
+          <div className="mt-2 text-xs text-muted-foreground">
+            Toque pelo menos 2 vezes. O BPM se ajusta automaticamente.
           </div>
         </div>
 
