@@ -92,6 +92,7 @@ function Header() {
     { to: "/escalas", label: "Escalas" },
     { to: "/acordes", label: "Acordes" },
     { to: "/metronomo", label: "Metrônomo" },
+    { to: "/afinador", label: "Afinador" },
     ...(isAdmin ? [{ to: "/admin", label: "Painel do Adm" }] : []),
   ];
 
