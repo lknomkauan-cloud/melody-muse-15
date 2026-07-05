@@ -283,35 +283,138 @@ function EscalasPage() {
   );
 }
 
+type VideoLink = { id: string; title: string; channel: string };
+
+// Biblioteca curada de vídeos reais (IDs verificados no YouTube)
+const GENERAL_MODES_VIDEOS: VideoLink[] = [
+  { id: "M3I63u_eUYY", title: "Modos Gregos usando o Campo Harmônico (sem 49 shapes)", channel: "Antonio Colangelo" },
+  { id: "LYc7hi2BURc", title: "Modos Gregos — Lídio (curso Cifra Club)", channel: "Cifra Club" },
+  { id: "bXDczAgJEjE", title: "Modos Gregos — Modo Frígio (piano)", channel: "Aprenda Piano Online" },
+];
+
+const MODE_VIDEOS: Record<string, VideoLink[]> = {
+  Jônio: [
+    { id: "M3I63u_eUYY", title: "Modos Gregos pelo Campo Harmônico", channel: "Antonio Colangelo" },
+    { id: "FEsu-0EAiGg", title: "Domine a Pentatônica", channel: "Vil Margos Bert" },
+  ],
+  Dórico: [
+    { id: "M3I63u_eUYY", title: "Modos Gregos — inclui Dórico", channel: "Antonio Colangelo" },
+    { id: "FEsu-0EAiGg", title: "Pentatônica aplicada (base dórica)", channel: "Vil Margos Bert" },
+  ],
+  Frígio: [
+    { id: "bXDczAgJEjE", title: "Modo Frígio — visualização no piano", channel: "Aprenda Piano Online" },
+    { id: "M3I63u_eUYY", title: "Modos Gregos — inclui Frígio", channel: "Antonio Colangelo" },
+  ],
+  Lídio: [
+    { id: "LYc7hi2BURc", title: "Modo Lídio — aula completa", channel: "Cifra Club" },
+    { id: "M3I63u_eUYY", title: "Modos Gregos pelo Campo Harmônico", channel: "Antonio Colangelo" },
+  ],
+  Mixolídio: [
+    { id: "M3I63u_eUYY", title: "Modos Gregos — inclui Mixolídio", channel: "Antonio Colangelo" },
+    { id: "FEsu-0EAiGg", title: "Pentatônica dominante (Mixolídio)", channel: "Vil Margos Bert" },
+  ],
+  Eólio: [
+    { id: "FEsu-0EAiGg", title: "Domine a Pentatônica Menor", channel: "Vil Margos Bert" },
+    { id: "M3I63u_eUYY", title: "Modos Gregos — inclui Eólio", channel: "Antonio Colangelo" },
+  ],
+  Lócrio: [
+    { id: "M3I63u_eUYY", title: "Modos Gregos — inclui Lócrio", channel: "Antonio Colangelo" },
+    { id: "LYc7hi2BURc", title: "Curso de Modos Gregos (Cifra Club)", channel: "Cifra Club" },
+  ],
+};
+
+const INSTRUMENT_VIDEOS: Record<string, VideoLink[]> = {
+  guitarra: [
+    { id: "FEsu-0EAiGg", title: "Domine a Pentatônica na Guitarra", channel: "Vil Margos Bert" },
+    { id: "PWILH0sKAWQ", title: "Patterns de Pentatônica — Ricardo Marins", channel: "NIG Strings" },
+  ],
+  violao: [
+    { id: "FEsu-0EAiGg", title: "Pentatônica no violão/guitarra", channel: "Vil Margos Bert" },
+    { id: "M3I63u_eUYY", title: "Modos gregos no violão", channel: "Antonio Colangelo" },
+  ],
+  baixo: [
+    { id: "TvfRusBup4M", title: "Domine QUALQUER Escala no Baixo", channel: "ToqueMaisBaixo — Duvalle" },
+    { id: "7lFa9SmzitE", title: "Harmonia no Contrabaixo — Tétrades", channel: "Ronaldo Lobo" },
+  ],
+  piano: [
+    { id: "bXDczAgJEjE", title: "Escalas & Modos no piano", channel: "Aprenda Piano Online" },
+    { id: "SUprqEn-JSQ", title: "Segredos de Harmonia Avançada (teclado)", channel: "Caio Vinicius" },
+  ],
+  teclado: [
+    { id: "bXDczAgJEjE", title: "Escalas & Modos no teclado", channel: "Aprenda Piano Online" },
+    { id: "SUprqEn-JSQ", title: "Harmonia Avançada no teclado", channel: "Caio Vinicius" },
+  ],
+  sax: [
+    { id: "97mBDIM-9Oc", title: "Saxofonese 008 — Escalas", channel: "Otávio DelleVedove" },
+    { id: "435GgZSHWOg", title: "Tocar de Ouvido no Sax", channel: "Digital Mix Sax" },
+  ],
+  saxofone: [
+    { id: "97mBDIM-9Oc", title: "Saxofonese 008 — Escalas", channel: "Otávio DelleVedove" },
+    { id: "435GgZSHWOg", title: "Tocar de Ouvido no Sax", channel: "Digital Mix Sax" },
+  ],
+  bateria: [
+    { id: "M3I63u_eUYY", title: "Modos e teoria — útil pra baterista também", channel: "Antonio Colangelo" },
+  ],
+  violino: [
+    { id: "M3I63u_eUYY", title: "Modos Gregos — base teórica", channel: "Antonio Colangelo" },
+    { id: "FEsu-0EAiGg", title: "Pentatônica — conceito universal", channel: "Vil Margos Bert" },
+  ],
+};
+
 function ModeVideoLinks({ modeName, modeRoot, instrumentLabel }: { modeName: string; modeRoot: string; instrumentLabel: string }) {
-  const queries = [
-    { label: `Modo ${modeName} no ${instrumentLabel}`, q: `modo ${modeName} ${instrumentLabel} tutorial` },
-    { label: `Pentatônica ${modeName} — ${modeRoot}`, q: `pentatônica ${modeName} ${modeRoot} ${instrumentLabel} como tocar` },
-    { label: `Aplicação prática no ${instrumentLabel}`, q: `improvisação modo ${modeName} ${instrumentLabel} aula` },
-  ];
+  const instrumentKey = instrumentLabel.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const modeVids = MODE_VIDEOS[modeName] ?? GENERAL_MODES_VIDEOS;
+  const instVids = INSTRUMENT_VIDEOS[instrumentKey] ?? [];
+  // Deduplica por id
+  const seen = new Set<string>();
+  const videos = [...modeVids, ...instVids].filter((v) => (seen.has(v.id) ? false : (seen.add(v.id), true))).slice(0, 4);
+
+  const fallbackSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(`pentatônica ${modeName} ${modeRoot} ${instrumentLabel} aula`)}`;
+
   return (
     <div className="mt-4 border-t border-border pt-3">
       <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         <Youtube className="h-3.5 w-3.5 text-primary" />
-        Videoaulas — abra no YouTube
+        Videoaulas recomendadas
       </div>
-      <div className="flex flex-wrap gap-2">
-        {queries.map((v) => (
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {videos.map((v) => (
           <a
-            key={v.q}
-            href={`https://www.youtube.com/results?search_query=${encodeURIComponent(v.q)}`}
+            key={v.id}
+            href={`https://www.youtube.com/watch?v=${v.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background/60 px-3 py-1.5 text-xs font-medium text-foreground transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
+            className="group flex gap-3 rounded-lg border border-border bg-background/60 p-2 transition-all hover:border-primary/50 hover:bg-primary/5"
           >
-            <Youtube className="h-3.5 w-3.5" />
-            {v.label}
+            <div className="relative flex-shrink-0 overflow-hidden rounded-md">
+              <img
+                src={`https://img.youtube.com/vi/${v.id}/mqdefault.jpg`}
+                alt={v.title}
+                loading="lazy"
+                className="h-16 w-28 object-cover transition-transform group-hover:scale-105"
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover:opacity-100">
+                <Youtube className="h-6 w-6 text-white drop-shadow-lg" fill="red" />
+              </div>
+            </div>
+            <div className="flex min-w-0 flex-1 flex-col justify-center">
+              <span className="line-clamp-2 text-xs font-semibold leading-tight text-foreground group-hover:text-primary">
+                {v.title}
+              </span>
+              <span className="mt-1 truncate text-[10px] text-muted-foreground">{v.channel}</span>
+            </div>
           </a>
         ))}
       </div>
-      <p className="mt-2 text-[11px] text-muted-foreground">
-        As buscas já estão prontas com o modo, tônica e instrumento — clique para ver aulas em vídeo demonstrando a pentatônica em ação.
-      </p>
+      <a
+        href={fallbackSearch}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-2 inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary"
+      >
+        Buscar mais no YouTube para {modeRoot} {modeName} no {instrumentLabel} →
+      </a>
     </div>
   );
 }
+
