@@ -225,6 +225,7 @@ function EscalasContent({
                 {i.label}
               </button>
             ))}
+          </div>
         </div>
 
         <InstrumentCoach
@@ -232,9 +233,8 @@ function EscalasContent({
           instrumentLabel={INSTRUMENTS.find(i => i.id === instrument)?.label ?? instrument}
         />
 
-
-
         <div className="space-y-3">
+
           {SCALE_TYPES.map((scale, idx) => {
             const notes = getScaleNotes(selectedTonic, scale.pattern);
             const isOpen = expanded.has(idx);
