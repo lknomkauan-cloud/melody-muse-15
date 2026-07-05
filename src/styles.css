@@ -132,3 +132,7 @@
   backdrop-filter: blur(12px);
   border: 1px solid oklch(0.2 0.04 270 / 20%);
 }
+
+#lovable-badge {
+  display: none !important;
+}
