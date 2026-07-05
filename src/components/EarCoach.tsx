@@ -191,7 +191,7 @@ function usePitchEngine() {
   const streamRef = useRef<MediaStream | null>(null);
 
   const stop = useCallback(() => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    if (rafRef.current) { clearTimeout(rafRef.current); cancelAnimationFrame(rafRef.current); }
     rafRef.current = null;
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
@@ -225,18 +225,56 @@ function usePitchEngine() {
       streamRef.current = stream;
       const src = ctx.createMediaStreamSource(stream);
       const analyser = ctx.createAnalyser();
-      analyser.fftSize = 2048;
+      analyser.fftSize = 4096; // janela maior = leitura mais estável
       src.connect(analyser);
       const buf = new Float32Array(analyser.fftSize);
-      const loop = () => {
+
+      // Estabilização: precisa ver a mesma nota várias vezes seguidas
+      // antes de confirmar, e segura o valor por um tempo mínimo.
+      const STABLE_FRAMES = 4;      // ~4 leituras iguais para confirmar
+      const HOLD_MS = 700;          // segura a nota exibida por 700ms
+      const SAMPLE_MS = 90;         // amostra a cada ~90ms (mais lento que rAF)
+      let candidateName: string | null = null;
+      let candidateCount = 0;
+      let lastCommit: { name: string; at: number } | null = null;
+      let freqSmooth = 0;
+
+      const tick = () => {
         analyser.getFloatTimeDomainData(buf);
         const f = detectPitch(buf, ctx.sampleRate);
         const note = freqToNote(f);
-        setPitch(f ? { freq: f, note } : null);
-        rafRef.current = requestAnimationFrame(loop);
+        const now = performance.now();
+
+        if (f && note) {
+          // suaviza a frequência exibida
+          freqSmooth = freqSmooth ? freqSmooth * 0.7 + f * 0.3 : f;
+          if (note.name === candidateName) {
+            candidateCount++;
+          } else {
+            candidateName = note.name;
+            candidateCount = 1;
+          }
+          if (candidateCount >= STABLE_FRAMES) {
+            lastCommit = { name: note.name, at: now };
+            setPitch({ freq: freqSmooth, note });
+          } else if (lastCommit && now - lastCommit.at < HOLD_MS) {
+            // mantém a nota anterior estável enquanto acumula confiança
+          } else if (!lastCommit) {
+            // nada ainda — não pisca
+          }
+        } else {
+          candidateName = null;
+          candidateCount = 0;
+          if (!lastCommit || now - lastCommit.at > HOLD_MS) {
+            lastCommit = null;
+            freqSmooth = 0;
+            setPitch(null);
+          }
+        }
+        rafRef.current = window.setTimeout(tick, SAMPLE_MS) as unknown as number;
       };
       setOn(true);
-      loop();
+      tick();
     } catch (e) {
       setError(describeMicError(e));
       stop();
@@ -316,19 +354,29 @@ function GuidedExercise({ pentatonicNotes, tonic }: { pentatonicNotes: string[];
   const [hits, setHits] = useState<Array<"ok" | "off">>([]);
   const { pitch, error, on, start, stop } = usePitchEngine();
   const lastMatchRef = useRef<number>(0);
+  const sustainRef = useRef<{ name: string | null; since: number }>({ name: null, since: 0 });
 
   useEffect(() => {
-    if (!on || !pitch?.note) return;
+    if (!on || !pitch?.note) { sustainRef.current = { name: null, since: 0 }; return; }
     const target = sequence[idx];
     const now = performance.now();
-    if (now - lastMatchRef.current < 250) return; // debounce
-    if (pitch.note.name === target && Math.abs(pitch.note.cents) < 40) {
+    // exige que a nota seja sustentada por pelo menos 600ms antes de contar
+    const SUSTAIN_MS = 600;
+    const COOLDOWN_MS = 500;
+    if (sustainRef.current.name !== pitch.note.name) {
+      sustainRef.current = { name: pitch.note.name, since: now };
+      return;
+    }
+    const heldFor = now - sustainRef.current.since;
+    if (now - lastMatchRef.current < COOLDOWN_MS) return;
+    if (pitch.note.name === target && Math.abs(pitch.note.cents) < 40 && heldFor >= SUSTAIN_MS) {
       lastMatchRef.current = now;
+      sustainRef.current = { name: null, since: 0 };
       setHits((h) => [...h, "ok"]);
       setIdx((i) => Math.min(i + 1, sequence.length));
-    } else if (pentatonicNotes.includes(pitch.note.name) === false && Math.abs(pitch.note.cents) < 40) {
-      // nota completamente fora — marca erro leve mas não avança
-      if (now - lastMatchRef.current > 700) {
+    } else if (pentatonicNotes.includes(pitch.note.name) === false && Math.abs(pitch.note.cents) < 40 && heldFor >= SUSTAIN_MS) {
+      // nota completamente fora, sustentada — marca erro leve mas não avança
+      if (now - lastMatchRef.current > 1200) {
         lastMatchRef.current = now;
         setHits((h) => (h[h.length - 1] === "off" ? h : [...h, "off"]));
       }
