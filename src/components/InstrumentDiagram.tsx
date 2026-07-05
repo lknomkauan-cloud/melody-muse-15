@@ -16,7 +16,7 @@ const C = {
   fgSoft: "color-mix(in oklch, var(--foreground) 15%, transparent)",
 };
 
-export type InstrumentId = "violao" | "guitarra" | "baixo" | "piano" | "sax" | "violino" | "bateria";
+export type InstrumentId = "violao" | "guitarra" | "baixo" | "piano" | "teclado" | "sax" | "violino" | "bateria";
 
 type Props = {
   instrument: InstrumentId;
