@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { BookOpen, ChevronDown, ChevronUp, Music2 } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, Music2, Youtube } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { InstrumentDiagram } from "@/components/InstrumentDiagram";
 
@@ -252,6 +252,7 @@ function EscalasPage() {
                                   Desenho no {INSTRUMENTS.find(i => i.id === instrument)?.label}
                                 </span>
                                 <InstrumentDiagram instrument={instrument} root={modeRoot} pentSemis={m.pentSemis} />
+                                <ModeVideoLinks modeName={m.name} modeRoot={modeRoot} instrumentLabel={INSTRUMENTS.find(i => i.id === instrument)?.label ?? ""} />
                               </div>
                               <div className="rounded-lg bg-card/60 p-3 text-sm leading-relaxed">
                                 <span className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">
@@ -271,6 +272,39 @@ function EscalasPage() {
           })}
         </div>
       </div>
+    </div>
+  );
+}
+
+function ModeVideoLinks({ modeName, modeRoot, instrumentLabel }: { modeName: string; modeRoot: string; instrumentLabel: string }) {
+  const queries = [
+    { label: `Modo ${modeName} no ${instrumentLabel}`, q: `modo ${modeName} ${instrumentLabel} tutorial` },
+    { label: `Pentatônica ${modeName} — ${modeRoot}`, q: `pentatônica ${modeName} ${modeRoot} ${instrumentLabel} como tocar` },
+    { label: `Aplicação prática no ${instrumentLabel}`, q: `improvisação modo ${modeName} ${instrumentLabel} aula` },
+  ];
+  return (
+    <div className="mt-4 border-t border-border pt-3">
+      <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <Youtube className="h-3.5 w-3.5 text-primary" />
+        Videoaulas — abra no YouTube
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {queries.map((v) => (
+          <a
+            key={v.q}
+            href={`https://www.youtube.com/results?search_query=${encodeURIComponent(v.q)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background/60 px-3 py-1.5 text-xs font-medium text-foreground transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
+          >
+            <Youtube className="h-3.5 w-3.5" />
+            {v.label}
+          </a>
+        ))}
+      </div>
+      <p className="mt-2 text-[11px] text-muted-foreground">
+        As buscas já estão prontas com o modo, tônica e instrumento — clique para ver aulas em vídeo demonstrando a pentatônica em ação.
+      </p>
     </div>
   );
 }
