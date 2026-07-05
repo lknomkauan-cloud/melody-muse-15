@@ -13,14 +13,6 @@ type Agent = {
   free?: boolean;
 };
 
-type Category = {
-
-  name: string;
-  desc: string;
-  url: string;
-  tag: string; // "Música" | "Geral" etc
-  free?: boolean;
-};
 
 type Category = {
   id: string;
