@@ -375,7 +375,9 @@ function EscalasContent({
             );
           })}
         </div>
+        )}
     </>
+
   );
 }
 
