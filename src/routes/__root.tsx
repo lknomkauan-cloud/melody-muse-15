@@ -84,7 +84,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 function Header() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, profile } = useAuth();
   const navItems = [
     { to: "/", label: "Início" },
     { to: "/estudar", label: "Estudar" },
@@ -95,12 +95,13 @@ function Header() {
     ...(isAdmin ? [{ to: "/admin", label: "Painel do Adm" }] : []),
   ];
 
-
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     window.location.href = "/";
   };
+
+  const displayName = profile?.full_name || user?.email?.split("@")[0] || "";
+  const initials = displayName.slice(0, 2).toUpperCase();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass">
@@ -121,11 +122,22 @@ function Header() {
             </Link>
           ))}
           {user ? (
-            <div className="ml-2 flex items-center gap-2 border-l border-border pl-3">
-              <span className="flex items-center gap-1.5 text-xs text-muted-foreground max-w-[160px] truncate">
-                <UserIcon className="h-3.5 w-3.5" />
-                {user.email}
-              </span>
+            <div className="ml-2 flex items-center gap-1.5 border-l border-border pl-3">
+              <Link
+                to="/conta"
+                activeProps={{ className: "ring-2 ring-primary" }}
+                className="group flex items-center gap-2 rounded-full bg-muted/40 pl-1 pr-3 py-1 text-xs font-medium text-foreground hover:bg-muted transition-colors"
+                title="Minha conta"
+              >
+                <span className="relative flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[10px] font-bold text-primary">
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    initials || <UserIcon className="h-3.5 w-3.5" />
+                  )}
+                </span>
+                <span className="hidden md:inline max-w-[100px] truncate">{displayName}</span>
+              </Link>
               <button onClick={handleSignOut} className="rounded-md p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted" aria-label="Sair">
                 <LogOut className="h-4 w-4" />
               </button>
@@ -136,13 +148,13 @@ function Header() {
             </Link>
           )}
         </nav>
-        <MobileNav navItems={navItems} user={user} onSignOut={handleSignOut} />
+        <MobileNav navItems={navItems} user={user} onSignOut={handleSignOut} avatarUrl={profile?.avatar_url ?? null} initials={initials} />
       </div>
     </header>
   );
 }
 
-function MobileNav({ navItems, user, onSignOut }: { navItems: { to: string; label: string }[]; user: ReturnType<typeof useAuth>["user"]; onSignOut: () => void }) {
+function MobileNav({ navItems, user, onSignOut, avatarUrl, initials }: { navItems: { to: string; label: string }[]; user: ReturnType<typeof useAuth>["user"]; onSignOut: () => void; avatarUrl: string | null; initials: string }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -169,9 +181,17 @@ function MobileNav({ navItems, user, onSignOut }: { navItems: { to: string; labe
             ))}
             <div className="mt-2 border-t border-border pt-2">
               {user ? (
-                <button onClick={() => { onSignOut(); setOpen(false); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground">
-                  <LogOut className="h-4 w-4" /> Sair ({user.email})
-                </button>
+                <>
+                  <Link to="/conta" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-muted">
+                    <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[10px] font-bold text-primary">
+                      {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : (initials || <UserIcon className="h-3.5 w-3.5" />)}
+                    </span>
+                    Minha conta
+                  </Link>
+                  <button onClick={() => { onSignOut(); setOpen(false); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground">
+                    <LogOut className="h-4 w-4" /> Sair
+                  </button>
+                </>
               ) : (
                 <Link to="/auth" onClick={() => setOpen(false)} className="block rounded-md bg-primary px-3 py-2 text-center text-sm font-medium text-primary-foreground">
                   Entrar / Criar conta

@@ -13,6 +13,7 @@ import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as MetronomoRouteImport } from './routes/metronomo'
 import { Route as EstudarRouteImport } from './routes/estudar'
 import { Route as EscalasRouteImport } from './routes/escalas'
+import { Route as ContaRouteImport } from './routes/conta'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AcordesRouteImport } from './routes/acordes'
@@ -38,6 +39,11 @@ const EstudarRoute = EstudarRouteImport.update({
 const EscalasRoute = EscalasRouteImport.update({
   id: '/escalas',
   path: '/escalas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContaRoute = ContaRouteImport.update({
+  id: '/conta',
+  path: '/conta',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/acordes': typeof AcordesRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/conta': typeof ContaRoute
   '/escalas': typeof EscalasRoute
   '/estudar': typeof EstudarRouteWithChildren
   '/metronomo': typeof MetronomoRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/acordes': typeof AcordesRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/conta': typeof ContaRoute
   '/escalas': typeof EscalasRoute
   '/estudar': typeof EstudarRouteWithChildren
   '/metronomo': typeof MetronomoRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/acordes': typeof AcordesRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/conta': typeof ContaRoute
   '/escalas': typeof EscalasRoute
   '/estudar': typeof EstudarRouteWithChildren
   '/metronomo': typeof MetronomoRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/acordes'
     | '/admin'
     | '/auth'
+    | '/conta'
     | '/escalas'
     | '/estudar'
     | '/metronomo'
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/acordes'
     | '/admin'
     | '/auth'
+    | '/conta'
     | '/escalas'
     | '/estudar'
     | '/metronomo'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/acordes'
     | '/admin'
     | '/auth'
+    | '/conta'
     | '/escalas'
     | '/estudar'
     | '/metronomo'
@@ -152,6 +164,7 @@ export interface RootRouteChildren {
   AcordesRoute: typeof AcordesRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
+  ContaRoute: typeof ContaRoute
   EscalasRoute: typeof EscalasRoute
   EstudarRoute: typeof EstudarRouteWithChildren
   MetronomoRoute: typeof MetronomoRoute
@@ -187,6 +200,13 @@ declare module '@tanstack/react-router' {
       path: '/escalas'
       fullPath: '/escalas'
       preLoaderRoute: typeof EscalasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conta': {
+      id: '/conta'
+      path: '/conta'
+      fullPath: '/conta'
+      preLoaderRoute: typeof ContaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -250,6 +270,7 @@ const rootRouteChildren: RootRouteChildren = {
   AcordesRoute: AcordesRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
+  ContaRoute: ContaRoute,
   EscalasRoute: EscalasRoute,
   EstudarRoute: EstudarRouteWithChildren,
   MetronomoRoute: MetronomoRoute,
