@@ -83,6 +83,7 @@ const FILLS: Fill[] = [
     fill: G(
       "x.......x.......",
       "x...............",
+      "................",
       {
         SN: "x.xxo.x.xxo.x.xx",
         HH: "x.x.x.x.x.x.x.x.",
@@ -104,6 +105,7 @@ const FILLS: Fill[] = [
     ),
     fill: G(
       "x...............",
+      "................",
       "................",
       {
         SN: "x.xx.xx.xx......",
@@ -156,6 +158,7 @@ const FILLS: Fill[] = [
     ),
     fill: G(
       "x..xx..xx..xx..x",
+      "................",
       "................",
       {
         SN: "xxxxxxxxxxxxxxxx", // rufado curto
@@ -227,6 +230,7 @@ const FILLS: Fill[] = [
     fill: G(
       "x...x...x.......",
       "................",
+      "................",
       {
         SN: "xoxoxoxoxoxoxxxx",
         CY: "...............x",
@@ -248,6 +252,7 @@ const FILLS: Fill[] = [
     ),
     fill: G(
       "x.....x.x.......",
+      "................",
       "................",
       {
         SN: "xxxxxxxxxxxx....",
