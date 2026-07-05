@@ -191,7 +191,7 @@ function usePitchEngine() {
   const streamRef = useRef<MediaStream | null>(null);
 
   const stop = useCallback(() => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    if (rafRef.current) { clearTimeout(rafRef.current); cancelAnimationFrame(rafRef.current); }
     rafRef.current = null;
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
