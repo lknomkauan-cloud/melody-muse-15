@@ -83,6 +83,7 @@ const INSTRUMENTS = [
   { id: "guitarra", label: "Guitarra" },
   { id: "baixo", label: "Baixo" },
   { id: "piano", label: "Piano" },
+  { id: "teclado", label: "Teclado" },
   { id: "sax", label: "Sax" },
   { id: "violino", label: "Violino" },
   { id: "bateria", label: "Bateria" },
@@ -97,7 +98,8 @@ function instrumentTip(inst: InstrumentId, modeRoot: string, pentSemis: number[]
       return `Toque a tônica ${modeRoot} na 6ª corda (E grave) e use a fórmula em trastes ${intervals}. Ex.: dedo 1 = ${modeRoot}, sobe ${pentSemis[1]} trastes para a 2ª nota, e assim por diante. Transponha o mesmo desenho para a 5ª corda (A) somando 5 trastes.`;
     case "baixo":
       return `Posicione a tônica ${modeRoot} na 4ª corda (E) e replique o intervalo em trastes: ${intervals}. Use o desenho ‘box’ atravessando as cordas E-A-D-G para alcançar 2 oitavas sem deslocar a mão.`;
-    case "piano": {
+    case "piano":
+    case "teclado": {
       const teclas = pentSemis.map((s) => transpose(modeRoot, s)).join(" – ");
       return `Teclas: ${teclas}. Dedilhado sugerido na mão direita: 1-2-3-1-2 subindo, 2-1-3-2-1 descendo. Comece com o polegar em ${modeRoot}.`;
     }

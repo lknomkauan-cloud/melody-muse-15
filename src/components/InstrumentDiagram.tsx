@@ -16,7 +16,7 @@ const C = {
   fgSoft: "color-mix(in oklch, var(--foreground) 15%, transparent)",
 };
 
-export type InstrumentId = "violao" | "guitarra" | "baixo" | "piano" | "sax" | "violino" | "bateria";
+export type InstrumentId = "violao" | "guitarra" | "baixo" | "piano" | "teclado" | "sax" | "violino" | "bateria";
 
 type Props = {
   instrument: InstrumentId;
@@ -38,6 +38,7 @@ export function InstrumentDiagram({ instrument, root, pentSemis }: Props) {
     case "violino":
       return <Fretboard tuning={[4, 9, 2, 7]} labels={["E", "A", "D", "G"]} frets={8} rootPc={rootPc} pentPcs={pentPcs} fretless />;
     case "piano":
+    case "teclado":
       return <Piano rootPc={rootPc} pentPcs={pentPcs} />;
     case "sax":
       return <Sax rootPc={rootPc} pentPcs={pentPcs} />;
