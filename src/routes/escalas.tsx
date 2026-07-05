@@ -247,6 +247,12 @@ function EscalasPage() {
                                   </div>
                                 ))}
                               </div>
+                              <div className="mb-4 rounded-lg bg-card/60 p-3">
+                                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                  Desenho no {INSTRUMENTS.find(i => i.id === instrument)?.label}
+                                </span>
+                                <InstrumentDiagram instrument={instrument} root={modeRoot} pentSemis={m.pentSemis} />
+                              </div>
                               <div className="rounded-lg bg-card/60 p-3 text-sm leading-relaxed">
                                 <span className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">
                                   Como tocar no {INSTRUMENTS.find(i => i.id === instrument)?.label}
