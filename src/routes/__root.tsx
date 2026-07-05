@@ -87,13 +87,13 @@ function Header() {
   const { user, isAdmin, profile } = useAuth();
   const navItems = [
     { to: "/", label: "Início" },
+    ...(isAdmin ? [{ to: "/admin", label: "Painel do Adm" }] : []),
     { to: "/estudar", label: "Estudar" },
     { to: "/quiz", label: "Quiz" },
     { to: "/escalas", label: "Escalas" },
     { to: "/acordes", label: "Acordes" },
     { to: "/metronomo", label: "Metrônomo" },
     { to: "/afinador", label: "Afinador" },
-    ...(isAdmin ? [{ to: "/admin", label: "Painel do Adm" }] : []),
   ];
 
   const handleSignOut = async () => {
