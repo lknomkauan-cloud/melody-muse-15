@@ -225,18 +225,56 @@ function usePitchEngine() {
       streamRef.current = stream;
       const src = ctx.createMediaStreamSource(stream);
       const analyser = ctx.createAnalyser();
-      analyser.fftSize = 2048;
+      analyser.fftSize = 4096; // janela maior = leitura mais estável
       src.connect(analyser);
       const buf = new Float32Array(analyser.fftSize);
-      const loop = () => {
+
+      // Estabilização: precisa ver a mesma nota várias vezes seguidas
+      // antes de confirmar, e segura o valor por um tempo mínimo.
+      const STABLE_FRAMES = 4;      // ~4 leituras iguais para confirmar
+      const HOLD_MS = 700;          // segura a nota exibida por 700ms
+      const SAMPLE_MS = 90;         // amostra a cada ~90ms (mais lento que rAF)
+      let candidateName: string | null = null;
+      let candidateCount = 0;
+      let lastCommit: { name: string; at: number } | null = null;
+      let freqSmooth = 0;
+
+      const tick = () => {
         analyser.getFloatTimeDomainData(buf);
         const f = detectPitch(buf, ctx.sampleRate);
         const note = freqToNote(f);
-        setPitch(f ? { freq: f, note } : null);
-        rafRef.current = requestAnimationFrame(loop);
+        const now = performance.now();
+
+        if (f && note) {
+          // suaviza a frequência exibida
+          freqSmooth = freqSmooth ? freqSmooth * 0.7 + f * 0.3 : f;
+          if (note.name === candidateName) {
+            candidateCount++;
+          } else {
+            candidateName = note.name;
+            candidateCount = 1;
+          }
+          if (candidateCount >= STABLE_FRAMES) {
+            lastCommit = { name: note.name, at: now };
+            setPitch({ freq: freqSmooth, note });
+          } else if (lastCommit && now - lastCommit.at < HOLD_MS) {
+            // mantém a nota anterior estável enquanto acumula confiança
+          } else if (!lastCommit) {
+            // nada ainda — não pisca
+          }
+        } else {
+          candidateName = null;
+          candidateCount = 0;
+          if (!lastCommit || now - lastCommit.at > HOLD_MS) {
+            lastCommit = null;
+            freqSmooth = 0;
+            setPitch(null);
+          }
+        }
+        rafRef.current = window.setTimeout(tick, SAMPLE_MS) as unknown as number;
       };
       setOn(true);
-      loop();
+      tick();
     } catch (e) {
       setError(describeMicError(e));
       stop();
