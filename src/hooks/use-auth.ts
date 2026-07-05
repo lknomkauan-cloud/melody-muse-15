@@ -39,7 +39,7 @@ export function useAuth() {
       if (cancelled) return;
       const rs = (roles ?? []).map((r) => r.role as AppRole);
       setIsAdmin(rs.includes("admin"));
-      setRole(rs.includes("admin") ? "admin" : rs.includes("teacher") ? "teacher" : rs.includes("student") ? "student" : null);
+      setRole(rs.includes("teacher") ? "teacher" : rs.includes("admin") ? "admin" : rs.includes("student") ? "student" : null);
       setProfile(prof ?? null);
     };
 
