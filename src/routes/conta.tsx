@@ -15,8 +15,8 @@ import {
 export const Route = createFileRoute("/conta")({
   head: () => ({
     meta: [
-      { title: "Minha conta — Melodia" },
-      { name: "description", content: "Gerencie seu perfil, avatar e informações da sua conta no Melodia." },
+      { title: "Minha conta — Notes for Life" },
+      { name: "description", content: "Gerencie seu perfil, avatar e informações da sua conta no Notes for Life." },
     ],
   }),
   component: ContaPage,

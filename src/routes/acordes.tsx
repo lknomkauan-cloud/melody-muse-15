@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/acordes")({
   head: () => ({
     meta: [
-      { title: "Acordes — Melodia" },
+      { title: "Acordes — Notes for Life" },
       { name: "description", content: "Referência visual de acordes: triades maiores, menores, diminutas e aumentadas para todas as tonalidades." },
-      { property: "og:title", content: "Acordes — Melodia" },
+      { property: "og:title", content: "Acordes — Notes for Life" },
       { property: "og:description", content: "Referência visual de triades, tétrades e inversões para qualquer tonalidade." },
     ],
   }),

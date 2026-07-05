@@ -12,7 +12,7 @@ import {
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Painel do Admin — Melodia" },
+      { title: "Painel do Admin — Notes for Life" },
       { name: "description", content: "Painel administrativo restrito." },
       { name: "robots", content: "noindex, nofollow" },
     ],

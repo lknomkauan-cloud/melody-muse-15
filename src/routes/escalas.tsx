@@ -12,9 +12,9 @@ import { ImprovisationMethodology } from "@/components/ImprovisationMethodology"
 export const Route = createFileRoute("/escalas")({
   head: () => ({
     meta: [
-      { title: "Escalas — Melodia" },
+      { title: "Escalas — Notes for Life" },
       { name: "description", content: "Consulta completa de escalas maiores, menores e modais com graus, notas e pentatônicas dos modos gregos para cada instrumento." },
-      { property: "og:title", content: "Escalas — Melodia" },
+      { property: "og:title", content: "Escalas — Notes for Life" },
       { property: "og:description", content: "Escalas, modos gregos e pentatônicas modais aplicadas a violão, guitarra, baixo, piano, sax e violino." },
     ],
   }),

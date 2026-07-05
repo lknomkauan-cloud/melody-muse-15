@@ -14,9 +14,9 @@ import heroImage from "../assets/hero-music.png";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Melodia — Estudo Musical" },
+      { title: "Notes for Life" },
       { name: "description", content: "App completo para estudar teoria musical, praticar com quizzes e usar ferramentas como metrônomo." },
-      { property: "og:title", content: "Melodia — Estudo Musical" },
+      { property: "og:title", content: "Notes for Life" },
       { property: "og:description", content: "App completo para estudar teoria musical, praticar com quizzes e usar ferramentas como metrônomo." },
     ],
   }),
@@ -180,7 +180,7 @@ function HomePage() {
         <div className="mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Music className="h-5 w-5 text-primary" />
-            <span className="font-display font-bold text-foreground">Melodia</span>
+            <span className="font-display font-bold text-foreground">Notes for Life</span>
           </div>
           <p className="text-sm text-muted-foreground">Feito para músicos que querem ir além.</p>
         </div>

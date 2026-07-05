@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/quiz")({
   head: () => ({
     meta: [
-      { title: "Quiz de Notas — Melodia" },
+      { title: "Quiz de Notas — Notes for Life" },
       { name: "description", content: "Teste seus conhecimentos em teoria musical com quizzes interativos de notas, intervalos e acordes." },
-      { property: "og:title", content: "Quiz de Notas — Melodia" },
+      { property: "og:title", content: "Quiz de Notas — Notes for Life" },
       { property: "og:description", content: "Teste seus conhecimentos em teoria musical com quizzes interativos." },
     ],
   }),
