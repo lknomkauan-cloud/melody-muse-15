@@ -354,19 +354,29 @@ function GuidedExercise({ pentatonicNotes, tonic }: { pentatonicNotes: string[];
   const [hits, setHits] = useState<Array<"ok" | "off">>([]);
   const { pitch, error, on, start, stop } = usePitchEngine();
   const lastMatchRef = useRef<number>(0);
+  const sustainRef = useRef<{ name: string | null; since: number }>({ name: null, since: 0 });
 
   useEffect(() => {
-    if (!on || !pitch?.note) return;
+    if (!on || !pitch?.note) { sustainRef.current = { name: null, since: 0 }; return; }
     const target = sequence[idx];
     const now = performance.now();
-    if (now - lastMatchRef.current < 250) return; // debounce
-    if (pitch.note.name === target && Math.abs(pitch.note.cents) < 40) {
+    // exige que a nota seja sustentada por pelo menos 600ms antes de contar
+    const SUSTAIN_MS = 600;
+    const COOLDOWN_MS = 500;
+    if (sustainRef.current.name !== pitch.note.name) {
+      sustainRef.current = { name: pitch.note.name, since: now };
+      return;
+    }
+    const heldFor = now - sustainRef.current.since;
+    if (now - lastMatchRef.current < COOLDOWN_MS) return;
+    if (pitch.note.name === target && Math.abs(pitch.note.cents) < 40 && heldFor >= SUSTAIN_MS) {
       lastMatchRef.current = now;
+      sustainRef.current = { name: null, since: 0 };
       setHits((h) => [...h, "ok"]);
       setIdx((i) => Math.min(i + 1, sequence.length));
-    } else if (pentatonicNotes.includes(pitch.note.name) === false && Math.abs(pitch.note.cents) < 40) {
-      // nota completamente fora — marca erro leve mas não avança
-      if (now - lastMatchRef.current > 700) {
+    } else if (pentatonicNotes.includes(pitch.note.name) === false && Math.abs(pitch.note.cents) < 40 && heldFor >= SUSTAIN_MS) {
+      // nota completamente fora, sustentada — marca erro leve mas não avança
+      if (now - lastMatchRef.current > 1200) {
         lastMatchRef.current = now;
         setHits((h) => (h[h.length - 1] === "off" ? h : [...h, "off"]));
       }
