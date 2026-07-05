@@ -3,6 +3,7 @@ import { useState } from "react";
 import { BookOpen, ChevronDown, ChevronUp, Music2, Youtube } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { InstrumentDiagram } from "@/components/InstrumentDiagram";
+import { EarCoach } from "@/components/EarCoach";
 
 export const Route = createFileRoute("/escalas")({
   head: () => ({
@@ -253,6 +254,12 @@ function EscalasPage() {
                                 </span>
                                 <InstrumentDiagram instrument={instrument} root={modeRoot} pentSemis={m.pentSemis} />
                                 <ModeVideoLinks modeName={m.name} modeRoot={modeRoot} instrumentLabel={INSTRUMENTS.find(i => i.id === instrument)?.label ?? ""} />
+                                <EarCoach
+                                  tonic={modeRoot}
+                                  modeName={m.name}
+                                  pentatonicNotes={pentNotes}
+                                  instrumentLabel={INSTRUMENTS.find(i => i.id === instrument)?.label ?? ""}
+                                />
                               </div>
                               <div className="rounded-lg bg-card/60 p-3 text-sm leading-relaxed">
                                 <span className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">
