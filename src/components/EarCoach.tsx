@@ -104,57 +104,88 @@ export function EarCoach({
 }
 
 /* -------------------- 1) Afinador ao vivo -------------------- */
-function useMicPitch(active: boolean) {
-  const [pitch, setPitch] = useState<{ freq: number; note: ReturnType<typeof freqToNote> } | null>(null);
+type PitchState = { freq: number; note: ReturnType<typeof freqToNote> } | null;
+
+function describeMicError(e: unknown): string {
+  if (e instanceof Error) {
+    if (e.name === "NotAllowedError" || e.name === "SecurityError")
+      return "Permissão do microfone negada. Toque no cadeado ao lado do endereço e permita o microfone.";
+    if (e.name === "NotFoundError") return "Nenhum microfone encontrado no dispositivo.";
+    if (e.name === "NotReadableError") return "Microfone em uso por outro app. Feche e tente novamente.";
+    if (e.name === "OverconstrainedError") return "Microfone não suporta as configurações pedidas.";
+    return e.message || "Erro ao acessar o microfone";
+  }
+  return "Erro ao acessar o microfone";
+}
+
+function usePitchEngine() {
+  const [pitch, setPitch] = useState<PitchState>(null);
   const [error, setError] = useState<string | null>(null);
+  const [on, setOn] = useState(false);
   const rafRef = useRef<number | null>(null);
   const ctxRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  useEffect(() => {
-    if (!active) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
-        if (cancelled) { stream.getTracks().forEach((t) => t.stop()); return; }
-        streamRef.current = stream;
-        const AC: typeof AudioContext = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-        const ctx = new AC();
-        ctxRef.current = ctx;
-        const src = ctx.createMediaStreamSource(stream);
-        const analyser = ctx.createAnalyser();
-        analyser.fftSize = 2048;
-        src.connect(analyser);
-        const buf = new Float32Array(analyser.fftSize);
-        const loop = () => {
-          analyser.getFloatTimeDomainData(buf);
-          const f = detectPitch(buf, ctx.sampleRate);
-          const note = freqToNote(f);
-          setPitch(f ? { freq: f, note } : null);
-          rafRef.current = requestAnimationFrame(loop);
-        };
-        loop();
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Erro ao acessar o microfone");
-      }
-    })();
-    return () => {
-      cancelled = true;
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      streamRef.current?.getTracks().forEach((t) => t.stop());
-      ctxRef.current?.close().catch(() => {});
-      streamRef.current = null;
-      ctxRef.current = null;
-    };
-  }, [active]);
+  const stop = useCallback(() => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    ctxRef.current?.close().catch(() => {});
+    ctxRef.current = null;
+    setPitch(null);
+    setOn(false);
+  }, []);
 
-  return { pitch, error };
+  // IMPORTANTE: chamar SEM await antes — precisa estar direto no gesto do usuário (iOS Safari).
+  const start = useCallback(async () => {
+    setError(null);
+    try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setError("Este navegador não suporta microfone. Tente Chrome ou Safari atualizados.");
+        return;
+      }
+      const AC: typeof AudioContext | undefined =
+        window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AC) { setError("AudioContext indisponível neste navegador."); return; }
+      // Cria o AudioContext SÍNCRONO dentro do gesto (obrigatório no iOS)
+      const ctx = new AC();
+      ctxRef.current = ctx;
+      // Pede o microfone imediatamente (a Promise é aceita como parte do gesto)
+      const streamPromise = navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+      });
+      // Resume o contexto (necessário no iOS/Chrome mobile)
+      try { await ctx.resume(); } catch { /* noop */ }
+      const stream = await streamPromise;
+      streamRef.current = stream;
+      const src = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 2048;
+      src.connect(analyser);
+      const buf = new Float32Array(analyser.fftSize);
+      const loop = () => {
+        analyser.getFloatTimeDomainData(buf);
+        const f = detectPitch(buf, ctx.sampleRate);
+        const note = freqToNote(f);
+        setPitch(f ? { freq: f, note } : null);
+        rafRef.current = requestAnimationFrame(loop);
+      };
+      setOn(true);
+      loop();
+    } catch (e) {
+      setError(describeMicError(e));
+      stop();
+    }
+  }, [stop]);
+
+  useEffect(() => () => { stop(); }, [stop]);
+
+  return { pitch, error, on, start, stop };
 }
 
 function LiveTuner({ pentatonicNotes, tonic }: { pentatonicNotes: string[]; tonic: string }) {
-  const [on, setOn] = useState(false);
-  const { pitch, error } = useMicPitch(on);
+  const { pitch, error, on, start, stop } = usePitchEngine();
   const inScale = pitch?.note ? pentatonicNotes.includes(pitch.note.name) : false;
   const isTonic = pitch?.note?.name === tonic;
 
@@ -162,7 +193,7 @@ function LiveTuner({ pentatonicNotes, tonic }: { pentatonicNotes: string[]; toni
     <div>
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <button
-          onClick={() => setOn((v) => !v)}
+          onClick={on ? stop : start}
           className={cn(
             "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all",
             on ? "bg-destructive text-destructive-foreground" : "bg-primary text-primary-foreground",
@@ -213,13 +244,13 @@ function LiveTuner({ pentatonicNotes, tonic }: { pentatonicNotes: string[]; toni
   );
 }
 
+
 /* -------------------- 2) Exercício guiado -------------------- */
 function GuidedExercise({ pentatonicNotes, tonic }: { pentatonicNotes: string[]; tonic: string }) {
   const sequence = [...pentatonicNotes, pentatonicNotes[0]]; // sobe até oitava
-  const [on, setOn] = useState(false);
   const [idx, setIdx] = useState(0);
   const [hits, setHits] = useState<Array<"ok" | "off">>([]);
-  const { pitch, error } = useMicPitch(on);
+  const { pitch, error, on, start, stop } = usePitchEngine();
   const lastMatchRef = useRef<number>(0);
 
   useEffect(() => {
@@ -247,7 +278,7 @@ function GuidedExercise({ pentatonicNotes, tonic }: { pentatonicNotes: string[];
     <div>
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <button
-          onClick={() => { setOn((v) => !v); }}
+          onClick={on ? stop : start}
           className={cn(
             "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all",
             on ? "bg-destructive text-destructive-foreground" : "bg-primary text-primary-foreground",
