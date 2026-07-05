@@ -708,3 +708,18 @@ export function ImprovisationMethodology() {
     </div>
   );
 }
+
+function RhythmCard({ name, bpm, pattern, tips, refs }: { name: string; bpm: string; pattern: string; tips: string; refs: string }) {
+  return (
+    <div className="rounded-xl border border-border bg-card/60 p-4 space-y-2">
+      <div className="flex items-baseline justify-between gap-2">
+        <h4 className="font-display font-bold text-base">{name}</h4>
+        <span className="text-[10px] font-mono uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">{bpm} BPM</span>
+      </div>
+      <p className="text-xs text-muted-foreground"><strong className="text-foreground">Padrão: </strong><span dangerouslySetInnerHTML={{ __html: pattern }} /></p>
+      <p className="text-xs text-muted-foreground"><strong className="text-foreground">Como estudar: </strong><span dangerouslySetInnerHTML={{ __html: tips }} /></p>
+      <p className="text-xs text-muted-foreground italic"><strong className="not-italic text-foreground">Ref: </strong>{refs}</p>
+    </div>
+  );
+}
+
