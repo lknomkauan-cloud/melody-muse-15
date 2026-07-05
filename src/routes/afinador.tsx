@@ -20,11 +20,13 @@ export const Route = createFileRoute("/afinador")({
 // ============================================================================
 
 type Nota = { nome: string; freq: number; nota: string; oitava: number; dica?: string };
+type Variacao = { id: string; label: string; notas: Nota[]; descricao?: string };
 type Instrumento = {
   id: string;
   label: string;
   descricao: string;
   notas: Nota[];
+  variacoes?: Variacao[];
   dicaGeral?: string;
 };
 
