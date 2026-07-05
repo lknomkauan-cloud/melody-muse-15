@@ -24,7 +24,7 @@ export const Route = createFileRoute("/conta")({
 
 function ContaPage() {
   const navigate = useNavigate();
-  const { user, role, profile, loading } = useAuth();
+  const { user, role, profile, loading, isAdmin } = useAuth();
   const [saving, setSaving] = useState(false);
   const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
@@ -74,7 +74,6 @@ function ContaPage() {
   };
 
   const isTeacher = role === "teacher";
-  const isAdmin = role === "admin";
   const displayName = fullName || user.email?.split("@")[0] || "Usuário";
   const initials = displayName.slice(0, 2).toUpperCase();
   const roleLabel = isAdmin ? "Administrador" : isTeacher ? "Professor" : "Aluno";
