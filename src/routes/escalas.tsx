@@ -363,10 +363,10 @@ function EscalasContent({
             );
           })}
         </div>
-      </div>
-    </div>
+    </>
   );
 }
+
 
 type VideoLink = { id: string; title: string; channel: string };
 
