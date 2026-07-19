@@ -287,6 +287,8 @@ function EscalasContent({
                   <div>
                     <span className="font-display text-lg font-bold">{selectedTonic} {scale.name}</span>
                     <span className="ml-2 text-xs text-muted-foreground">({scale.pattern.join("-")})</span>
+                    {scale.origin && <span className="ml-2 text-[10px] uppercase tracking-wide text-primary/80">{scale.origin}</span>}
+                    {scale.vibe && <p className="mt-1 text-xs text-muted-foreground">{scale.vibe}</p>}
                   </div>
                   {isOpen ? <ChevronUp className="h-5 w-5 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
                 </button>
