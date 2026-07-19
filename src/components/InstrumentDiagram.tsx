@@ -16,7 +16,7 @@ const C = {
   fgSoft: "color-mix(in oklch, var(--foreground) 15%, transparent)",
 };
 
-export type InstrumentId = "violao" | "guitarra" | "baixo" | "piano" | "teclado" | "sax" | "violino" | "bateria";
+export type InstrumentId = "violao" | "guitarra" | "baixo" | "piano" | "teclado" | "sax" | "violino" | "bateria" | "banjo" | "flauta";
 
 type Props = {
   instrument: InstrumentId;
@@ -37,11 +37,15 @@ export function InstrumentDiagram({ instrument, root, pentSemis }: Props) {
       return <Fretboard tuning={[7, 2, 9, 4]} labels={["G", "D", "A", "E"]} frets={13} rootPc={rootPc} pentPcs={pentPcs} />;
     case "violino":
       return <Fretboard tuning={[4, 9, 2, 7]} labels={["E", "A", "D", "G"]} frets={8} rootPc={rootPc} pentPcs={pentPcs} fretless />;
+    case "banjo":
+      return <Fretboard tuning={[7, 2, 11, 7, 2]} labels={["g*", "D", "B", "G", "D"]} frets={13} rootPc={rootPc} pentPcs={pentPcs} />;
     case "piano":
     case "teclado":
       return <Piano rootPc={rootPc} pentPcs={pentPcs} />;
     case "sax":
       return <Sax rootPc={rootPc} pentPcs={pentPcs} />;
+    case "flauta":
+      return <Recorder rootPc={rootPc} pentPcs={pentPcs} />;
     case "bateria":
       return <Drums />;
   }
