@@ -84,7 +84,7 @@ function getScaleNotes(tonic: string, pattern: number[]) {
   return notes;
 }
 
-const DEGREE_NAMES = ["I", "II", "III", "IV", "V", "VI", "VII"];
+const DEGREE_NAMES = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
 
 // Modos gregos — offset em semitons da tônica da escala maior + pentatônica característica
 type ModeInfo = {
