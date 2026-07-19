@@ -339,3 +339,84 @@ function Drums() {
     </div>
   );
 }
+
+/* ---------- Flauta Doce (Soprano, dedilhado barroco) ---------- */
+
+// Fingerings: T + 7 holes. ● closed, ○ open, ◐ half.
+const RECORDER_FINGERINGS: Record<string, string> = {
+  C:  "●●●●●●●●",
+  "C#": "●●●●●●●◐",
+  D:  "●●●●●●●○",
+  "D#": "●●●●●●◐○",
+  E:  "●●●●●●○○",
+  F:  "●●●●●○●●",
+  "F#": "●●●●●○●○",
+  G:  "●●●●○○○○",
+  "G#": "●●●○●●○○",
+  A:  "●●●○○○○○",
+  "A#": "●●○●●○○○",
+  B:  "●●○○○○○○",
+};
+
+function Recorder({ rootPc, pentPcs }: { rootPc: number; pentPcs: Set<number> }) {
+  const notes: { pc: number; name: string; fing: string }[] = [];
+  for (let i = 0; i < 12; i++) {
+    const p = (rootPc + i) % 12;
+    if (pentPcs.has(p)) {
+      const name = CHROMATIC[p];
+      notes.push({ pc: p, name, fing: RECORDER_FINGERINGS[name] ?? "" });
+    }
+  }
+  // add octave tonic at the end
+  notes.push({ pc: rootPc, name: CHROMATIC[rootPc] + "'", fing: RECORDER_FINGERINGS[CHROMATIC[rootPc]] ?? "" });
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2 justify-center">
+        {notes.map((n, idx) => {
+          const isRoot = n.pc === rootPc;
+          return (
+            <div
+              key={idx}
+              className="flex flex-col items-center rounded-lg border p-2 min-w-[54px]"
+              style={{
+                background: isRoot ? C.primary : C.bg,
+                borderColor: C.primary,
+                color: isRoot ? C.primaryFg : C.primary,
+              }}
+            >
+              <span className="font-display text-sm font-bold">{n.name}</span>
+              <FingerChart fing={n.fing} filled={isRoot} />
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-[11px] text-muted-foreground text-center">
+        Dedilhado da flauta doce soprano (sistema barroco). Topo = polegar (costas); demais = furos frontais 1-7.
+        <span className="mx-1">●</span>tampado
+        <span className="mx-1">○</span>aberto
+        <span className="mx-1">◐</span>meio-furo
+      </p>
+    </div>
+  );
+}
+
+function FingerChart({ fing, filled }: { fing: string; filled: boolean }) {
+  const chars = fing.split("");
+  const stroke = filled ? C.primaryFg : C.primary;
+  const solid = filled ? C.primaryFg : C.primary;
+  return (
+    <svg viewBox="0 0 20 96" width={20} height={96} className="mt-1">
+      {chars.map((ch, i) => {
+        const cy = 6 + i * 12;
+        const fillC = ch === "●" ? solid : ch === "◐" ? solid : "transparent";
+        return (
+          <g key={i}>
+            <circle cx={10} cy={cy} r={4} fill={fillC} stroke={stroke} strokeWidth={1.2} opacity={ch === "◐" ? 0.5 : 1} />
+            {i === 0 && <line x1={2} x2={8} y1={cy} y2={cy} stroke={stroke} strokeWidth={0.8} opacity={0.5} />}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
