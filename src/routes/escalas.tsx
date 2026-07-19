@@ -499,6 +499,18 @@ const INSTRUMENT_VIDEOS: Record<string, VideoLink[]> = {
     { id: "M3I63u_eUYY", title: "Modos Gregos — base teórica", channel: "Antonio Colangelo" },
     { id: "FEsu-0EAiGg", title: "Pentatônica — conceito universal", channel: "Vil Margos Bert" },
   ],
+  banjo: [
+    { id: "9K5Vf_dQXY0", title: "Banjo 5-string — pentatônica e rolls", channel: "Banjo Ben Clark" },
+    { id: "M3I63u_eUYY", title: "Modos Gregos — teoria aplicável ao banjo", channel: "Antonio Colangelo" },
+  ],
+  "flauta doce": [
+    { id: "iKY3sJ7uZ2E", title: "Escalas na flauta doce soprano", channel: "Flauta Doce Brasil" },
+    { id: "bXDczAgJEjE", title: "Escalas & Modos (teoria)", channel: "Aprenda Piano Online" },
+  ],
+  flauta: [
+    { id: "iKY3sJ7uZ2E", title: "Escalas na flauta doce soprano", channel: "Flauta Doce Brasil" },
+    { id: "bXDczAgJEjE", title: "Escalas & Modos (teoria)", channel: "Aprenda Piano Online" },
+  ],
 };
 
 function ModeVideoLinks({ modeName, modeRoot, instrumentLabel }: { modeName: string; modeRoot: string; instrumentLabel: string }) {
