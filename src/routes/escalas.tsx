@@ -109,10 +109,12 @@ const INSTRUMENTS = [
   { id: "violao", label: "Violão" },
   { id: "guitarra", label: "Guitarra" },
   { id: "baixo", label: "Baixo" },
+  { id: "banjo", label: "Banjo" },
   { id: "piano", label: "Piano" },
   { id: "teclado", label: "Teclado" },
   { id: "sax", label: "Sax" },
   { id: "violino", label: "Violino" },
+  { id: "flauta", label: "Flauta Doce" },
   { id: "bateria", label: "Bateria" },
 ] as const;
 type InstrumentId = typeof INSTRUMENTS[number]["id"];
@@ -140,6 +142,14 @@ function instrumentTip(inst: InstrumentId, modeRoot: string, pentSemis: number[]
     }
     case "bateria":
       return `A bateria não produz alturas definidas. Use a tônica ${modeRoot} como referência de pulso: marque o tempo 1 no bumbo e crie levadas que ressaltem os graus ${intervals} através de acentos no prato de condução ou tom-tons.`;
+    case "banjo": {
+      const notas = pentSemis.map((s) => transpose(modeRoot, s)).join(" – ");
+      return `Afinação padrão open G (g D B G D). Localize ${modeRoot} na 4ª corda (D) ou 3ª (G) e use trastes ${intervals}. Use rolls (Scruggs: T-I-M-T-M-T-I-M) para embalar as notas ${notas}; a 5ª corda (g drone) funciona como pedal quando o modo estiver em G ou tônicas próximas.`;
+    }
+    case "flauta": {
+      const notas = pentSemis.map((s) => transpose(modeRoot, s)).join(" – ");
+      return `Flauta doce soprano (dedilhado barroco). Notas: ${notas}. Cubra o polegar (T) e os furos frontais conforme o diagrama. Use ar leve nas notas graves (dó/ré) e vent o polegar (◐) para subir de oitava. Ataque com "tu" nas separações e "du" nas ligaduras.`;
+    }
   }
 }
 
@@ -488,6 +498,18 @@ const INSTRUMENT_VIDEOS: Record<string, VideoLink[]> = {
   violino: [
     { id: "M3I63u_eUYY", title: "Modos Gregos — base teórica", channel: "Antonio Colangelo" },
     { id: "FEsu-0EAiGg", title: "Pentatônica — conceito universal", channel: "Vil Margos Bert" },
+  ],
+  banjo: [
+    { id: "9K5Vf_dQXY0", title: "Banjo 5-string — pentatônica e rolls", channel: "Banjo Ben Clark" },
+    { id: "M3I63u_eUYY", title: "Modos Gregos — teoria aplicável ao banjo", channel: "Antonio Colangelo" },
+  ],
+  "flauta doce": [
+    { id: "iKY3sJ7uZ2E", title: "Escalas na flauta doce soprano", channel: "Flauta Doce Brasil" },
+    { id: "bXDczAgJEjE", title: "Escalas & Modos (teoria)", channel: "Aprenda Piano Online" },
+  ],
+  flauta: [
+    { id: "iKY3sJ7uZ2E", title: "Escalas na flauta doce soprano", channel: "Flauta Doce Brasil" },
+    { id: "bXDczAgJEjE", title: "Escalas & Modos (teoria)", channel: "Aprenda Piano Online" },
   ],
 };
 
