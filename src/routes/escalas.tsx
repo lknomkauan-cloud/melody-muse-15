@@ -23,13 +23,40 @@ export const Route = createFileRoute("/escalas")({
 
 const TONALITIES = ["C", "G", "D", "A", "E", "B", "F#", "C#", "F", "Bb", "Eb", "Ab", "Db", "Gb", "Cb"] as const;
 
-const SCALE_TYPES = [
+type ScaleType = {
+  name: string;
+  pattern: number[];
+  hasModes: boolean;
+  origin?: string;
+  vibe?: string;
+};
+
+const SCALE_TYPES: ScaleType[] = [
   { name: "Maior", pattern: [2, 2, 1, 2, 2, 2, 1], hasModes: true },
   { name: "Menor Natural", pattern: [2, 1, 2, 2, 1, 2, 2], hasModes: false },
   { name: "Menor Harmônica", pattern: [2, 1, 2, 2, 1, 3, 1], hasModes: false },
   { name: "Menor Melódica", pattern: [2, 1, 2, 2, 2, 2, 1], hasModes: false },
   { name: "Pentatônica Maior", pattern: [2, 2, 3, 2, 3], hasModes: false },
   { name: "Pentatônica Menor", pattern: [3, 2, 2, 3, 2], hasModes: false },
+  { name: "Blues", pattern: [3, 2, 1, 1, 3, 2], hasModes: false, origin: "EUA / África", vibe: "Pentatônica menor + blue note (b5). Base do blues, rock e jazz." },
+  // Árabe / Oriente Médio
+  { name: "Árabe (Byzantina / Duplo Harmônica)", pattern: [1, 3, 1, 2, 1, 3, 1], hasModes: false, origin: "Árabe / Bizantino", vibe: "Duas 2ªs aumentadas — sonoridade do Oriente Médio e do flamenco." },
+  { name: "Frígia Dominante (Espanhola)", pattern: [1, 3, 1, 2, 1, 2, 2], hasModes: false, origin: "Espanha / Árabe", vibe: "5º modo da menor harmônica. Flamenco, klezmer, metal neoclássico." },
+  { name: "Cigana Húngara (Hungarian Minor)", pattern: [2, 1, 3, 1, 1, 3, 1], hasModes: false, origin: "Hungria / Roma", vibe: "Menor com 4ª aumentada e 7ª maior. Csárdás, música cigana do leste europeu." },
+  { name: "Persa", pattern: [1, 3, 1, 1, 2, 3, 1], hasModes: false, origin: "Pérsia / Irã", vibe: "Escala misteriosa e melancólica usada em maqam persa." },
+  { name: "Egípcia (Suspensa)", pattern: [2, 3, 2, 3, 2], hasModes: false, origin: "Egito", vibe: "Pentatônica suspensa — 2º modo da pentatônica maior, som ancestral." },
+  // Ásia
+  { name: "Chinesa Maior", pattern: [4, 2, 1, 4, 1], hasModes: false, origin: "China", vibe: "Pentatônica com trítono — som tradicional do teatro chinês." },
+  { name: "Mongol / Chinesa Pentatônica", pattern: [2, 2, 3, 2, 3], hasModes: false, origin: "Ásia Oriental", vibe: "Pentatônica maior — base da música chinesa, mongol e coreana." },
+  { name: "Japonesa Hirajoshi", pattern: [2, 1, 4, 1, 4], hasModes: false, origin: "Japão", vibe: "Pentatônica do koto e shamisen — som contemplativo japonês." },
+  { name: "Japonesa In Sen", pattern: [1, 4, 2, 3, 2], hasModes: false, origin: "Japão", vibe: "Pentatônica sombria usada em música tradicional e trilhas de anime." },
+  { name: "Ryukyu (Okinawa)", pattern: [4, 1, 2, 4, 1], hasModes: false, origin: "Okinawa", vibe: "Pentatônica maior com 4ª e 7ª — som característico de Okinawa." },
+  { name: "Balinês (Pelog)", pattern: [1, 2, 4, 1, 4], hasModes: false, origin: "Bali / Indonésia", vibe: "Aproximação do sistema pelog do gamelão balinês." },
+  { name: "Indiana (Raga Todi)", pattern: [1, 2, 3, 1, 1, 3, 1], hasModes: false, origin: "Índia", vibe: "Raga do período da manhã — melancólico e introspectivo." },
+  // Outras
+  { name: "Enigmática", pattern: [1, 3, 2, 2, 2, 1, 1], hasModes: false, origin: "Itália (Verdi)", vibe: "Escala experimental criada por Verdi — combina notas árabes e ocidentais." },
+  { name: "Tons Inteiros", pattern: [2, 2, 2, 2, 2, 2], hasModes: false, origin: "França (Debussy)", vibe: "Sem semitons — som flutuante impressionista." },
+  { name: "Diminuta (Semitom-Tom)", pattern: [1, 2, 1, 2, 1, 2, 1, 2], hasModes: false, origin: "Jazz", vibe: "Octatônica simétrica — usada em improvisação sobre dominantes." },
 ];
 
 const CHROMATIC = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -57,7 +84,7 @@ function getScaleNotes(tonic: string, pattern: number[]) {
   return notes;
 }
 
-const DEGREE_NAMES = ["I", "II", "III", "IV", "V", "VI", "VII"];
+const DEGREE_NAMES = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
 
 // Modos gregos — offset em semitons da tônica da escala maior + pentatônica característica
 type ModeInfo = {
@@ -260,6 +287,8 @@ function EscalasContent({
                   <div>
                     <span className="font-display text-lg font-bold">{selectedTonic} {scale.name}</span>
                     <span className="ml-2 text-xs text-muted-foreground">({scale.pattern.join("-")})</span>
+                    {scale.origin && <span className="ml-2 text-[10px] uppercase tracking-wide text-primary/80">{scale.origin}</span>}
+                    {scale.vibe && <p className="mt-1 text-xs text-muted-foreground">{scale.vibe}</p>}
                   </div>
                   {isOpen ? <ChevronUp className="h-5 w-5 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
                 </button>
