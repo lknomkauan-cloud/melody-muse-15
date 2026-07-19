@@ -142,6 +142,14 @@ function instrumentTip(inst: InstrumentId, modeRoot: string, pentSemis: number[]
     }
     case "bateria":
       return `A bateria não produz alturas definidas. Use a tônica ${modeRoot} como referência de pulso: marque o tempo 1 no bumbo e crie levadas que ressaltem os graus ${intervals} através de acentos no prato de condução ou tom-tons.`;
+    case "banjo": {
+      const notas = pentSemis.map((s) => transpose(modeRoot, s)).join(" – ");
+      return `Afinação padrão open G (g D B G D). Localize ${modeRoot} na 4ª corda (D) ou 3ª (G) e use trastes ${intervals}. Use rolls (Scruggs: T-I-M-T-M-T-I-M) para embalar as notas ${notas}; a 5ª corda (g drone) funciona como pedal quando o modo estiver em G ou tônicas próximas.`;
+    }
+    case "flauta": {
+      const notas = pentSemis.map((s) => transpose(modeRoot, s)).join(" – ");
+      return `Flauta doce soprano (dedilhado barroco). Notas: ${notas}. Cubra o polegar (T) e os furos frontais conforme o diagrama. Use ar leve nas notas graves (dó/ré) e vent o polegar (◐) para subir de oitava. Ataque com "tu" nas separações e "du" nas ligaduras.`;
+    }
   }
 }
 
