@@ -178,16 +178,49 @@ function AcordesPage() {
               })}
             </div>
 
-            <InstrumentDiagram
-              instrument={instrument}
-              root={selectedRoot}
-              pentSemis={selectedType.intervals}
-            />
+            {(instrument === "violao" || instrument === "guitarra" || instrument === "ukulele") ? (
+              (() => {
+                const dbKey = instrument === "ukulele" ? "ukulele" : "guitar";
+                const has = hasCifraData(dbKey, selectedRoot, selectedType.name);
+                if (has) {
+                  return (
+                    <ChordDiagramCifra
+                      instrument={dbKey}
+                      root={selectedRoot}
+                      chordName={selectedType.name}
+                    />
+                  );
+                }
+                // fallback to neck highlight
+                if (instrument === "ukulele") {
+                  return (
+                    <div className="rounded-lg border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
+                      Sem desenho cadastrado para este acorde no ukulele.
+                    </div>
+                  );
+                }
+                return (
+                  <InstrumentDiagram
+                    instrument={instrument}
+                    root={selectedRoot}
+                    pentSemis={selectedType.intervals}
+                  />
+                );
+              })()
+            ) : (
+              <InstrumentDiagram
+                instrument={instrument}
+                root={selectedRoot}
+                pentSemis={selectedType.intervals}
+              />
+            )}
 
             <p className="mt-3 text-xs text-muted-foreground">
-              Cada bolinha marca uma nota do acorde. O círculo preenchido é a tônica ({selectedRoot}). Toque as notas
-              simultaneamente (dedilhado) ou em arpejo, dependendo do instrumento.
+              {instrument === "violao" || instrument === "guitarra" || instrument === "ukulele"
+                ? `Diagrama estilo Cifra Club: pontos = onde apertar, número = dedo, barra = pestana. X = corda abafada, O = corda solta. Use as setas para ver outras posições/pestanas.`
+                : `Cada bolinha marca uma nota do acorde. O círculo preenchido é a tônica (${selectedRoot}).`}
             </p>
+
           </div>
         )}
       </div>
