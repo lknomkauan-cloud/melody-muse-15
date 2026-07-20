@@ -49,6 +49,16 @@ const SAMPLER_CONFIG: Partial<Record<InstrumentId, { baseUrl: string; urls: Reco
     urls: { A3:"A3.mp3", A4:"A4.mp3", "C#4":"Cs4.mp3", E3:"E3.mp3", E4:"E4.mp3" },
     octave: 4,
   },
+  flauta: {
+    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/flute/",
+    urls: { A4:"A4.mp3", A5:"A5.mp3", A6:"A6.mp3", C4:"C4.mp3", C5:"C5.mp3", C6:"C6.mp3", C7:"C7.mp3", E4:"E4.mp3", E5:"E5.mp3", E6:"E6.mp3" },
+    octave: 5,
+  },
+  bateria: {
+    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/xylophone/",
+    urls: { C5:"C5.mp3", G4:"G4.mp3", C6:"C6.mp3", G5:"G5.mp3", C7:"C7.mp3", G6:"G6.mp3", C8:"C8.mp3" },
+    octave: 4,
+  },
 };
 
 // cache global de samplers
@@ -81,31 +91,6 @@ export function ScalePlayer({ notes, instrument, className }: { notes: string[];
     try {
       await Tone.start();
 
-      // Bateria: sequência percussiva simples ascendente
-      if (instrument === "bateria") {
-        const kick = new Tone.MembraneSynth().toDestination();
-        const snare = new Tone.NoiseSynth({ noise:{ type:"white" }, envelope:{ attack:0.001, decay:0.15, sustain:0 } }).toDestination();
-        const hh = new Tone.MetalSynth({ envelope:{ attack:0.001, decay:0.08, release:0.01 } as never, harmonicity: 5.1, resonance: 4000, octaves: 1.5 }).toDestination();
-        (hh.volume as Tone.Param<"decibels">).value = -18;
-        const seq: Array<() => void> = [
-          () => kick.triggerAttackRelease("C2","8n"),
-          () => hh.triggerAttackRelease("C6","16n"),
-          () => snare.triggerAttackRelease("8n"),
-          () => hh.triggerAttackRelease("C6","16n"),
-        ];
-        setState("playing");
-        let i = 0;
-        const stopped = { v: false };
-        const now = Tone.now();
-        const interval = 0.25;
-        for (let k = 0; k < 8; k++) {
-          Tone.getTransport().scheduleOnce(() => { if (!stopped.v) seq[k % 4](); }, now + k * interval);
-        }
-        Tone.getTransport().start();
-        const timer = setTimeout(() => { setState("idle"); Tone.getTransport().stop(); kick.dispose(); snare.dispose(); hh.dispose(); }, 8 * interval * 1000 + 200);
-        stopRef.current = () => { stopped.v = true; clearTimeout(timer); Tone.getTransport().stop(); kick.dispose(); snare.dispose(); hh.dispose(); setState("idle"); };
-        return;
-      }
 
       const sampler = await getSampler(instrument);
       const cfg = SAMPLER_CONFIG[instrument];
