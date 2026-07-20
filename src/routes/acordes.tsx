@@ -3,6 +3,8 @@ import { useState } from "react";
 import { BookOpen, Guitar, Piano as PianoIcon, Music2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { InstrumentDiagram, type InstrumentId } from "@/components/InstrumentDiagram";
+import { ChordDiagramCifra, hasCifraData } from "@/components/ChordDiagramCifra";
+
 
 
 export const Route = createFileRoute("/acordes")({
