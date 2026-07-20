@@ -47,9 +47,11 @@ function getChordNotes(root: string, intervals: number[]) {
   return intervals.map((int) => CHROMATIC[(idx + int) % 12]);
 }
 
-const INSTRUMENTS: { id: InstrumentId; label: string }[] = [
+type InstId = InstrumentId | "ukulele";
+const INSTRUMENTS: { id: InstId; label: string }[] = [
   { id: "violao", label: "Violão" },
   { id: "guitarra", label: "Guitarra" },
+  { id: "ukulele", label: "Ukulele" },
   { id: "baixo", label: "Baixo" },
   { id: "piano", label: "Piano/Teclado" },
   { id: "violino", label: "Violino" },
@@ -57,6 +59,7 @@ const INSTRUMENTS: { id: InstrumentId; label: string }[] = [
   { id: "banjo", label: "Banjo" },
   { id: "flauta", label: "Flauta Doce" },
 ];
+
 
 function AcordesPage() {
   const [selectedRoot, setSelectedRoot] = useState("C");
