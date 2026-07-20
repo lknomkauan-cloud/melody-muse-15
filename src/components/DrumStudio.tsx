@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Drum, CircleDot, Square, Loader2, Sparkles } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { analyzeDrum } from "@/lib/analyze-drum.functions";
+import { DrumPatternPlayer } from "@/components/DrumPatternPlayer";
 import { cn } from "@/lib/utils";
 
 /* -------- Modelo de linhas de bateria -------- */
@@ -497,8 +498,15 @@ export function DrumStudio() {
                 </div>
 
                 <div className="rounded-xl border border-border bg-background/40 p-3">
-                  <div className="mb-2 text-[11px] uppercase tracking-wider font-semibold text-primary">
-                    {view === "groove" ? "Levada base — 1 compasso" : "Virada — 1 compasso"}
+                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-[11px] uppercase tracking-wider font-semibold text-primary">
+                      {view === "groove" ? "Levada base — 1 compasso" : "Virada — 1 compasso"}
+                    </span>
+                    <DrumPatternPlayer
+                      pattern={view === "groove" ? f.groove : f.fill}
+                      bpm={parseInt(f.bpm.match(/\d+/)?.[0] ?? "100", 10)}
+                      label={view === "groove" ? "Ouvir levada" : "Ouvir virada"}
+                    />
                   </div>
                   <PatternGrid pattern={view === "groove" ? f.groove : f.fill} />
                   <p className="mt-3 text-xs text-muted-foreground italic">

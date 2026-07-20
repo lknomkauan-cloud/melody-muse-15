@@ -8,6 +8,7 @@ import { InstrumentCoach } from "@/components/InstrumentCoach";
 import { DrumStudio } from "@/components/DrumStudio";
 import { CagedShapes } from "@/components/CagedShapes";
 import { ImprovisationMethodology } from "@/components/ImprovisationMethodology";
+import { ScalePlayer } from "@/components/ScalePlayer";
 
 export const Route = createFileRoute("/escalas")({
   head: () => ({
@@ -305,13 +306,14 @@ function EscalasContent({
 
                 {isOpen && (
                   <div className="border-t border-border px-5 pb-5 pt-3">
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       {notes.map((note, i) => (
                         <div key={`${note}-${i}`} className="flex flex-col items-center rounded-xl bg-muted px-4 py-3 min-w-[60px]">
                           <span className="text-xs text-muted-foreground">{DEGREE_NAMES[i]}</span>
                           <span className="font-display text-lg font-bold text-primary">{note}</span>
                         </div>
                       ))}
+                      <ScalePlayer notes={notes} instrument={instrument} className="ml-2" />
                     </div>
 
                     {/* Pentatônicas: mostra CAGED direto (sem precisar abrir modos gregos) */}
@@ -371,13 +373,14 @@ function EscalasContent({
                                 <span className="text-xs text-muted-foreground">Pentatônica modal</span>
                               </div>
                               <p className="mb-3 text-sm text-muted-foreground">{m.vibe}</p>
-                              <div className="mb-4 flex flex-wrap gap-2">
+                              <div className="mb-4 flex flex-wrap items-center gap-2">
                                 {pentNotes.map((n, i) => (
                                   <div key={i} className="flex flex-col items-center rounded-lg bg-background px-3 py-2 min-w-[56px] border border-border">
                                     <span className="text-[10px] text-muted-foreground">{m.pentDegrees[i]}</span>
                                     <span className="font-display text-base font-bold text-primary">{n}</span>
                                   </div>
                                 ))}
+                                <ScalePlayer notes={pentNotes} instrument={instrument} className="ml-1" />
                               </div>
                               <div className="mb-4 rounded-lg bg-card/60 p-3">
                                 <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
