@@ -461,6 +461,18 @@ function EscalasContent({
                       </div>
                     )}
 
+                    {/* Desenho do instrumento — sempre visível para a escala atual */}
+                    <div className="mt-4 rounded-lg bg-card/60 p-3">
+                      <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Desenho no {INSTRUMENTS.find(i => i.id === instrument)?.label}
+                      </span>
+                      <InstrumentDiagram
+                        instrument={instrument}
+                        root={selectedTonic}
+                        pentSemis={scale.pattern.reduce<number[]>((acc, step) => { acc.push((acc[acc.length - 1] ?? 0) + step); return acc; }, [0]).slice(0, -1)}
+                      />
+                    </div>
+
                     {/* Pentatônicas: mostra CAGED direto (sem precisar abrir modos gregos) */}
                     {(scale.name === "Pentatônica Maior" || scale.name === "Pentatônica Menor") &&
                       (instrument === "guitarra" || instrument === "violao" || instrument === "baixo") && (
