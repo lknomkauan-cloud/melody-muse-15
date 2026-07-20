@@ -473,14 +473,13 @@ function EscalasContent({
                       />
                     </div>
 
-                    {/* Pentatônicas: mostra CAGED direto (sem precisar abrir modos gregos) */}
+                    {/* Pentatônicas em guitarra/violão/baixo: mostra CAGED direto */}
                     {(scale.name === "Pentatônica Maior" || scale.name === "Pentatônica Menor") &&
                       (instrument === "guitarra" || instrument === "violao" || instrument === "baixo") && (
                         <div className="mt-4 rounded-lg bg-card/60 p-3">
                           <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                            Desenho no {INSTRUMENTS.find(i => i.id === instrument)?.label}
+                            CAGED — 5 posições
                           </span>
-                          <InstrumentDiagram instrument={instrument} root={selectedTonic} pentSemis={scale.pattern.reduce<number[]>((acc, step) => { acc.push((acc[acc.length - 1] ?? 0) + step); return acc; }, [0]).slice(0, -1)} />
                           <CagedShapes
                             root={selectedTonic}
                             pentSemis={scale.pattern.reduce<number[]>((acc, step) => { acc.push((acc[acc.length - 1] ?? 0) + step); return acc; }, [0]).slice(0, -1)}
