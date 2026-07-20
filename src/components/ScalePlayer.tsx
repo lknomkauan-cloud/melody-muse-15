@@ -111,23 +111,31 @@ export function ScalePlayer({ notes, instrument, className }: { notes: string[];
       const cfg = SAMPLER_CONFIG[instrument];
       const octBase = cfg?.octave ?? 4;
 
-      // Sequência ascendente + descendente com detecção de oitava
+      // Sequência: sobe do I ao VII e volta ao I (sem repetir o VII)
       const now = Tone.now();
       const dt = 0.32;
-      let oct = octBase;
-      let prevIdx = -1;
       const CHROMATIC = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
       const enh: Record<string,string> = { Db:"C#", Eb:"D#", Gb:"F#", Ab:"G#", Bb:"A#", Cb:"B" };
       const norm = (n: string) => enh[n] ?? n;
 
-      const seq = [...notes, ...notes.slice().reverse().slice(1)];
+      // Ascendente: mantém oitava, incrementa só quando cruza (idx < prevIdx)
+      const ascending: string[] = [];
+      let oct = octBase;
+      let prevIdx = -1;
+      for (const n of notes) {
+        const idx = CHROMATIC.indexOf(norm(n));
+        if (prevIdx !== -1 && idx < prevIdx) oct++;
+        prevIdx = idx;
+        ascending.push(toToneNote(norm(n), oct));
+      }
+      // Descendente: mesmo caminho em ordem inversa, sem repetir o topo
+      const descending = ascending.slice(0, -1).reverse();
+      const combined = [...ascending, ...descending];
+
       const events: Array<{ note: string; t: number }> = [];
       let t = 0;
-      for (const n of seq) {
-        const idx = CHROMATIC.indexOf(norm(n));
-        if (prevIdx !== -1 && idx <= prevIdx) oct++;
-        prevIdx = idx;
-        events.push({ note: toToneNote(norm(n), oct), t });
+      for (const note of combined) {
+        events.push({ note, t });
         t += dt;
       }
 
