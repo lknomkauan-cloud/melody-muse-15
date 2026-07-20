@@ -8,58 +8,63 @@ type InstrumentId =
   | "piano" | "teclado" | "sax" | "violino"
   | "flauta" | "bateria";
 
-// URLs abaixo apontam APENAS para arquivos que existem no repo
-// nbrosowsky/tonejs-instruments (verificado). Cs = C#, Ds = D#, etc.
+// Samples: FluidR3_GM soundfont (gravado de instrumentos reais, licença livre)
+// via CDN gleitz/midi-js-soundfonts. Todas as notas cromáticas existem —
+// usamos algumas âncoras por instrumento para o Tone.Sampler interpolar.
+// Nomenclatura: flats (Bb, Db, Eb, Gb, Ab), NÃO sharps.
+const GM = "https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM";
+
 const SAMPLER_CONFIG: Partial<Record<InstrumentId, { baseUrl: string; urls: Record<string, string>; octave: number }>> = {
   violao: {
-    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-acoustic/",
-    urls: { F3:"F3.mp3", A3:"A3.mp3", C4:"C4.mp3", "D#4":"Ds4.mp3", "F#4":"Fs4.mp3", A4:"A4.mp3", C5:"C5.mp3", "D#5":"Ds5.mp3", "F#5":"Fs5.mp3", A5:"A5.mp3", C6:"C6.mp3" },
+    baseUrl: `${GM}/acoustic_guitar_nylon-mp3/`,
+    urls: { E2:"E2.mp3", A2:"A2.mp3", D3:"D3.mp3", G3:"G3.mp3", B3:"B3.mp3", E4:"E4.mp3", A4:"A4.mp3", D5:"D5.mp3" },
     octave: 3,
   },
   guitarra: {
-    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-electric/",
-    urls: { E2:"E2.mp3", "F#2":"Fs2.mp3", A2:"A2.mp3", C3:"C3.mp3", "D#3":"Ds3.mp3", "F#3":"Fs3.mp3", A3:"A3.mp3", C4:"C4.mp3", "D#4":"Ds4.mp3", "F#4":"Fs4.mp3", A4:"A4.mp3", C5:"C5.mp3", "D#5":"Ds5.mp3", "F#5":"Fs5.mp3", A5:"A5.mp3" },
+    baseUrl: `${GM}/electric_guitar_clean-mp3/`,
+    urls: { E2:"E2.mp3", A2:"A2.mp3", D3:"D3.mp3", G3:"G3.mp3", B3:"B3.mp3", E4:"E4.mp3", A4:"A4.mp3", D5:"D5.mp3", G5:"G5.mp3" },
     octave: 3,
   },
   baixo: {
-    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/bass-electric/",
-    urls: { E1:"E1.mp3", G1:"G1.mp3", C2:"C2.mp3", E2:"E2.mp3", G2:"G2.mp3", C3:"C3.mp3", E3:"E3.mp3", G3:"G3.mp3", C4:"C4.mp3" },
+    baseUrl: `${GM}/electric_bass_finger-mp3/`,
+    urls: { E1:"E1.mp3", A1:"A1.mp3", D2:"D2.mp3", G2:"G2.mp3", C3:"C3.mp3", E3:"E3.mp3", A3:"A3.mp3" },
     octave: 2,
   },
   piano: {
-    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/piano/",
-    urls: { A3:"A3.mp3", C4:"C4.mp3", "D#4":"Ds4.mp3", "F#4":"Fs4.mp3", A4:"A4.mp3", C5:"C5.mp3", "D#5":"Ds5.mp3", "F#5":"Fs5.mp3", A5:"A5.mp3", C6:"C6.mp3" },
+    baseUrl: `${GM}/acoustic_grand_piano-mp3/`,
+    urls: { C3:"C3.mp3", C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3", G5:"G5.mp3", C6:"C6.mp3" },
     octave: 4,
   },
   teclado: {
-    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/piano/",
-    urls: { A3:"A3.mp3", C4:"C4.mp3", "D#4":"Ds4.mp3", "F#4":"Fs4.mp3", A4:"A4.mp3", C5:"C5.mp3", "D#5":"Ds5.mp3", "F#5":"Fs5.mp3", A5:"A5.mp3", C6:"C6.mp3" },
+    baseUrl: `${GM}/acoustic_grand_piano-mp3/`,
+    urls: { C3:"C3.mp3", C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3", G5:"G5.mp3", C6:"C6.mp3" },
     octave: 4,
   },
   violino: {
-    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/violin/",
-    urls: { G3:"G3.mp3", A3:"A3.mp3", C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", A4:"A4.mp3", C5:"C5.mp3", E5:"E5.mp3", G5:"G5.mp3", A5:"A5.mp3", C6:"C6.mp3", E6:"E6.mp3", G6:"G6.mp3", C7:"C7.mp3" },
+    baseUrl: `${GM}/violin-mp3/`,
+    urls: { G3:"G3.mp3", D4:"D4.mp3", A4:"A4.mp3", E5:"E5.mp3", A5:"A5.mp3", E6:"E6.mp3" },
     octave: 4,
   },
   sax: {
-    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/saxophone/",
-    urls: { "D#3":"Ds3.mp3", F3:"F3.mp3", G3:"G3.mp3", A3:"A3.mp3", C4:"C4.mp3", "D#4":"Ds4.mp3", F4:"F4.mp3", G4:"G4.mp3", A4:"A4.mp3", C5:"C5.mp3", "D#5":"Ds5.mp3", F5:"F5.mp3", G5:"G5.mp3", A5:"A5.mp3", "D#6":"Ds6.mp3" },
+    baseUrl: `${GM}/alto_sax-mp3/`,
+    urls: { C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3", G5:"G5.mp3" },
     octave: 4,
   },
   banjo: {
-    // usa samples de violão (mais brilhante que nada) — banjo real não existe no repo
-    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-acoustic/",
-    urls: { F3:"F3.mp3", A3:"A3.mp3", C4:"C4.mp3", "D#4":"Ds4.mp3", "F#4":"Fs4.mp3", A4:"A4.mp3", C5:"C5.mp3", "D#5":"Ds5.mp3", "F#5":"Fs5.mp3", A5:"A5.mp3" },
+    baseUrl: `${GM}/banjo-mp3/`,
+    urls: { G3:"G3.mp3", C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3" },
     octave: 4,
   },
   flauta: {
-    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/flute/",
-    urls: { C4:"C4.mp3", E4:"E4.mp3", A4:"A4.mp3", C5:"C5.mp3", E5:"E5.mp3", A5:"A5.mp3", C6:"C6.mp3", E6:"E6.mp3", A6:"A6.mp3", C7:"C7.mp3", E7:"E7.mp3" },
+    // FluidR3_GM tem "recorder" — timbre real de flauta doce
+    baseUrl: `${GM}/recorder-mp3/`,
+    urls: { C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3", G5:"G5.mp3", C6:"C6.mp3" },
     octave: 5,
   },
   bateria: {
-    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/xylophone/",
-    urls: { G4:"G4.mp3", C5:"C5.mp3", G5:"G5.mp3", C6:"C6.mp3", G6:"G6.mp3", C7:"C7.mp3", G7:"G7.mp3", C8:"C8.mp3" },
+    // xilofone afinado para representar melodicamente escalas na bateria
+    baseUrl: `${GM}/xylophone-mp3/`,
+    urls: { C4:"C4.mp3", G4:"G4.mp3", C5:"C5.mp3", G5:"G5.mp3", C6:"C6.mp3", G6:"G6.mp3", C7:"C7.mp3" },
     octave: 4,
   },
 };
