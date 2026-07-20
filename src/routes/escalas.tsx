@@ -373,13 +373,14 @@ function EscalasContent({
                                 <span className="text-xs text-muted-foreground">Pentatônica modal</span>
                               </div>
                               <p className="mb-3 text-sm text-muted-foreground">{m.vibe}</p>
-                              <div className="mb-4 flex flex-wrap gap-2">
+                              <div className="mb-4 flex flex-wrap items-center gap-2">
                                 {pentNotes.map((n, i) => (
                                   <div key={i} className="flex flex-col items-center rounded-lg bg-background px-3 py-2 min-w-[56px] border border-border">
                                     <span className="text-[10px] text-muted-foreground">{m.pentDegrees[i]}</span>
                                     <span className="font-display text-base font-bold text-primary">{n}</span>
                                   </div>
                                 ))}
+                                <ScalePlayer notes={pentNotes} instrument={instrument} className="ml-1" />
                               </div>
                               <div className="mb-4 rounded-lg bg-card/60 p-3">
                                 <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
