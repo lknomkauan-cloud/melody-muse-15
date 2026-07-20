@@ -119,9 +119,9 @@ function AcordesPage() {
               >
                 <div className="font-display text-2xl font-bold">{fullName}</div>
                 <div className="mt-1 text-xs text-muted-foreground">{chord.name}</div>
-                <div className="mt-3 flex flex-wrap gap-1.5">
+                <div className="mt-3 flex flex-wrap gap-1">
                   {notes.map((n) => (
-                    <span key={n} className="rounded-md bg-background px-2 py-1 text-sm font-semibold text-foreground">
+                    <span key={n} className="rounded bg-background px-1.5 py-0.5 text-[10px] font-semibold text-foreground">
                       {n}
                     </span>
                   ))}
