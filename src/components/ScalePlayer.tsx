@@ -91,31 +91,6 @@ export function ScalePlayer({ notes, instrument, className }: { notes: string[];
     try {
       await Tone.start();
 
-      // Bateria: sequência percussiva simples ascendente
-      if (instrument === "bateria") {
-        const kick = new Tone.MembraneSynth().toDestination();
-        const snare = new Tone.NoiseSynth({ noise:{ type:"white" }, envelope:{ attack:0.001, decay:0.15, sustain:0 } }).toDestination();
-        const hh = new Tone.MetalSynth({ envelope:{ attack:0.001, decay:0.08, release:0.01 } as never, harmonicity: 5.1, resonance: 4000, octaves: 1.5 }).toDestination();
-        (hh.volume as Tone.Param<"decibels">).value = -18;
-        const seq: Array<() => void> = [
-          () => kick.triggerAttackRelease("C2","8n"),
-          () => hh.triggerAttackRelease("C6","16n"),
-          () => snare.triggerAttackRelease("8n"),
-          () => hh.triggerAttackRelease("C6","16n"),
-        ];
-        setState("playing");
-        let i = 0;
-        const stopped = { v: false };
-        const now = Tone.now();
-        const interval = 0.25;
-        for (let k = 0; k < 8; k++) {
-          Tone.getTransport().scheduleOnce(() => { if (!stopped.v) seq[k % 4](); }, now + k * interval);
-        }
-        Tone.getTransport().start();
-        const timer = setTimeout(() => { setState("idle"); Tone.getTransport().stop(); kick.dispose(); snare.dispose(); hh.dispose(); }, 8 * interval * 1000 + 200);
-        stopRef.current = () => { stopped.v = true; clearTimeout(timer); Tone.getTransport().stop(); kick.dispose(); snare.dispose(); hh.dispose(); setState("idle"); };
-        return;
-      }
 
       const sampler = await getSampler(instrument);
       const cfg = SAMPLER_CONFIG[instrument];
