@@ -430,6 +430,37 @@ function EscalasContent({
                       <ScalePlayer notes={notes} instrument={instrument} className="ml-2" />
                     </div>
 
+                    {SCALE_SONGS[scale.name] && (
+                      <div className="mt-4 rounded-xl border border-primary/15 bg-primary/5 p-3">
+                        <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          <Music2 className="h-3.5 w-3.5 text-primary" />
+                          3 músicas para treinar essa escala
+                        </div>
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                          {SCALE_SONGS[scale.name].map((song) => {
+                            const q = encodeURIComponent(`${song.title} ${song.artist}`);
+                            return (
+                              <a
+                                key={`${song.title}-${song.artist}`}
+                                href={`https://www.youtube.com/results?search_query=${q}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group flex items-center gap-2 rounded-lg border border-border bg-background/60 p-2 transition-all hover:border-primary/50 hover:bg-primary/5"
+                              >
+                                <Youtube className="h-4 w-4 flex-shrink-0 text-primary" />
+                                <div className="min-w-0 flex-1">
+                                  <span className="block truncate text-xs font-semibold text-foreground group-hover:text-primary">
+                                    {song.title}
+                                  </span>
+                                  <span className="block truncate text-[10px] text-muted-foreground">{song.artist}</span>
+                                </div>
+                              </a>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Pentatônicas: mostra CAGED direto (sem precisar abrir modos gregos) */}
                     {(scale.name === "Pentatônica Maior" || scale.name === "Pentatônica Menor") &&
                       (instrument === "guitarra" || instrument === "violao" || instrument === "baixo") && (
