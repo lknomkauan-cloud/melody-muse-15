@@ -8,72 +8,91 @@ type InstrumentId =
   | "piano" | "teclado" | "sax" | "violino"
   | "flauta" | "bateria";
 
+// URLs abaixo apontam APENAS para arquivos que existem no repo
+// nbrosowsky/tonejs-instruments (verificado). Cs = C#, Ds = D#, etc.
 const SAMPLER_CONFIG: Partial<Record<InstrumentId, { baseUrl: string; urls: Record<string, string>; octave: number }>> = {
   violao: {
     baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-acoustic/",
-    urls: { A2:"A2.mp3", A3:"A3.mp3", A4:"A4.mp3", "C#3":"Cs3.mp3", "C#4":"Cs4.mp3", E2:"E2.mp3", E3:"E3.mp3", E4:"E4.mp3", "G#3":"Gs3.mp3", "G#4":"Gs4.mp3" },
+    urls: { F3:"F3.mp3", A3:"A3.mp3", C4:"C4.mp3", "D#4":"Ds4.mp3", "F#4":"Fs4.mp3", A4:"A4.mp3", C5:"C5.mp3", "D#5":"Ds5.mp3", "F#5":"Fs5.mp3", A5:"A5.mp3", C6:"C6.mp3" },
     octave: 3,
   },
   guitarra: {
     baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-electric/",
-    urls: { A2:"A2.mp3", A3:"A3.mp3", A4:"A4.mp3", A5:"A5.mp3", "C#3":"Cs3.mp3", "C#4":"Cs4.mp3", "C#5":"Cs5.mp3", E2:"E2.mp3", E3:"E3.mp3", E4:"E4.mp3", E5:"E5.mp3" },
+    urls: { E2:"E2.mp3", "F#2":"Fs2.mp3", A2:"A2.mp3", C3:"C3.mp3", "D#3":"Ds3.mp3", "F#3":"Fs3.mp3", A3:"A3.mp3", C4:"C4.mp3", "D#4":"Ds4.mp3", "F#4":"Fs4.mp3", A4:"A4.mp3", C5:"C5.mp3", "D#5":"Ds5.mp3", "F#5":"Fs5.mp3", A5:"A5.mp3" },
     octave: 3,
   },
   baixo: {
     baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/bass-electric/",
-    urls: { "C#1":"Cs1.mp3", E1:"E1.mp3", G1:"G1.mp3", "A#1":"As1.mp3", "C#2":"Cs2.mp3", E2:"E2.mp3", G2:"G2.mp3", "A#2":"As2.mp3", "C#3":"Cs3.mp3", E3:"E3.mp3" },
+    urls: { E1:"E1.mp3", G1:"G1.mp3", C2:"C2.mp3", E2:"E2.mp3", G2:"G2.mp3", C3:"C3.mp3", E3:"E3.mp3", G3:"G3.mp3", C4:"C4.mp3" },
     octave: 2,
   },
   piano: {
     baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/piano/",
-    urls: { A3:"A3.mp3", A4:"A4.mp3", A5:"A5.mp3", "C#4":"Cs4.mp3", "C#5":"Cs5.mp3", E4:"E4.mp3", E5:"E5.mp3" },
+    urls: { A3:"A3.mp3", C4:"C4.mp3", "D#4":"Ds4.mp3", "F#4":"Fs4.mp3", A4:"A4.mp3", C5:"C5.mp3", "D#5":"Ds5.mp3", "F#5":"Fs5.mp3", A5:"A5.mp3", C6:"C6.mp3" },
     octave: 4,
   },
   teclado: {
     baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/piano/",
-    urls: { A3:"A3.mp3", A4:"A4.mp3", A5:"A5.mp3", "C#4":"Cs4.mp3", "C#5":"Cs5.mp3", E4:"E4.mp3", E5:"E5.mp3" },
+    urls: { A3:"A3.mp3", C4:"C4.mp3", "D#4":"Ds4.mp3", "F#4":"Fs4.mp3", A4:"A4.mp3", C5:"C5.mp3", "D#5":"Ds5.mp3", "F#5":"Fs5.mp3", A5:"A5.mp3", C6:"C6.mp3" },
     octave: 4,
   },
   violino: {
     baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/violin/",
-    urls: { A3:"A3.mp3", A4:"A4.mp3", A5:"A5.mp3", C4:"C4.mp3", C5:"C5.mp3", E4:"E4.mp3", E5:"E5.mp3", G3:"G3.mp3", G4:"G4.mp3" },
+    urls: { G3:"G3.mp3", A3:"A3.mp3", C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", A4:"A4.mp3", C5:"C5.mp3", E5:"E5.mp3", G5:"G5.mp3", A5:"A5.mp3", C6:"C6.mp3", E6:"E6.mp3", G6:"G6.mp3", C7:"C7.mp3" },
     octave: 4,
   },
   sax: {
     baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/saxophone/",
-    urls: { A3:"A3.mp3", A4:"A4.mp3", "C#3":"Cs3.mp3", "C#4":"Cs4.mp3", "C#5":"Cs5.mp3", E3:"E3.mp3", E4:"E4.mp3", "G#3":"Gs3.mp3", "G#4":"Gs4.mp3" },
+    urls: { "D#3":"Ds3.mp3", F3:"F3.mp3", G3:"G3.mp3", A3:"A3.mp3", C4:"C4.mp3", "D#4":"Ds4.mp3", F4:"F4.mp3", G4:"G4.mp3", A4:"A4.mp3", C5:"C5.mp3", "D#5":"Ds5.mp3", F5:"F5.mp3", G5:"G5.mp3", A5:"A5.mp3", "D#6":"Ds6.mp3" },
     octave: 4,
   },
   banjo: {
+    // usa samples de violão (mais brilhante que nada) — banjo real não existe no repo
     baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-acoustic/",
-    urls: { A3:"A3.mp3", A4:"A4.mp3", "C#4":"Cs4.mp3", E3:"E3.mp3", E4:"E4.mp3" },
+    urls: { F3:"F3.mp3", A3:"A3.mp3", C4:"C4.mp3", "D#4":"Ds4.mp3", "F#4":"Fs4.mp3", A4:"A4.mp3", C5:"C5.mp3", "D#5":"Ds5.mp3", "F#5":"Fs5.mp3", A5:"A5.mp3" },
     octave: 4,
   },
   flauta: {
     baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/flute/",
-    urls: { A4:"A4.mp3", A5:"A5.mp3", A6:"A6.mp3", C4:"C4.mp3", C5:"C5.mp3", C6:"C6.mp3", C7:"C7.mp3", E4:"E4.mp3", E5:"E5.mp3", E6:"E6.mp3" },
+    urls: { C4:"C4.mp3", E4:"E4.mp3", A4:"A4.mp3", C5:"C5.mp3", E5:"E5.mp3", A5:"A5.mp3", C6:"C6.mp3", E6:"E6.mp3", A6:"A6.mp3", C7:"C7.mp3", E7:"E7.mp3" },
     octave: 5,
   },
   bateria: {
     baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/xylophone/",
-    urls: { C5:"C5.mp3", G4:"G4.mp3", C6:"C6.mp3", G5:"G5.mp3", C7:"C7.mp3", G6:"G6.mp3", C8:"C8.mp3" },
+    urls: { G4:"G4.mp3", C5:"C5.mp3", G5:"G5.mp3", C6:"C6.mp3", G6:"G6.mp3", C7:"C7.mp3", G7:"G7.mp3", C8:"C8.mp3" },
     octave: 4,
   },
 };
 
-// cache global de samplers
-const samplerCache = new Map<InstrumentId, Tone.Sampler>();
+// cache global de samplers + promise de carregamento
+const samplerCache = new Map<InstrumentId, { sampler: Tone.Sampler; ready: Promise<void> }>();
 
 async function getSampler(inst: InstrumentId): Promise<Tone.Sampler | null> {
   const cfg = SAMPLER_CONFIG[inst];
   if (!cfg) return null;
-  let s = samplerCache.get(inst);
-  if (!s) {
-    s = new Tone.Sampler({ urls: cfg.urls, baseUrl: cfg.baseUrl, release: 1 }).toDestination();
-    samplerCache.set(inst, s);
+  let entry = samplerCache.get(inst);
+  if (!entry) {
+    let resolveReady!: () => void;
+    let rejectReady!: (e: unknown) => void;
+    const ready = new Promise<void>((res, rej) => { resolveReady = res; rejectReady = rej; });
+    const sampler = new Tone.Sampler({
+      urls: cfg.urls,
+      baseUrl: cfg.baseUrl,
+      release: 1,
+      onload: () => resolveReady(),
+      onerror: (e) => rejectReady(e),
+    }).toDestination();
+    entry = { sampler, ready };
+    samplerCache.set(inst, entry);
   }
-  await Tone.loaded();
-  return s;
+  try {
+    await entry.ready;
+  } catch (e) {
+    console.error(`Sampler load failed for ${inst}`, e);
+    samplerCache.delete(inst);
+    return null;
+  }
+  return entry.sampler;
 }
 
 function toToneNote(n: string, octave: number) {
