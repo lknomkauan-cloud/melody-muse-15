@@ -60,6 +60,120 @@ const SCALE_TYPES: ScaleType[] = [
   { name: "Diminuta (Semitom-Tom)", pattern: [1, 2, 1, 2, 1, 2, 1, 2], hasModes: false, origin: "Jazz", vibe: "Octatônica simétrica — usada em improvisação sobre dominantes." },
 ];
 
+// 3 músicas de exemplo por tipo de escala (para treinar ouvido/aplicação real)
+const SCALE_SONGS: Record<string, { title: string; artist: string }[]> = {
+  "Maior": [
+    { title: "Let It Be", artist: "The Beatles" },
+    { title: "Someone Like You", artist: "Adele" },
+    { title: "Wonderful Tonight", artist: "Eric Clapton" },
+  ],
+  "Menor Natural": [
+    { title: "Losing My Religion", artist: "R.E.M." },
+    { title: "Stairway to Heaven (intro)", artist: "Led Zeppelin" },
+    { title: "Smells Like Teen Spirit", artist: "Nirvana" },
+  ],
+  "Menor Harmônica": [
+    { title: "Sultans of Swing (solo)", artist: "Dire Straits" },
+    { title: "Hava Nagila", artist: "Tradicional" },
+    { title: "Remember Tomorrow", artist: "Iron Maiden" },
+  ],
+  "Menor Melódica": [
+    { title: "Yesterday (ponte)", artist: "The Beatles" },
+    { title: "'Round Midnight", artist: "Thelonious Monk" },
+    { title: "Blue in Green", artist: "Miles Davis" },
+  ],
+  "Pentatônica Maior": [
+    { title: "My Girl", artist: "The Temptations" },
+    { title: "Amazing Grace", artist: "Tradicional" },
+    { title: "Sweet Home Alabama (solo)", artist: "Lynyrd Skynyrd" },
+  ],
+  "Pentatônica Menor": [
+    { title: "Back in Black (solo)", artist: "AC/DC" },
+    { title: "Sunshine of Your Love", artist: "Cream" },
+    { title: "Black Magic Woman", artist: "Santana" },
+  ],
+  "Blues": [
+    { title: "The Thrill Is Gone", artist: "B.B. King" },
+    { title: "Pride and Joy", artist: "Stevie Ray Vaughan" },
+    { title: "Crossroads", artist: "Robert Johnson / Cream" },
+  ],
+  "Árabe (Byzantina / Duplo Harmônica)": [
+    { title: "Misirlou", artist: "Dick Dale" },
+    { title: "Hava Nagila", artist: "Tradicional" },
+    { title: "Sandstorm (motivo)", artist: "Darude" },
+  ],
+  "Frígia Dominante (Espanhola)": [
+    { title: "Entre Dos Aguas", artist: "Paco de Lucía" },
+    { title: "Malagueña", artist: "Ernesto Lecuona" },
+    { title: "Killing in the Name (riff)", artist: "Rage Against the Machine" },
+  ],
+  "Cigana Húngara (Hungarian Minor)": [
+    { title: "Csárdás", artist: "Vittorio Monti" },
+    { title: "Hungarian Dance Nº 5", artist: "Johannes Brahms" },
+    { title: "Gypsy", artist: "Dick Dale" },
+  ],
+  "Persa": [
+    { title: "Kashmir", artist: "Led Zeppelin" },
+    { title: "Caravan", artist: "Duke Ellington" },
+    { title: "Prince Ali (Aladdin)", artist: "Alan Menken" },
+  ],
+  "Egípcia (Suspensa)": [
+    { title: "Walk Like an Egyptian", artist: "The Bangles" },
+    { title: "Tutankhamun", artist: "Nile" },
+    { title: "Desert Rose", artist: "Sting" },
+  ],
+  "Chinesa Maior": [
+    { title: "Mo Li Hua (Jasmine Flower)", artist: "Tradicional" },
+    { title: "Turandot — Nessun Dorma (motivo)", artist: "Puccini" },
+    { title: "Kung Fu Panda (tema)", artist: "Hans Zimmer" },
+  ],
+  "Mongol / Chinesa Pentatônica": [
+    { title: "Mo Li Hua", artist: "Tradicional Chinesa" },
+    { title: "Auld Lang Syne", artist: "Tradicional" },
+    { title: "Mulan — Reflection", artist: "Matthew Wilder" },
+  ],
+  "Japonesa Hirajoshi": [
+    { title: "Sakura Sakura", artist: "Tradicional Japonesa" },
+    { title: "Tenkū no Shiro Laputa (tema)", artist: "Joe Hisaishi" },
+    { title: "Rocky Mountain Way (intro)", artist: "Joe Walsh" },
+  ],
+  "Japonesa In Sen": [
+    { title: "Kimigayo", artist: "Hino Nacional Japonês" },
+    { title: "Naruto Main Theme", artist: "Toshio Masuda" },
+    { title: "Tokyo Drift (motivo)", artist: "Teriyaki Boyz" },
+  ],
+  "Ryukyu (Okinawa)": [
+    { title: "Asadoya Yunta", artist: "Tradicional de Okinawa" },
+    { title: "Shima Uta", artist: "The Boom" },
+    { title: "Tinsagu nu Hana", artist: "Tradicional" },
+  ],
+  "Balinês (Pelog)": [
+    { title: "Baris (gamelão)", artist: "Tradicional Balinês" },
+    { title: "Kecak", artist: "Tradicional Balinês" },
+    { title: "Tabuh Telu", artist: "Gamelão Gong Kebyar" },
+  ],
+  "Indiana (Raga Todi)": [
+    { title: "Raga Todi", artist: "Ravi Shankar" },
+    { title: "Within You Without You", artist: "The Beatles" },
+    { title: "Slumdog Millionaire — Jai Ho", artist: "A.R. Rahman" },
+  ],
+  "Enigmática": [
+    { title: "Ave Maria (versão Verdi)", artist: "Giuseppe Verdi" },
+    { title: "Enigma Variations", artist: "Edward Elgar" },
+    { title: "Not to Touch the Earth", artist: "The Doors" },
+  ],
+  "Tons Inteiros": [
+    { title: "Voiles (Prélude)", artist: "Claude Debussy" },
+    { title: "Juju", artist: "Wayne Shorter" },
+    { title: "You Are the Sunshine of My Life (intro)", artist: "Stevie Wonder" },
+  ],
+  "Diminuta (Semitom-Tom)": [
+    { title: "Giant Steps (frases)", artist: "John Coltrane" },
+    { title: "Blue Monk (solos)", artist: "Thelonious Monk" },
+    { title: "Symphony Nº 4 (motivo)", artist: "Stravinsky" },
+  ],
+};
+
 const CHROMATIC = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const ENHARMONIC: Record<string, string> = { Db: "C#", Eb: "D#", Gb: "F#", Ab: "G#", Bb: "A#", Cb: "B" };
 
