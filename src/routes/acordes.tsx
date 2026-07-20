@@ -3,6 +3,8 @@ import { useState } from "react";
 import { BookOpen, Guitar, Piano as PianoIcon, Music2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { InstrumentDiagram, type InstrumentId } from "@/components/InstrumentDiagram";
+import { ChordDiagramCifra, hasCifraData } from "@/components/ChordDiagramCifra";
+
 
 
 export const Route = createFileRoute("/acordes")({
@@ -45,9 +47,11 @@ function getChordNotes(root: string, intervals: number[]) {
   return intervals.map((int) => CHROMATIC[(idx + int) % 12]);
 }
 
-const INSTRUMENTS: { id: InstrumentId; label: string }[] = [
+type InstId = InstrumentId | "ukulele";
+const INSTRUMENTS: { id: InstId; label: string }[] = [
   { id: "violao", label: "Violão" },
   { id: "guitarra", label: "Guitarra" },
+  { id: "ukulele", label: "Ukulele" },
   { id: "baixo", label: "Baixo" },
   { id: "piano", label: "Piano/Teclado" },
   { id: "violino", label: "Violino" },
@@ -56,10 +60,11 @@ const INSTRUMENTS: { id: InstrumentId; label: string }[] = [
   { id: "flauta", label: "Flauta Doce" },
 ];
 
+
 function AcordesPage() {
   const [selectedRoot, setSelectedRoot] = useState("C");
   const [selectedType, setSelectedType] = useState<ChordDef | null>(CHORD_TYPES[0]);
-  const [instrument, setInstrument] = useState<InstrumentId>("violao");
+  const [instrument, setInstrument] = useState<InstId>("violao");
 
   return (
     <div className="min-h-screen px-4 py-8">
@@ -173,16 +178,49 @@ function AcordesPage() {
               })}
             </div>
 
-            <InstrumentDiagram
-              instrument={instrument}
-              root={selectedRoot}
-              pentSemis={selectedType.intervals}
-            />
+            {(instrument === "violao" || instrument === "guitarra" || instrument === "ukulele") ? (
+              (() => {
+                const dbKey = instrument === "ukulele" ? "ukulele" : "guitar";
+                const has = hasCifraData(dbKey, selectedRoot, selectedType.name);
+                if (has) {
+                  return (
+                    <ChordDiagramCifra
+                      instrument={dbKey}
+                      root={selectedRoot}
+                      chordName={selectedType.name}
+                    />
+                  );
+                }
+                // fallback to neck highlight
+                if (instrument === "ukulele") {
+                  return (
+                    <div className="rounded-lg border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
+                      Sem desenho cadastrado para este acorde no ukulele.
+                    </div>
+                  );
+                }
+                return (
+                  <InstrumentDiagram
+                    instrument={instrument}
+                    root={selectedRoot}
+                    pentSemis={selectedType.intervals}
+                  />
+                );
+              })()
+            ) : (
+              <InstrumentDiagram
+                instrument={instrument}
+                root={selectedRoot}
+                pentSemis={selectedType.intervals}
+              />
+            )}
 
             <p className="mt-3 text-xs text-muted-foreground">
-              Cada bolinha marca uma nota do acorde. O círculo preenchido é a tônica ({selectedRoot}). Toque as notas
-              simultaneamente (dedilhado) ou em arpejo, dependendo do instrumento.
+              {instrument === "violao" || instrument === "guitarra" || instrument === "ukulele"
+                ? `Diagrama estilo Cifra Club: pontos = onde apertar, número = dedo, barra = pestana. X = corda abafada, O = corda solta. Use as setas para ver outras posições/pestanas.`
+                : `Cada bolinha marca uma nota do acorde. O círculo preenchido é a tônica (${selectedRoot}).`}
             </p>
+
           </div>
         )}
       </div>
