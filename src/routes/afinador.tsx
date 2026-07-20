@@ -479,6 +479,172 @@ const INSTRUMENTOS: Instrumento[] = [
 
     ],
   },
+  {
+    id: "teclado",
+    label: "Teclado / Piano",
+    descricao: "Referência cromática A4 = 440 Hz. Pianos acústicos precisam de afinador profissional; teclados digitais já vêm afinados.",
+    dicaGeral: "Use os botões abaixo para ouvir cada nota de referência. Toque uma tecla e compare a altura pelo microfone.",
+    notas: [
+      n("C2", "Dó grave (segunda oitava)"),
+      n("C3", "Dó médio-grave"),
+      n("C4", "Dó central (dó 4)"),
+      n("A4", "Lá 440 — referência universal"),
+      n("C5", "Dó agudo"),
+      n("C6", "Dó bem agudo"),
+    ],
+    variacoes: [
+      {
+        id: "referencia",
+        label: "Referência (A4 = 440 Hz)",
+        descricao: "Notas base para conferir se o teclado está no diapasão padrão",
+        notas: [
+          n("C2", "Dó 2"), n("C3", "Dó 3"), n("C4", "Dó central"),
+          n("A4", "Lá 440"), n("C5", "Dó 5"), n("C6", "Dó 6"),
+        ],
+      },
+      {
+        id: "cromatica",
+        label: "Cromática (oitava central)",
+        descricao: "Todas as 12 notas da oitava do dó central — útil para checar afinação tecla a tecla",
+        notas: [
+          n("C4", "Dó"), n("C#4", "Dó#/Réb"), n("D4", "Ré"), n("D#4", "Ré#/Mib"),
+          n("E4", "Mi"), n("F4", "Fá"), n("F#4", "Fá#/Solb"), n("G4", "Sol"),
+          n("G#4", "Sol#/Láb"), n("A4", "Lá 440"), n("A#4", "Lá#/Sib"), n("B4", "Si"),
+        ],
+      },
+      {
+        id: "diapasao-baixo",
+        label: "Diapasão 442 Hz (orquestra)",
+        descricao: "Algumas orquestras europeias afinam em A=442 — apenas para conferência auditiva",
+        notas: [
+          n("A3", "Lá 3"), n("A4", "Lá referência"), n("A5", "Lá 5"),
+        ],
+      },
+    ],
+  },
+  {
+    id: "banjo",
+    label: "Banjo",
+    descricao: "Banjo de 5 cordas em Open G (gDGBD) — afinação padrão do bluegrass",
+    dicaGeral: "A 5ª corda (curta, a mais aguda) é o 'g' de drone. Afine devagar — cordas de banjo são finas.",
+    notas: [
+      n("D3", "4ª corda (mais grave)"),
+      n("G3", "3ª corda"),
+      n("B3", "2ª corda"),
+      n("D4", "1ª corda"),
+      n("G4", "5ª corda (drone curta)"),
+    ],
+    variacoes: [
+      {
+        id: "open-g",
+        label: "Open G (5 cordas)",
+        descricao: "gDGBD — padrão do bluegrass, Earl Scruggs",
+        notas: [
+          n("D3", "4ª corda"), n("G3", "3ª corda"),
+          n("B3", "2ª corda"), n("D4", "1ª corda"),
+          n("G4", "5ª corda (drone)"),
+        ],
+      },
+      {
+        id: "double-c",
+        label: "Double C",
+        descricao: "gCGCD — clawhammer, old-time",
+        notas: [
+          n("C3", "4ª"), n("G3", "3ª"),
+          n("C4", "2ª"), n("D4", "1ª"),
+          n("G4", "5ª (drone)"),
+        ],
+      },
+      {
+        id: "sawmill",
+        label: "Sawmill (G modal)",
+        descricao: "gDGCD — usada em modais e mountain music",
+        notas: [
+          n("D3", "4ª"), n("G3", "3ª"),
+          n("C4", "2ª"), n("D4", "1ª"),
+          n("G4", "5ª (drone)"),
+        ],
+      },
+      {
+        id: "irish-tenor",
+        label: "Banjo Tenor Irlandês (4 cordas)",
+        descricao: "GDAE — mesma afinação de bandolim/violino, uma oitava abaixo",
+        notas: [
+          n("G2", "4ª corda"), n("D3", "3ª"),
+          n("A3", "2ª"), n("E4", "1ª"),
+        ],
+      },
+      {
+        id: "plectrum",
+        label: "Plectrum (4 cordas)",
+        descricao: "CGBD — jazz banjo, dixieland",
+        notas: [
+          n("C3", "4ª"), n("G3", "3ª"),
+          n("B3", "2ª"), n("D4", "1ª"),
+        ],
+      },
+    ],
+  },
+  {
+    id: "flauta-doce",
+    label: "Flauta Doce",
+    descricao: "Flauta soprano em Dó — dedilhado barroco",
+    dicaGeral:
+      "A afinação depende do sopro e da temperatura. Sopre estável e médio; se estiver grave, puxe a cabeça pra fora; se aguda, empurre.",
+    notas: [
+      n("C5", "Dó — todos os furos fechados"),
+      n("D5", "Ré"),
+      n("E5", "Mi"),
+      n("F5", "Fá"),
+      n("G5", "Sol"),
+      n("A5", "Lá"),
+      n("B5", "Si"),
+      n("C6", "Dó agudo"),
+    ],
+    variacoes: [
+      {
+        id: "soprano-c",
+        label: "Soprano em Dó (padrão)",
+        descricao: "Flauta doce comum das aulas — C5 a D7",
+        notas: [
+          n("C5", "Dó — furos todos fechados"),
+          n("D5", "Ré"), n("E5", "Mi"), n("F5", "Fá"),
+          n("G5", "Sol"), n("A5", "Lá"), n("B5", "Si"),
+          n("C6", "Dó agudo"), n("D6", "Ré agudo"),
+        ],
+      },
+      {
+        id: "contralto-f",
+        label: "Contralto em Fá",
+        descricao: "Uma quinta abaixo — F4 a G6, som mais grave e cheio",
+        notas: [
+          n("F4", "Fá — furos fechados"), n("G4", "Sol"),
+          n("A4", "Lá"), n("A#4", "Sib"), n("C5", "Dó"),
+          n("D5", "Ré"), n("E5", "Mi"), n("F5", "Fá agudo"),
+        ],
+      },
+      {
+        id: "tenor-c",
+        label: "Tenor em Dó",
+        descricao: "Uma oitava abaixo da soprano — C4 a D6",
+        notas: [
+          n("C4", "Dó central"), n("D4", "Ré"),
+          n("E4", "Mi"), n("F4", "Fá"), n("G4", "Sol"),
+          n("A4", "Lá 440"), n("B4", "Si"), n("C5", "Dó"),
+        ],
+      },
+      {
+        id: "sopranino-f",
+        label: "Sopraninho em Fá",
+        descricao: "A menor da família — F5 a G7",
+        notas: [
+          n("F5", "Fá"), n("G5", "Sol"),
+          n("A5", "Lá"), n("A#5", "Sib"), n("C6", "Dó"),
+          n("D6", "Ré"), n("E6", "Mi"), n("F6", "Fá agudo"),
+        ],
+      },
+    ],
+  },
 
 ];
 
