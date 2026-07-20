@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Guitar, Piano as PianoIcon, Music2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { InstrumentDiagram, type InstrumentId } from "@/components/InstrumentDiagram";
+
 
 export const Route = createFileRoute("/acordes")({
   head: () => ({
@@ -43,9 +45,21 @@ function getChordNotes(root: string, intervals: number[]) {
   return intervals.map((int) => CHROMATIC[(idx + int) % 12]);
 }
 
+const INSTRUMENTS: { id: InstrumentId; label: string }[] = [
+  { id: "violao", label: "Violão" },
+  { id: "guitarra", label: "Guitarra" },
+  { id: "baixo", label: "Baixo" },
+  { id: "piano", label: "Piano/Teclado" },
+  { id: "violino", label: "Violino" },
+  { id: "sax", label: "Saxofone" },
+  { id: "banjo", label: "Banjo" },
+  { id: "flauta", label: "Flauta Doce" },
+];
+
 function AcordesPage() {
   const [selectedRoot, setSelectedRoot] = useState("C");
-  const [selectedType, setSelectedType] = useState<ChordDef | null>(null);
+  const [selectedType, setSelectedType] = useState<ChordDef | null>(CHORD_TYPES[0]);
+  const [instrument, setInstrument] = useState<InstrumentId>("violao");
 
   return (
     <div className="min-h-screen px-4 py-8">
@@ -56,11 +70,13 @@ function AcordesPage() {
             Referência
           </div>
           <h1 className="font-display text-3xl font-bold sm:text-4xl">Acordes</h1>
-          <p className="mt-2 text-muted-foreground">Consulte as notas que compõem cada tipo de acorde em qualquer tonalidade.</p>
+          <p className="mt-2 text-muted-foreground">
+            Escolha a tônica e o tipo de acorde. O diagrama mostra onde tocar cada nota no instrumento escolhido.
+          </p>
         </div>
 
         {/* Seletor de tônica */}
-        <div className="mb-6 rounded-2xl border border-border bg-card p-4">
+        <div className="mb-4 rounded-2xl border border-border bg-card p-4">
           <label className="mb-3 block text-sm font-medium text-muted-foreground">Tônica</label>
           <div className="flex flex-wrap gap-2">
             {ROOTS.map((r) => (
@@ -81,7 +97,7 @@ function AcordesPage() {
         </div>
 
         {/* Grade de acordes */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {CHORD_TYPES.map((chord) => {
             const notes = getChordNotes(selectedRoot, chord.intervals);
             const fullName = `${selectedRoot}${chord.symbol}`;
@@ -90,7 +106,7 @@ function AcordesPage() {
             return (
               <button
                 key={chord.name}
-                onClick={() => setSelectedType(isSelected ? null : chord)}
+                onClick={() => setSelectedType(chord)}
                 className={cn(
                   "rounded-2xl border p-5 text-left transition-all hover:scale-[1.02]",
                   isSelected ? "border-primary/50 bg-primary/5 ring-1 ring-primary/30" : `border-border bg-card ${chord.color}`,
@@ -110,7 +126,67 @@ function AcordesPage() {
             );
           })}
         </div>
+
+        {/* Seletor de instrumento + diagrama */}
+        {selectedType && (
+          <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Music2 className="h-4 w-4" />
+                  Como tocar
+                </div>
+                <div className="font-display text-2xl font-bold">
+                  {selectedRoot}
+                  {selectedType.symbol}{" "}
+                  <span className="text-sm font-normal text-muted-foreground">({selectedType.name})</span>
+                </div>
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  {getChordNotes(selectedRoot, selectedType.intervals).map((n) => (
+                    <span key={n} className="rounded-md bg-muted px-2 py-0.5 text-xs font-semibold">
+                      {n}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-4 flex flex-wrap gap-2">
+              {INSTRUMENTS.map((inst) => {
+                const active = instrument === inst.id;
+                const Icon = inst.id === "piano" ? PianoIcon : Guitar;
+                return (
+                  <button
+                    key={inst.id}
+                    onClick={() => setInstrument(inst.id)}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-all",
+                      active
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {inst.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <InstrumentDiagram
+              instrument={instrument}
+              root={selectedRoot}
+              pentSemis={selectedType.intervals}
+            />
+
+            <p className="mt-3 text-xs text-muted-foreground">
+              Cada bolinha marca uma nota do acorde. O círculo preenchido é a tônica ({selectedRoot}). Toque as notas
+              simultaneamente (dedilhado) ou em arpejo, dependendo do instrumento.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
