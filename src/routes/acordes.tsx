@@ -64,7 +64,7 @@ const INSTRUMENTS: { id: InstId; label: string }[] = [
 function AcordesPage() {
   const [selectedRoot, setSelectedRoot] = useState("C");
   const [selectedType, setSelectedType] = useState<ChordDef | null>(CHORD_TYPES[0]);
-  const [instrument, setInstrument] = useState<InstrumentId>("violao");
+  const [instrument, setInstrument] = useState<InstId>("violao");
 
   return (
     <div className="min-h-screen px-4 py-8">
