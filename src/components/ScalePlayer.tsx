@@ -49,6 +49,16 @@ const SAMPLER_CONFIG: Partial<Record<InstrumentId, { baseUrl: string; urls: Reco
     urls: { A3:"A3.mp3", A4:"A4.mp3", "C#4":"Cs4.mp3", E3:"E3.mp3", E4:"E4.mp3" },
     octave: 4,
   },
+  flauta: {
+    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/flute/",
+    urls: { A4:"A4.mp3", A5:"A5.mp3", A6:"A6.mp3", C4:"C4.mp3", C5:"C5.mp3", C6:"C6.mp3", C7:"C7.mp3", E4:"E4.mp3", E5:"E5.mp3", E6:"E6.mp3" },
+    octave: 5,
+  },
+  bateria: {
+    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/xylophone/",
+    urls: { C5:"C5.mp3", G4:"G4.mp3", C6:"C6.mp3", G5:"G5.mp3", C7:"C7.mp3", G6:"G6.mp3", C8:"C8.mp3" },
+    octave: 4,
+  },
 };
 
 // cache global de samplers
