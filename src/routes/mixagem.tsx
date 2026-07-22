@@ -344,6 +344,10 @@ type Track = {
   pan: number;
   muted: boolean;
   solo: boolean;
+  low: number;   // dB -12..+12 (low shelf ~120Hz)
+  mid: number;   // dB -12..+12 (peaking ~1kHz)
+  high: number;  // dB -12..+12 (high shelf ~8kHz)
+  reverb: number; // 0..1 send amount
 };
 
 const TRACK_COLORS = [
