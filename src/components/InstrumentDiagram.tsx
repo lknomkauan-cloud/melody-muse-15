@@ -376,11 +376,11 @@ function Recorder({ rootPc, pentPcs }: { rootPc: number; pentPcs: Set<number> })
           return (
             <div
               key={idx}
-              className="flex flex-col items-center rounded-lg border p-2 min-w-[54px]"
+              className="flex flex-col items-center rounded-lg p-2 min-w-[54px]"
               style={{
-                background: isRoot ? C.primary : C.bg,
-                borderColor: C.primary,
-                color: isRoot ? C.primaryFg : C.primary,
+                background: "#ffffff",
+                border: `${isRoot ? 2 : 1}px solid #000000`,
+                color: "#000000",
               }}
             >
               <span className="font-display text-sm font-bold">{n.name}</span>
