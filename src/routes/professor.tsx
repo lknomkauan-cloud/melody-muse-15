@@ -442,7 +442,7 @@ function ProfessorPage() {
           <p className="mb-3 text-xs text-muted-foreground">
             Toque as notas do acorde <span className="font-semibold text-foreground">{root}{chord.suffix}</span> uma por uma. O Professor marca cada nota conforme você acerta e mostra a direção certa quando erra.
           </p>
-          <ChordListener chord={chord} root={root} />
+          <ChordListener chord={chord} root={root} instrument={instrumentId} />
         </section>
       </div>
     </div>
