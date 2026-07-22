@@ -525,16 +525,25 @@ function EstudioPanel() {
     audioCtxRef.current = ctx;
 
     const anySolo = tracks.some((t) => t.solo);
+
+    // Master chain: busIn -> mLow -> mMid -> mHigh -> masterGain -> destination
+    const busIn = ctx.createGain();
+    const mLow = ctx.createBiquadFilter();
+    mLow.type = "lowshelf"; mLow.frequency.value = 120; mLow.gain.value = masterLow;
+    const mMid = ctx.createBiquadFilter();
+    mMid.type = "peaking"; mMid.frequency.value = 1000; mMid.Q.value = 0.9; mMid.gain.value = masterMid;
+    const mHigh = ctx.createBiquadFilter();
+    mHigh.type = "highshelf"; mHigh.frequency.value = 8000; mHigh.gain.value = masterHigh;
     const master = ctx.createGain();
     master.gain.value = masterVol;
-    master.connect(ctx.destination);
+    busIn.connect(mLow).connect(mMid).connect(mHigh).connect(master).connect(ctx.destination);
 
-    // Shared reverb bus (generated impulse response)
+    // Shared reverb bus (generated impulse response) + master reverb amount
     const convolver = ctx.createConvolver();
     convolver.buffer = makeImpulseResponse(ctx, 2.5, 2.2);
     const reverbReturn = ctx.createGain();
-    reverbReturn.gain.value = 0.9;
-    convolver.connect(reverbReturn).connect(master);
+    reverbReturn.gain.value = masterReverb;
+    convolver.connect(reverbReturn).connect(busIn);
 
     const buffers = await Promise.all(
       tracks.map(async (t) => t.buffer ?? ctx.decodeAudioData(await t.blob.arrayBuffer())),
