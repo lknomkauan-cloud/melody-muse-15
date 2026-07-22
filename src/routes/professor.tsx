@@ -421,7 +421,7 @@ function ProfessorPage() {
                 </div>
               </div>
               <button
-                onClick={() => playChord(chord.intervals, root)}
+                onClick={() => playChord(chord.intervals, root, instrumentId)}
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
               >
                 <Volume2 className="h-4 w-4" /> Ouvir o acorde
