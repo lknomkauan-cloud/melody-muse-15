@@ -378,11 +378,6 @@ const TRACK_COLORS = [
 ];
 
 function EstudioPanel() {
-  // YouTube reference
-  const [url, setUrl] = useState("");
-  const [videoId, setVideoId] = useState<string | null>(null);
-  const [removeStems, setRemoveStems] = useState<Record<string, boolean>>({});
-
   // DAW state
   const [tracks, setTracks] = useState<Track[]>([]);
   const [recording, setRecording] = useState(false);
@@ -410,16 +405,7 @@ function EstudioPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleLoadYT = () => setVideoId(parseYouTubeId(url));
 
-  const openExternal = (service: "moises" | "vocalremover" | "lalal") => {
-    const map = {
-      moises: "https://moises.ai/",
-      vocalremover: "https://vocalremover.org/",
-      lalal: "https://www.lalal.ai/",
-    };
-    window.open(map[service], "_blank", "noopener");
-  };
 
   const startRecording = async () => {
     try {
