@@ -507,7 +507,7 @@ function NoteListener({ notes }: { notes: string[] }) {
 }
 
 /* ---------- Componente: escuta e valida um acorde por partes ---------- */
-function ChordListener({ chord, root }: { chord: ChordKind; root: string }) {
+function ChordListener({ chord, root, instrument }: { chord: ChordKind; root: string; instrument: InstrumentId }) {
   const targetPcs = useMemo(() => chord.intervals.map((s) => (pcOf(root) + s + 120) % 12), [chord, root]);
   const targetNames = useMemo(() => targetPcs.map(nameOfPc), [targetPcs]);
   const [hit, setHit] = useState<Set<number>>(new Set());
