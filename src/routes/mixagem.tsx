@@ -365,6 +365,7 @@ function EstudioPanel() {
   const [elapsed, setElapsed] = useState(0);
   const [masterVol, setMasterVol] = useState(0.9);
   const [bpm, setBpm] = useState(120);
+  const [source, setSource] = useState<"mic" | "system" | "both">("mic");
 
   const mediaRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
