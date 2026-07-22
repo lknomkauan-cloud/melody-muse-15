@@ -308,10 +308,21 @@ function EscalasPage() {
           >
             <Zap className="h-4 w-4" /> Como Improvisar
           </button>
+          <button
+            onClick={() => setTab("groove")}
+            className={cn(
+              "inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-all -mb-px",
+              tab === "groove" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <Flame className="h-4 w-4" /> Neo Soul / Gospel
+          </button>
         </div>
 
         {tab === "improvisar" ? (
           <ImprovisationMethodology />
+        ) : tab === "groove" ? (
+          <NeoSoulGospelPanel />
         ) : (
           <EscalasContent
             selectedTonic={selectedTonic}
