@@ -1,8 +1,52 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GraduationCap, Mic, Square, Volume2, RotateCcw, CheckCircle2, Circle } from "lucide-react";
+import * as Tone from "tone";
 import { InstrumentDiagram, type InstrumentId } from "@/components/InstrumentDiagram";
 import { cn } from "@/lib/utils";
+
+/* ---------- Samples reais por instrumento (FluidR3_GM soundfont) ---------- */
+const GM = "https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM";
+const SAMPLER_CONFIG: Record<InstrumentId, { baseUrl: string; urls: Record<string, string> }> = {
+  violao: { baseUrl: `${GM}/acoustic_guitar_nylon-mp3/`, urls: { E2:"E2.mp3", A2:"A2.mp3", D3:"D3.mp3", G3:"G3.mp3", B3:"B3.mp3", E4:"E4.mp3", A4:"A4.mp3", D5:"D5.mp3" } },
+  guitarra: { baseUrl: `${GM}/electric_guitar_clean-mp3/`, urls: { E2:"E2.mp3", A2:"A2.mp3", D3:"D3.mp3", G3:"G3.mp3", B3:"B3.mp3", E4:"E4.mp3", A4:"A4.mp3", D5:"D5.mp3" } },
+  baixo: { baseUrl: `${GM}/electric_bass_finger-mp3/`, urls: { E1:"E1.mp3", A1:"A1.mp3", D2:"D2.mp3", G2:"G2.mp3", C3:"C3.mp3", E3:"E3.mp3", A3:"A3.mp3" } },
+  piano: { baseUrl: `${GM}/acoustic_grand_piano-mp3/`, urls: { C3:"C3.mp3", C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3", G5:"G5.mp3", C6:"C6.mp3" } },
+  teclado: { baseUrl: `${GM}/electric_piano_1-mp3/`, urls: { C3:"C3.mp3", C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3", C6:"C6.mp3" } },
+  violino: { baseUrl: `${GM}/violin-mp3/`, urls: { G3:"G3.mp3", D4:"D4.mp3", A4:"A4.mp3", E5:"E5.mp3", A5:"A5.mp3", E6:"E6.mp3" } },
+  sax: { baseUrl: `${GM}/alto_sax-mp3/`, urls: { C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3", G5:"G5.mp3" } },
+  banjo: { baseUrl: `${GM}/banjo-mp3/`, urls: { G3:"G3.mp3", C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3" } },
+  flauta: { baseUrl: `${GM}/recorder-mp3/`, urls: { C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3", G5:"G5.mp3", C6:"C6.mp3" } },
+  bateria: { baseUrl: `${GM}/xylophone-mp3/`, urls: { C4:"C4.mp3", G4:"G4.mp3", C5:"C5.mp3", G5:"G5.mp3", C6:"C6.mp3" } },
+};
+
+const INSTRUMENT_OCTAVE: Record<InstrumentId, number> = {
+  violao: 3, guitarra: 3, baixo: 2, piano: 4, teclado: 4, violino: 4, sax: 4, banjo: 4, flauta: 5, bateria: 4,
+};
+
+const samplerCache = new Map<InstrumentId, { sampler: Tone.Sampler; ready: Promise<void> }>();
+async function getSampler(inst: InstrumentId): Promise<Tone.Sampler | null> {
+  const cfg = SAMPLER_CONFIG[inst];
+  if (!cfg) return null;
+  let entry = samplerCache.get(inst);
+  if (!entry) {
+    let resolveReady!: () => void;
+    let rejectReady!: (e: unknown) => void;
+    const ready = new Promise<void>((res, rej) => { resolveReady = res; rejectReady = rej; });
+    const sampler = new Tone.Sampler({
+      urls: cfg.urls, baseUrl: cfg.baseUrl, release: 1,
+      onload: () => resolveReady(), onerror: (e) => rejectReady(e),
+    }).toDestination();
+    entry = { sampler, ready };
+    samplerCache.set(inst, entry);
+  }
+  try { await entry.ready; } catch (e) {
+    console.error(`Sampler load failed for ${inst}`, e);
+    samplerCache.delete(inst);
+    return null;
+  }
+  return entry.sampler;
+}
 
 export const Route = createFileRoute("/professor")({
   head: () => ({
