@@ -943,11 +943,36 @@ function EqKnob({
 
 function MixerStrip({ track, onChange }: { track: Track; onChange: (p: Partial<Track>) => void }) {
   return (
-    <div className="flex w-20 shrink-0 flex-col items-center gap-2 rounded-md border border-black/70 bg-gradient-to-b from-[#2a2a2a] to-[#1c1c1c] p-2 shadow-inner">
+    <div className="flex w-24 shrink-0 flex-col items-center gap-1.5 rounded-md border border-black/70 bg-gradient-to-b from-[#2a2a2a] to-[#1c1c1c] p-2 shadow-inner">
       <div className="h-1.5 w-full rounded" style={{ background: track.color }} />
       <div className="w-full truncate text-center text-[10px] font-semibold text-neutral-200" title={track.name}>
         {track.name}
       </div>
+
+      {/* EQ 3-band */}
+      <div className="flex w-full flex-col items-center gap-1 rounded border border-black/60 bg-black/30 p-1">
+        <span className="text-[8px] font-bold uppercase tracking-widest text-neutral-500">EQ</span>
+        <EqKnob label="Hi" value={track.high} onChange={(v) => onChange({ high: v })} color="#22d3ee" />
+        <EqKnob label="Md" value={track.mid} onChange={(v) => onChange({ mid: v })} color="#facc15" />
+        <EqKnob label="Lo" value={track.low} onChange={(v) => onChange({ low: v })} color="#f87171" />
+      </div>
+
+      {/* Reverb send */}
+      <div className="flex w-full flex-col items-center gap-0.5 rounded border border-black/60 bg-black/30 p-1">
+        <span className="text-[8px] font-bold uppercase tracking-widest text-neutral-500">Rev</span>
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.01}
+          value={track.reverb}
+          onChange={(e) => onChange({ reverb: parseFloat(e.target.value) })}
+          className="w-16 accent-purple-400"
+          title={`Reverb send: ${Math.round(track.reverb * 100)}%`}
+        />
+        <span className="font-mono text-[8px] text-neutral-400">{Math.round(track.reverb * 100)}%</span>
+      </div>
+
 
       {/* Pan knob (visual) */}
       <div className="flex flex-col items-center gap-0.5">
