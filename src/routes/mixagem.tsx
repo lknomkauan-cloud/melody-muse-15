@@ -330,27 +330,6 @@ function Section({
 
 /* ============================== ESTÚDIO (DAW skin) ============================== */
 
-function parseYouTubeId(url: string): string | null {
-  try {
-    const u = new URL(url.trim());
-    if (u.hostname.includes("youtu.be")) return u.pathname.slice(1);
-    if (u.searchParams.get("v")) return u.searchParams.get("v");
-    const m = u.pathname.match(/\/embed\/([^/?]+)/);
-    if (m) return m[1];
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-const STEMS = [
-  { id: "vocals", label: "Vocal / Microfone", emoji: "🎤" },
-  { id: "drums", label: "Bateria", emoji: "🥁" },
-  { id: "bass", label: "Baixo", emoji: "🎸" },
-  { id: "guitar", label: "Guitarra", emoji: "🎸" },
-  { id: "piano", label: "Piano / Teclado", emoji: "🎹" },
-  { id: "other", label: "Outros instrumentos", emoji: "🎶" },
-];
 
 type Track = {
   id: string;
