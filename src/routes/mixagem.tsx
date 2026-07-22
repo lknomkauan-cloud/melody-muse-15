@@ -468,6 +468,10 @@ function EstudioPanel() {
             pan: 0,
             muted: false,
             solo: false,
+            low: 0,
+            mid: 0,
+            high: 0,
+            reverb: 0,
           },
         ]);
         micStream?.getTracks().forEach((t) => t.stop());
