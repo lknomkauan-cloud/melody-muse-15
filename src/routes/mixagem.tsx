@@ -646,94 +646,10 @@ function EstudioPanel() {
         </div>
       </div>
 
-      {/* ============================ Reference: YouTube ============================ */}
-      <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold text-foreground">
-          <Youtube className="h-5 w-5 text-red-500" /> Faixa de referência (YouTube)
-        </h2>
-        <p className="mb-4 text-sm text-muted-foreground">
-          Cole o link, toque a música e grave por cima usando a DAW acima — como se fosse um <b>backing track</b>.
-        </p>
-
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <input
-            type="url"
-            placeholder="https://www.youtube.com/watch?v=..."
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-          />
-          <button
-            onClick={handleLoadYT}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            Carregar
-          </button>
-        </div>
-
-        {videoId && (
-          <div className="mt-4 aspect-video overflow-hidden rounded-lg border border-border bg-black">
-            <iframe
-              key={videoId}
-              src={`https://www.youtube.com/embed/${videoId}`}
-              className="h-full w-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              title="YouTube player"
-            />
-          </div>
-        )}
-
-        <div className="mt-6">
-          <h3 className="mb-2 text-sm font-semibold text-foreground">Isolar / remover instrumentos:</h3>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {STEMS.map((s) => {
-              const on = !!removeStems[s.id];
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => setRemoveStems({ ...removeStems, [s.id]: !on })}
-                  className={`flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors ${
-                    on
-                      ? "border-primary bg-primary/10 text-foreground"
-                      : "border-border bg-muted/20 text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="text-lg">{s.emoji}</span>
-                    {s.label}
-                  </span>
-                  <span className={`text-xs font-semibold ${on ? "text-primary" : ""}`}>
-                    {on ? "REMOVER" : "manter"}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="mt-6 space-y-4">
-          <VocalRemoverPanel />
-
-          <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-4 text-sm">
-            <p className="mb-2 flex items-center gap-2 font-semibold text-amber-600 dark:text-amber-400">
-              <Info className="h-4 w-4" /> Precisa separar bateria, baixo e outros (IA)?
-            </p>
-            {removed.length > 0 && (
-              <p className="mb-2 text-xs text-muted-foreground">
-                Selecionado: <b className="text-foreground">{removed.map((r) => STEMS.find((s) => s.id === r)?.label).join(", ")}</b>
-              </p>
-            )}
-            <div className="grid gap-2 sm:grid-cols-2">
-              <ExternalBtn onClick={() => openExternal("moises")} title="Moises.ai" desc="Melhor qualidade, 5 músicas grátis/mês" />
-              <ExternalBtn onClick={() => openExternal("lalal")} title="LALAL.AI" desc="Alta fidelidade, várias stems" />
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
+
 
 /* ---------- DAW sub-components ---------- */
 
