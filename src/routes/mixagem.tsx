@@ -581,12 +581,6 @@ function EstudioPanel() {
             </TransportBtn>
             <TransportBtn
               onClick={recording ? stopRecording : startRecording}
-              title={recording ? "Parar gravação" : "Gravar"}
-              accent={recording ? "recording" : "red"}
-            >
-              <Mic className="h-4 w-4" />
-            <TransportBtn
-              onClick={recording ? stopRecording : startRecording}
               title={recording ? "Parar gravação" : `Gravar (${source === "mic" ? "microfone" : source === "system" ? "áudio do sistema" : "mic + sistema"})`}
               accent={recording ? "recording" : "red"}
             >
@@ -618,6 +612,8 @@ function EstudioPanel() {
                 {s === "mic" ? "Mic" : s === "system" ? "Sistema" : "Mic+Sis"}
               </button>
             ))}
+          </div>
+
 
           <div className="ml-2 rounded-md border border-black/70 bg-[#0d0d0d] px-3 py-1 font-mono text-lg tracking-widest text-emerald-400 shadow-inner">
             {mmss(elapsed)}
