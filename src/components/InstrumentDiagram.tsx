@@ -301,9 +301,9 @@ function Sax({ rootPc, pentPcs }: { rootPc: number; pentPcs: Set<number> }) {
               cx={130}
               cy={y}
               r={12}
-              fill={on ? (isRoot ? C.primary : C.primarySoft) : C.muted}
-              stroke={on ? C.primary : C.border}
-              strokeWidth={1.5}
+              fill={on ? "#ffffff" : C.muted}
+              stroke={on ? "#000000" : C.border}
+              strokeWidth={on ? (isRoot ? 2.6 : 1.4) : 1}
             />
             {on && (
               <text
@@ -312,7 +312,7 @@ function Sax({ rootPc, pentPcs }: { rootPc: number; pentPcs: Set<number> }) {
                 fontSize={10}
                 textAnchor="middle"
                 fontWeight={700}
-                fill={isRoot ? C.primaryFg : C.primary}
+                fill="#000000"
               >
                 {CHROMATIC[k.pc]}
               </text>
