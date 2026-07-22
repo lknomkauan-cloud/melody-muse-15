@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { BookOpen, ChevronDown, ChevronUp, Music2, Youtube, Zap } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, Flame, Music2, Youtube, Zap } from "lucide-react";
+import { NeoSoulGospelPanel } from "@/components/NeoSoulGospel";
 import { cn } from "@/lib/utils";
 import { InstrumentDiagram } from "@/components/InstrumentDiagram";
 import { EarCoach } from "@/components/EarCoach";
@@ -273,7 +274,7 @@ function EscalasPage() {
   const [expanded, setExpanded] = useState<Set<number>>(new Set([0]));
   const [activeMode, setActiveMode] = useState<string | null>(null);
   const [instrument, setInstrument] = useState<InstrumentId>("violao");
-  const [tab, setTab] = useState<"escalas" | "improvisar">("escalas");
+  const [tab, setTab] = useState<"escalas" | "improvisar" | "groove">("escalas");
 
   return (
     <div className="min-h-screen px-4 py-8">
@@ -307,10 +308,21 @@ function EscalasPage() {
           >
             <Zap className="h-4 w-4" /> Como Improvisar
           </button>
+          <button
+            onClick={() => setTab("groove")}
+            className={cn(
+              "inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-all -mb-px",
+              tab === "groove" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <Flame className="h-4 w-4" /> Neo Soul / Gospel
+          </button>
         </div>
 
         {tab === "improvisar" ? (
           <ImprovisationMethodology />
+        ) : tab === "groove" ? (
+          <NeoSoulGospelPanel />
         ) : (
           <EscalasContent
             selectedTonic={selectedTonic}
