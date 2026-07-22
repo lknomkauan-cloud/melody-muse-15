@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Sliders,
   BookOpen,
-  Youtube,
+  
   Mic,
   Play,
   Pause,
@@ -27,7 +27,8 @@ export const Route = createFileRoute("/mixagem")({
       {
         name: "description",
         content:
-          "Aprenda mixagem musical: EQ, compressão, reverb, panorâmica, isole instrumentos de músicas do YouTube e grave suas próprias faixas.",
+          "Aprenda mixagem musical: EQ, compressão, reverb, panorâmica e grave suas próprias faixas em uma DAW no navegador.",
+
       },
       { property: "og:title", content: "Estúdio de Mixagem — Solando" },
       {
@@ -330,27 +331,6 @@ function Section({
 
 /* ============================== ESTÚDIO (DAW skin) ============================== */
 
-function parseYouTubeId(url: string): string | null {
-  try {
-    const u = new URL(url.trim());
-    if (u.hostname.includes("youtu.be")) return u.pathname.slice(1);
-    if (u.searchParams.get("v")) return u.searchParams.get("v");
-    const m = u.pathname.match(/\/embed\/([^/?]+)/);
-    if (m) return m[1];
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-const STEMS = [
-  { id: "vocals", label: "Vocal / Microfone", emoji: "🎤" },
-  { id: "drums", label: "Bateria", emoji: "🥁" },
-  { id: "bass", label: "Baixo", emoji: "🎸" },
-  { id: "guitar", label: "Guitarra", emoji: "🎸" },
-  { id: "piano", label: "Piano / Teclado", emoji: "🎹" },
-  { id: "other", label: "Outros instrumentos", emoji: "🎶" },
-];
 
 type Track = {
   id: string;
@@ -378,11 +358,6 @@ const TRACK_COLORS = [
 ];
 
 function EstudioPanel() {
-  // YouTube reference
-  const [url, setUrl] = useState("");
-  const [videoId, setVideoId] = useState<string | null>(null);
-  const [removeStems, setRemoveStems] = useState<Record<string, boolean>>({});
-
   // DAW state
   const [tracks, setTracks] = useState<Track[]>([]);
   const [recording, setRecording] = useState(false);
@@ -410,16 +385,7 @@ function EstudioPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleLoadYT = () => setVideoId(parseYouTubeId(url));
 
-  const openExternal = (service: "moises" | "vocalremover" | "lalal") => {
-    const map = {
-      moises: "https://moises.ai/",
-      vocalremover: "https://vocalremover.org/",
-      lalal: "https://www.lalal.ai/",
-    };
-    window.open(map[service], "_blank", "noopener");
-  };
 
   const startRecording = async () => {
     try {
@@ -549,7 +515,7 @@ function EstudioPanel() {
     rafRef.current = requestAnimationFrame(tick);
   };
 
-  const removed = Object.entries(removeStems).filter(([, v]) => v).map(([k]) => k);
+  
 
   const mmss = (s: number) => {
     const m = Math.floor(s / 60).toString().padStart(2, "0");
@@ -646,94 +612,10 @@ function EstudioPanel() {
         </div>
       </div>
 
-      {/* ============================ Reference: YouTube ============================ */}
-      <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold text-foreground">
-          <Youtube className="h-5 w-5 text-red-500" /> Faixa de referência (YouTube)
-        </h2>
-        <p className="mb-4 text-sm text-muted-foreground">
-          Cole o link, toque a música e grave por cima usando a DAW acima — como se fosse um <b>backing track</b>.
-        </p>
-
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <input
-            type="url"
-            placeholder="https://www.youtube.com/watch?v=..."
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-          />
-          <button
-            onClick={handleLoadYT}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            Carregar
-          </button>
-        </div>
-
-        {videoId && (
-          <div className="mt-4 aspect-video overflow-hidden rounded-lg border border-border bg-black">
-            <iframe
-              key={videoId}
-              src={`https://www.youtube.com/embed/${videoId}`}
-              className="h-full w-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              title="YouTube player"
-            />
-          </div>
-        )}
-
-        <div className="mt-6">
-          <h3 className="mb-2 text-sm font-semibold text-foreground">Isolar / remover instrumentos:</h3>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {STEMS.map((s) => {
-              const on = !!removeStems[s.id];
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => setRemoveStems({ ...removeStems, [s.id]: !on })}
-                  className={`flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors ${
-                    on
-                      ? "border-primary bg-primary/10 text-foreground"
-                      : "border-border bg-muted/20 text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="text-lg">{s.emoji}</span>
-                    {s.label}
-                  </span>
-                  <span className={`text-xs font-semibold ${on ? "text-primary" : ""}`}>
-                    {on ? "REMOVER" : "manter"}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="mt-6 space-y-4">
-          <VocalRemoverPanel />
-
-          <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-4 text-sm">
-            <p className="mb-2 flex items-center gap-2 font-semibold text-amber-600 dark:text-amber-400">
-              <Info className="h-4 w-4" /> Precisa separar bateria, baixo e outros (IA)?
-            </p>
-            {removed.length > 0 && (
-              <p className="mb-2 text-xs text-muted-foreground">
-                Selecionado: <b className="text-foreground">{removed.map((r) => STEMS.find((s) => s.id === r)?.label).join(", ")}</b>
-              </p>
-            )}
-            <div className="grid gap-2 sm:grid-cols-2">
-              <ExternalBtn onClick={() => openExternal("moises")} title="Moises.ai" desc="Melhor qualidade, 5 músicas grátis/mês" />
-              <ExternalBtn onClick={() => openExternal("lalal")} title="LALAL.AI" desc="Alta fidelidade, várias stems" />
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
+
 
 /* ---------- DAW sub-components ---------- */
 
@@ -996,178 +878,4 @@ function MasterStrip({ volume, onChange }: { volume: number; onChange: (v: numbe
     </div>
   );
 }
-
-function ExternalBtn({ onClick, title, desc }: { onClick: () => void; title: string; desc: string }) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex items-start gap-2 rounded-md border border-border bg-background p-3 text-left hover:border-primary"
-    >
-      <ExternalLink className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-      <span>
-        <span className="block text-sm font-semibold text-foreground">{title}</span>
-        <span className="block text-xs text-muted-foreground">{desc}</span>
-      </span>
-    </button>
-  );
-}
-
-/* ---------- Vocal Remover (center-channel cancellation, offline) ---------- */
-
-function audioBufferToWav(buffer: AudioBuffer): Blob {
-  const numCh = buffer.numberOfChannels;
-  const sampleRate = buffer.sampleRate;
-  const length = buffer.length * numCh * 2 + 44;
-  const ab = new ArrayBuffer(length);
-  const view = new DataView(ab);
-  const writeStr = (o: number, s: string) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
-  writeStr(0, "RIFF");
-  view.setUint32(4, length - 8, true);
-  writeStr(8, "WAVE"); writeStr(12, "fmt ");
-  view.setUint32(16, 16, true); view.setUint16(20, 1, true);
-  view.setUint16(22, numCh, true); view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * numCh * 2, true);
-  view.setUint16(32, numCh * 2, true); view.setUint16(34, 16, true);
-  writeStr(36, "data"); view.setUint32(40, length - 44, true);
-  let offset = 44;
-  const chans: Float32Array[] = [];
-  for (let c = 0; c < numCh; c++) chans.push(buffer.getChannelData(c));
-  for (let i = 0; i < buffer.length; i++) {
-    for (let c = 0; c < numCh; c++) {
-      const s = Math.max(-1, Math.min(1, chans[c][i]));
-      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
-      offset += 2;
-    }
-  }
-  return new Blob([ab], { type: "audio/wav" });
-}
-
-function VocalRemoverPanel() {
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [status, setStatus] = useState<string>("");
-  const [progress, setProgress] = useState(0);
-  const [originalUrl, setOriginalUrl] = useState<string | null>(null);
-  const [processedUrl, setProcessedUrl] = useState<string | null>(null);
-  const [mode, setMode] = useState<"karaoke" | "acapella">("karaoke");
-
-  const processFile = async (file: File) => {
-    setStatus("Lendo arquivo…"); setProgress(10);
-    setProcessedUrl(null);
-    const arrayBuf = await file.arrayBuffer();
-    setStatus("Decodificando áudio…"); setProgress(30);
-    const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    const ctx = new AC();
-    const decoded = await ctx.decodeAudioData(arrayBuf.slice(0));
-    setOriginalUrl(URL.createObjectURL(file));
-
-    if (decoded.numberOfChannels < 2) {
-      setStatus("⚠️ Este arquivo é mono. A remoção de vocal por cancelamento de canal exige áudio estéreo.");
-      setProgress(0); ctx.close();
-      return;
-    }
-
-    setStatus(mode === "karaoke" ? "Removendo vocal (L − R)…" : "Isolando vocal (L + R centro)…");
-    setProgress(60);
-
-    const out = ctx.createBuffer(2, decoded.length, decoded.sampleRate);
-    const L = decoded.getChannelData(0);
-    const R = decoded.getChannelData(1);
-    const oL = out.getChannelData(0);
-    const oR = out.getChannelData(1);
-    if (mode === "karaoke") {
-      for (let i = 0; i < decoded.length; i++) {
-        const diff = (L[i] - R[i]) * 0.7;
-        oL[i] = diff; oR[i] = -diff;
-      }
-    } else {
-      for (let i = 0; i < decoded.length; i++) {
-        const side = L[i] - R[i];
-        const center = (L[i] + R[i]) * 0.5 - side * 0.5;
-        oL[i] = center; oR[i] = center;
-      }
-    }
-
-    setStatus("Codificando WAV…"); setProgress(85);
-    const blob = audioBufferToWav(out);
-    setProcessedUrl(URL.createObjectURL(blob));
-    setStatus("✅ Pronto! Ouça abaixo ou baixe o resultado.");
-    setProgress(100);
-    ctx.close();
-  };
-
-  const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    setFileName(f.name);
-    processFile(f).catch((err) => setStatus(`Erro: ${err instanceof Error ? err.message : String(err)}`));
-  };
-
-  return (
-    <div className="rounded-lg border border-primary/40 bg-primary/5 p-4">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          🎧 Removedor de Vocal (integrado — processa no seu navegador)
-        </p>
-      </div>
-
-      <p className="mb-3 text-xs text-muted-foreground">
-        Envie um MP3/WAV <b>estéreo</b>. Usamos cancelamento de canal central (L−R) para remover o vocal, ou isolamento central para extrair só o vocal. Funciona offline, sem enviar áudio para nenhum servidor. Qualidade depende da mixagem original.
-      </p>
-
-      <div className="mb-3 flex gap-2">
-        <button
-          onClick={() => setMode("karaoke")}
-          className={`rounded-md border px-3 py-1.5 text-xs font-medium ${mode === "karaoke" ? "border-primary bg-primary/20 text-foreground" : "border-border text-muted-foreground"}`}
-        >
-          🎤 Remover Vocal (karaokê)
-        </button>
-        <button
-          onClick={() => setMode("acapella")}
-          className={`rounded-md border px-3 py-1.5 text-xs font-medium ${mode === "acapella" ? "border-primary bg-primary/20 text-foreground" : "border-border text-muted-foreground"}`}
-        >
-          🎙️ Isolar Vocal (acapella)
-        </button>
-      </div>
-
-      <label className="mb-3 flex cursor-pointer items-center justify-center gap-2 rounded-md border-2 border-dashed border-border bg-background/50 p-6 text-sm text-muted-foreground hover:border-primary hover:text-foreground">
-        <input type="file" accept="audio/*" onChange={onPick} className="hidden" />
-        📁 {fileName ? `Trocar arquivo (${fileName})` : "Selecionar arquivo de áudio"}
-      </label>
-
-      {status && (
-        <div className="mb-3">
-          <p className="mb-1 text-xs text-muted-foreground">{status}</p>
-          {progress > 0 && progress < 100 && (
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-              <div className="h-full bg-primary transition-all" style={{ width: `${progress}%` }} />
-            </div>
-          )}
-        </div>
-      )}
-
-      {originalUrl && (
-        <div className="mb-2">
-          <p className="mb-1 text-xs font-semibold text-muted-foreground">Original:</p>
-          <audio controls src={originalUrl} className="w-full" />
-        </div>
-      )}
-      {processedUrl && (
-        <div>
-          <p className="mb-1 text-xs font-semibold text-muted-foreground">
-            Resultado ({mode === "karaoke" ? "sem vocal" : "só vocal"}):
-          </p>
-          <audio controls src={processedUrl} className="w-full" />
-          <a
-            href={processedUrl}
-            download={`${fileName?.replace(/\.[^.]+$/, "") ?? "audio"}-${mode}.wav`}
-            className="mt-2 inline-flex items-center gap-2 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            <Download className="h-3.5 w-3.5" /> Baixar WAV
-          </a>
-        </div>
-      )}
-    </div>
-  );
-}
-
 
