@@ -227,33 +227,8 @@ function usePitchEngine() {
   return { pitch, error, on, start, stop };
 }
 
-/* ---------- Tom de referência (oscilador simples) ---------- */
+/* ---------- Áudio: som real do instrumento ---------- */
 
-function noteToFreq(name: string, octave: number): number {
-  const semi = pcOf(name);
-  const midi = (octave + 1) * 12 + semi;
-  return 440 * Math.pow(2, (midi - 69) / 12);
-}
-
-function playTone(name: string, octave = 4, durationMs = 800) {
-  try {
-    const AC: typeof AudioContext | undefined =
-      window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AC) return;
-    const ctx = new AC();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "triangle";
-    osc.frequency.value = noteToFreq(name, octave);
-    gain.gain.setValueAtTime(0, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + durationMs / 1000);
-    osc.connect(gain).connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + durationMs / 1000 + 0.05);
-    setTimeout(() => ctx.close().catch(() => {}), durationMs + 200);
-  } catch { /* noop */ }
-}
 
 async function playTone(name: string, octave = 4, durationMs = 900, instrument: InstrumentId = "piano") {
   try {
