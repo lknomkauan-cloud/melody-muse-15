@@ -63,7 +63,7 @@ export function EarCoach({
   pentatonicNotes: string[];
   instrumentLabel: string;
 }) {
-  const [tab, setTab] = useState<"tuner" | "exercise" | "ai">("tuner");
+  const [tab, setTab] = useState<"beginner" | "tuner" | "exercise" | "ai">("beginner");
   return (
     <div className="mt-4 rounded-xl border border-primary/30 bg-gradient-to-br from-primary/5 to-transparent p-4">
       <div className="mb-3 flex items-center justify-between gap-2">
@@ -75,6 +75,7 @@ export function EarCoach({
       </div>
       <div className="mb-3 flex flex-wrap gap-1.5">
         {[
+          { id: "beginner", label: "👨‍🏫 Professor IA (iniciante)" },
           { id: "tuner", label: "Afinador ao vivo" },
           { id: "exercise", label: "Exercício guiado" },
           { id: "ai", label: "Analisar solo (IA)" },
@@ -92,6 +93,7 @@ export function EarCoach({
         ))}
       </div>
 
+      {tab === "beginner" && <BeginnerProfessor pentatonicNotes={pentatonicNotes} tonic={tonic} instrumentLabel={instrumentLabel} />}
       {tab === "tuner" && <LiveTuner pentatonicNotes={pentatonicNotes} tonic={tonic} />}
       {tab === "exercise" && <GuidedExercise pentatonicNotes={pentatonicNotes} tonic={tonic} />}
       {tab === "ai" && (
@@ -102,6 +104,157 @@ export function EarCoach({
           instrumentLabel={instrumentLabel}
         />
       )}
+    </div>
+  );
+}
+
+/* -------------------- 0) Professor IA — Iniciante -------------------- */
+const NOTE_TO_SEMITONE: Record<string, number> = {
+  C: 0, "C#": 1, Db: 1, D: 2, "D#": 3, Eb: 3, E: 4, F: 5,
+  "F#": 6, Gb: 6, G: 7, "G#": 8, Ab: 8, A: 9, "A#": 10, Bb: 10, B: 11,
+};
+
+function noteToFreq(name: string, octave: number): number {
+  const semi = NOTE_TO_SEMITONE[name] ?? 0;
+  const midi = (octave + 1) * 12 + semi;
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+
+function playReferenceTone(name: string, octave = 4, durationMs = 900) {
+  try {
+    const AC: typeof AudioContext | undefined =
+      window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return;
+    const ctx = new AC();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.value = noteToFreq(name, octave);
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + durationMs / 1000);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + durationMs / 1000 + 0.05);
+    setTimeout(() => ctx.close().catch(() => {}), durationMs + 200);
+  } catch { /* noop */ }
+}
+
+function BeginnerProfessor({ pentatonicNotes, tonic, instrumentLabel }: { pentatonicNotes: string[]; tonic: string; instrumentLabel: string }) {
+  const [idx, setIdx] = useState(0);
+  const [status, setStatus] = useState<"waiting" | "close" | "correct">("waiting");
+  const [hint, setHint] = useState<string>("");
+  const { pitch, error, on, start, stop } = usePitchEngine();
+  const sustainRef = useRef<{ name: string | null; since: number }>({ name: null, since: 0 });
+  const target = pentatonicNotes[idx % pentatonicNotes.length];
+
+  useEffect(() => { setStatus("waiting"); setHint(""); sustainRef.current = { name: null, since: 0 }; }, [idx]);
+
+  useEffect(() => {
+    if (!on || !pitch?.note) return;
+    const now = performance.now();
+    const heard = pitch.note.name;
+    if (sustainRef.current.name !== heard) {
+      sustainRef.current = { name: heard, since: now };
+    }
+    const heldFor = now - sustainRef.current.since;
+    if (heard === target && Math.abs(pitch.note.cents) < 35 && heldFor >= 900) {
+      setStatus("correct");
+      setHint("🎉 Perfeito! Você tocou a nota certa e afinada.");
+    } else if (heard === target && heldFor >= 500) {
+      setStatus("close");
+      const cents = pitch.note.cents;
+      setHint(cents > 15 ? "Nota certa, mas um pouco AGUDA. Afrouxe um pouco." : cents < -15 ? "Nota certa, mas um pouco GRAVE. Ajuste a afinação." : "Nota certa! Segure firme mais um instante…");
+    } else if (heard !== target && heldFor >= 500) {
+      setStatus("waiting");
+      // dica de direção
+      const targetSemi = NOTE_TO_SEMITONE[target] ?? 0;
+      const heardSemi = NOTE_TO_SEMITONE[heard] ?? 0;
+      let diff = targetSemi - heardSemi;
+      if (diff > 6) diff -= 12;
+      if (diff < -6) diff += 12;
+      setHint(`Você tocou ${heard}. Alvo: ${target}. ${diff > 0 ? "Suba" : "Desça"} ${Math.abs(diff)} semitom(ns).`);
+    }
+  }, [pitch, on, target]);
+
+  const next = () => setIdx((i) => i + 1);
+  const reset = () => { setIdx(0); setStatus("waiting"); setHint(""); };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-start gap-2 rounded-lg border border-primary/30 bg-background/60 p-3">
+        <GraduationCap className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+        <div className="text-xs text-muted-foreground">
+          Aula para iniciantes no <span className="font-semibold text-foreground">{instrumentLabel}</span>. Toque a nota que o Professor pedir. Ele ouve o microfone e diz se está certo, se está fora ou como corrigir a afinação. Comece pela tônica <span className="font-semibold text-primary">{tonic}</span>.
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          onClick={on ? stop : start}
+          className={cn(
+            "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all",
+            on ? "bg-destructive text-destructive-foreground" : "bg-primary text-primary-foreground",
+          )}
+        >
+          {on ? <><Square className="h-4 w-4" /> Parar aula</> : <><Mic className="h-4 w-4" /> Começar aula</>}
+        </button>
+        <button
+          onClick={() => playReferenceTone(target, 4)}
+          className="inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-xs font-medium text-primary hover:bg-primary/20"
+        >
+          <Volume2 className="h-3.5 w-3.5" /> Ouvir a nota
+        </button>
+        <button
+          onClick={next}
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-background/60 px-3 py-2 text-xs font-medium hover:bg-secondary"
+        >
+          <ArrowRight className="h-3.5 w-3.5" /> Próxima nota
+        </button>
+        <button
+          onClick={reset}
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-background/60 px-3 py-2 text-xs font-medium hover:bg-secondary"
+        >
+          <RotateCcw className="h-3.5 w-3.5" /> Reiniciar
+        </button>
+      </div>
+
+      {error && <p className="text-xs text-destructive">{error}</p>}
+
+      <div className={cn(
+        "rounded-xl border-2 p-5 text-center transition-colors",
+        status === "correct" ? "border-emerald-500/70 bg-emerald-500/10" :
+        status === "close" ? "border-amber-500/70 bg-amber-500/10" :
+        "border-border bg-background/40",
+      )}>
+        <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Toque esta nota</div>
+        <div className={cn(
+          "font-display text-6xl font-bold",
+          status === "correct" ? "text-emerald-500" : status === "close" ? "text-amber-500" : "text-primary",
+        )}>{target}</div>
+        <div className="mt-2 text-sm text-muted-foreground">
+          {on && pitch?.note ? <>Você tocou: <span className="font-semibold text-foreground">{pitch.note.name}{pitch.note.octave}</span> ({pitch.freq.toFixed(1)} Hz, {pitch.note.cents > 0 ? "+" : ""}{pitch.note.cents} cents)</> : on ? "Ouvindo… toque a nota." : "Clique em Começar aula e libere o microfone."}
+        </div>
+        {hint && <div className="mt-3 rounded-md bg-background/70 px-3 py-2 text-sm">{hint}</div>}
+        {status === "correct" && (
+          <button onClick={next} className="mt-3 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
+            <ArrowRight className="h-4 w-4" /> Próxima nota da pentatônica
+          </button>
+        )}
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-1.5">
+        {pentatonicNotes.map((n, i) => (
+          <button
+            key={n}
+            onClick={() => setIdx(i)}
+            className={cn(
+              "rounded-md border px-2.5 py-1 text-xs font-semibold transition-all",
+              i === idx % pentatonicNotes.length ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background/60 text-muted-foreground hover:bg-secondary",
+            )}
+          >{n}</button>
+        ))}
+      </div>
     </div>
   );
 }
