@@ -580,7 +580,7 @@ function EstudioPanel() {
       const panner = ctx.createStereoPanner();
       panner.pan.value = t.pan;
 
-      src.connect(low).connect(mid).connect(high).connect(gain).connect(panner).connect(master);
+      src.connect(low).connect(mid).connect(high).connect(gain).connect(panner).connect(busIn);
 
       // Reverb send (post-fader)
       if (t.reverb > 0) {
