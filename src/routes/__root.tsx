@@ -89,6 +89,7 @@ function Header() {
     { to: "/", label: "Início" },
     ...(isAdmin ? [{ to: "/admin", label: "Painel do Adm" }] : []),
     { to: "/estudar", label: "Estudar" },
+    { to: "/professor", label: "Professor" },
     { to: "/quiz", label: "Quiz" },
     { to: "/escalas", label: "Escalas" },
     { to: "/acordes", label: "Acordes" },
