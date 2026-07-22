@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Sliders,
   BookOpen,
-  Youtube,
+  
   Mic,
   Play,
   Pause,
