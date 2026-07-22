@@ -274,7 +274,7 @@ function EscalasPage() {
   const [expanded, setExpanded] = useState<Set<number>>(new Set([0]));
   const [activeMode, setActiveMode] = useState<string | null>(null);
   const [instrument, setInstrument] = useState<InstrumentId>("violao");
-  const [tab, setTab] = useState<"escalas" | "improvisar">("escalas");
+  const [tab, setTab] = useState<"escalas" | "improvisar" | "groove">("escalas");
 
   return (
     <div className="min-h-screen px-4 py-8">
