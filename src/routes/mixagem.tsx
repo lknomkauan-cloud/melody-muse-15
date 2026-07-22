@@ -368,6 +368,10 @@ function EstudioPanel() {
   const [playing, setPlaying] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [masterVol, setMasterVol] = useState(0.9);
+  const [masterLow, setMasterLow] = useState(0);
+  const [masterMid, setMasterMid] = useState(0);
+  const [masterHigh, setMasterHigh] = useState(0);
+  const [masterReverb, setMasterReverb] = useState(0.15);
   const [bpm, setBpm] = useState(120);
   const [source, setSource] = useState<"mic" | "system" | "both">("mic");
 
