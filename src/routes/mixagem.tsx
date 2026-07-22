@@ -232,7 +232,58 @@ function TeoriaPanel() {
           ))}
         </ul>
       </Section>
+
+      <Section icon={<Download className="h-5 w-5" />} title="Apostilas em PDF para baixar" color="from-rose-500/20 to-transparent">
+        <p>
+          Selecionamos guias completos e gratuitos de mixagem para você baixar e estudar off-line. Clique para abrir o
+          PDF em uma nova aba e salvar no seu dispositivo.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <PdfLink
+            href="https://www.izotope.com/en/learn/mixing-guides.html"
+            title="iZotope — Mixing Guides (completo)"
+            desc="Coletânea profissional cobrindo EQ, compressão, reverb, panorâmica e masterização (EN)."
+          />
+          <PdfLink
+            href="https://cdn.shopify.com/s/files/1/0270/1499/files/The_Ultimate_Mixing_Guide.pdf"
+            title="The Ultimate Mixing Guide (PDF)"
+            desc="Manual didático em PDF com passo a passo do mix profissional (EN)."
+          />
+          <PdfLink
+            href="https://www.soundonsound.com/techniques/mixing-essentials"
+            title="Sound on Sound — Mixing Essentials"
+            desc="Série clássica de artigos técnicos usada em faculdades de áudio (EN)."
+          />
+          <PdfLink
+            href="https://producaomusical.com.br/wp-content/uploads/apostila-mixagem.pdf"
+            title="Apostila de Mixagem (PT-BR)"
+            desc="Guia em português com fundamentos, cadeia de sinal e dicas práticas."
+          />
+        </div>
+      </Section>
     </div>
+  );
+}
+
+function PdfLink({ href, title, desc }: { href: string; title: string; desc: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex items-start gap-3 rounded-lg border border-border bg-background p-4 transition-colors hover:border-primary hover:bg-primary/5"
+    >
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-rose-500/10 text-rose-500">
+        <Download className="h-5 w-5" />
+      </div>
+      <div className="min-w-0">
+        <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+          {title}
+          <ExternalLink className="h-3 w-3 opacity-60 group-hover:opacity-100" />
+        </div>
+        <p className="mt-0.5 text-xs text-muted-foreground">{desc}</p>
+      </div>
+    </a>
   );
 }
 
