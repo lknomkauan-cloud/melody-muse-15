@@ -344,6 +344,10 @@ type Track = {
   pan: number;
   muted: boolean;
   solo: boolean;
+  low: number;   // dB -12..+12 (low shelf ~120Hz)
+  mid: number;   // dB -12..+12 (peaking ~1kHz)
+  high: number;  // dB -12..+12 (high shelf ~8kHz)
+  reverb: number; // 0..1 send amount
 };
 
 const TRACK_COLORS = [
@@ -464,6 +468,10 @@ function EstudioPanel() {
             pan: 0,
             muted: false,
             solo: false,
+            low: 0,
+            mid: 0,
+            high: 0,
+            reverb: 0,
           },
         ]);
         micStream?.getTracks().forEach((t) => t.stop());
@@ -517,6 +525,13 @@ function EstudioPanel() {
     master.gain.value = masterVol;
     master.connect(ctx.destination);
 
+    // Shared reverb bus (generated impulse response)
+    const convolver = ctx.createConvolver();
+    convolver.buffer = makeImpulseResponse(ctx, 2.5, 2.2);
+    const reverbReturn = ctx.createGain();
+    reverbReturn.gain.value = 0.9;
+    convolver.connect(reverbReturn).connect(master);
+
     const buffers = await Promise.all(
       tracks.map(async (t) => t.buffer ?? ctx.decodeAudioData(await t.blob.arrayBuffer())),
     );
@@ -531,11 +546,36 @@ function EstudioPanel() {
       if (!shouldPlay) return;
       const src = ctx.createBufferSource();
       src.buffer = buffers[i];
+
+      // 3-band EQ: low shelf → peaking mid → high shelf
+      const low = ctx.createBiquadFilter();
+      low.type = "lowshelf";
+      low.frequency.value = 120;
+      low.gain.value = t.low;
+      const mid = ctx.createBiquadFilter();
+      mid.type = "peaking";
+      mid.frequency.value = 1000;
+      mid.Q.value = 0.9;
+      mid.gain.value = t.mid;
+      const high = ctx.createBiquadFilter();
+      high.type = "highshelf";
+      high.frequency.value = 8000;
+      high.gain.value = t.high;
+
       const gain = ctx.createGain();
       gain.gain.value = t.volume;
       const panner = ctx.createStereoPanner();
       panner.pan.value = t.pan;
-      src.connect(gain).connect(panner).connect(master);
+
+      src.connect(low).connect(mid).connect(high).connect(gain).connect(panner).connect(master);
+
+      // Reverb send (post-fader)
+      if (t.reverb > 0) {
+        const send = ctx.createGain();
+        send.gain.value = t.reverb;
+        panner.connect(send).connect(convolver);
+      }
+
       src.start(startAt);
       srcs.push(src);
       maxDuration = Math.max(maxDuration, buffers[i].duration);
@@ -855,13 +895,84 @@ function FakeWaveform({ color }: { color: string }) {
   );
 }
 
+function makeImpulseResponse(ctx: AudioContext, duration = 2.5, decay = 2.2): AudioBuffer {
+  const rate = ctx.sampleRate;
+  const len = Math.max(1, Math.floor(rate * duration));
+  const impulse = ctx.createBuffer(2, len, rate);
+  for (let ch = 0; ch < 2; ch++) {
+    const data = impulse.getChannelData(ch);
+    for (let i = 0; i < len; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
+    }
+  }
+  return impulse;
+}
+
+function EqKnob({
+  label,
+  value,
+  onChange,
+  color = "#a3a3a3",
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  color?: string;
+}) {
+  return (
+    <div className="flex w-full flex-col items-center gap-0.5">
+      <span className="text-[8px] font-bold uppercase tracking-wider text-neutral-500">{label}</span>
+      <input
+        type="range"
+        min={-12}
+        max={12}
+        step={0.5}
+        value={value}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+        className="w-14"
+        style={{ accentColor: color }}
+        title={`${label}: ${value > 0 ? "+" : ""}${value.toFixed(1)} dB`}
+      />
+      <span className="font-mono text-[8px] text-neutral-400">
+        {value > 0 ? "+" : ""}
+        {value.toFixed(1)}
+      </span>
+    </div>
+  );
+}
+
 function MixerStrip({ track, onChange }: { track: Track; onChange: (p: Partial<Track>) => void }) {
   return (
-    <div className="flex w-20 shrink-0 flex-col items-center gap-2 rounded-md border border-black/70 bg-gradient-to-b from-[#2a2a2a] to-[#1c1c1c] p-2 shadow-inner">
+    <div className="flex w-24 shrink-0 flex-col items-center gap-1.5 rounded-md border border-black/70 bg-gradient-to-b from-[#2a2a2a] to-[#1c1c1c] p-2 shadow-inner">
       <div className="h-1.5 w-full rounded" style={{ background: track.color }} />
       <div className="w-full truncate text-center text-[10px] font-semibold text-neutral-200" title={track.name}>
         {track.name}
       </div>
+
+      {/* EQ 3-band */}
+      <div className="flex w-full flex-col items-center gap-1 rounded border border-black/60 bg-black/30 p-1">
+        <span className="text-[8px] font-bold uppercase tracking-widest text-neutral-500">EQ</span>
+        <EqKnob label="Hi" value={track.high} onChange={(v) => onChange({ high: v })} color="#22d3ee" />
+        <EqKnob label="Md" value={track.mid} onChange={(v) => onChange({ mid: v })} color="#facc15" />
+        <EqKnob label="Lo" value={track.low} onChange={(v) => onChange({ low: v })} color="#f87171" />
+      </div>
+
+      {/* Reverb send */}
+      <div className="flex w-full flex-col items-center gap-0.5 rounded border border-black/60 bg-black/30 p-1">
+        <span className="text-[8px] font-bold uppercase tracking-widest text-neutral-500">Rev</span>
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.01}
+          value={track.reverb}
+          onChange={(e) => onChange({ reverb: parseFloat(e.target.value) })}
+          className="w-16 accent-purple-400"
+          title={`Reverb send: ${Math.round(track.reverb * 100)}%`}
+        />
+        <span className="font-mono text-[8px] text-neutral-400">{Math.round(track.reverb * 100)}%</span>
+      </div>
+
 
       {/* Pan knob (visual) */}
       <div className="flex flex-col items-center gap-0.5">
