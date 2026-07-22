@@ -558,7 +558,7 @@ function ChordListener({ chord, root, instrument }: { chord: ChordKind; root: st
         >
           {on ? <><Square className="h-4 w-4" /> Parar aula</> : <><Mic className="h-4 w-4" /> Iniciar aula</>}
         </button>
-        <button onClick={() => playChord(chord.intervals, root)} className="inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-xs font-medium text-primary hover:bg-primary/20">
+        <button onClick={() => playChord(chord.intervals, root, instrument)} className="inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-xs font-medium text-primary hover:bg-primary/20">
           <Volume2 className="h-3.5 w-3.5" /> Ouvir referência
         </button>
         <button onClick={reset} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs hover:bg-secondary">
