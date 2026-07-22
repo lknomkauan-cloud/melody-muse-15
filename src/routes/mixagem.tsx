@@ -1108,15 +1108,8 @@ function VocalRemoverPanel() {
         <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
           🎧 Removedor de Vocal (integrado — processa no seu navegador)
         </p>
-        <a
-          href="https://vocalremover.org/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs text-muted-foreground underline hover:text-foreground"
-        >
-          Técnica inspirada em vocalremover.org
-        </a>
       </div>
+
       <p className="mb-3 text-xs text-muted-foreground">
         Envie um MP3/WAV <b>estéreo</b>. Usamos cancelamento de canal central (L−R) para remover o vocal, ou isolamento central para extrair só o vocal. Funciona offline, sem enviar áudio para nenhum servidor. Qualidade depende da mixagem original.
       </p>
