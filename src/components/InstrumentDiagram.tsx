@@ -401,8 +401,8 @@ function Recorder({ rootPc, pentPcs }: { rootPc: number; pentPcs: Set<number> })
 
 function FingerChart({ fing, filled }: { fing: string; filled: boolean }) {
   const chars = fing.split("");
-  const stroke = filled ? C.primaryFg : C.primary;
-  const solid = filled ? C.primaryFg : C.primary;
+  const stroke = "#000000";
+  const solid = "#000000";
   return (
     <svg viewBox="0 0 20 96" width={20} height={96} className="mt-1">
       {chars.map((ch, i) => {
