@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Sliders,
   BookOpen,
@@ -932,6 +932,112 @@ function makeImpulseResponse(ctx: AudioContext, duration = 2.5, decay = 2.2): Au
   return impulse;
 }
 
+function RotaryKnob({
+  label,
+  value,
+  min,
+  max,
+  step = 0.01,
+  onChange,
+  color = "#a3a3a3",
+  size = 34,
+  format,
+  centerDetent = false,
+  resetValue,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  onChange: (v: number) => void;
+  color?: string;
+  size?: number;
+  format?: (v: number) => string;
+  centerDetent?: boolean;
+  resetValue?: number;
+}) {
+  const range = max - min;
+  const norm = (value - min) / range;
+  const angle = -135 + norm * 270;
+  const startRef = React.useRef<{ y: number; v: number } | null>(null);
+
+  const clampStep = (n: number) => {
+    const s = Math.min(max, Math.max(min, n));
+    return Math.round(s / step) * step;
+  };
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    startRef.current = { y: e.clientY, v: value };
+  };
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!startRef.current) return;
+    const dy = startRef.current.y - e.clientY;
+    const sensitivity = e.shiftKey ? 400 : 150;
+    onChange(clampStep(startRef.current.v + (dy / sensitivity) * range));
+  };
+  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
+    startRef.current = null;
+  };
+  const onDoubleClick = () => {
+    onChange(resetValue ?? (centerDetent ? (min + max) / 2 : min));
+  };
+  const onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const dir = e.deltaY < 0 ? 1 : -1;
+    const inc = (range / 100) * (e.shiftKey ? 0.25 : 1) * dir;
+    onChange(clampStep(value + inc));
+  };
+
+  const r = size / 2;
+  const cx = r;
+  const cy = r;
+  const trackR = r - 3;
+  const rad = (deg: number) => (deg * Math.PI) / 180;
+  const arcStart = { x: cx + trackR * Math.cos(rad(-135 - 90)), y: cy + trackR * Math.sin(rad(-135 - 90)) };
+  const arcEnd = { x: cx + trackR * Math.cos(rad(angle - 90)), y: cy + trackR * Math.sin(rad(angle - 90)) };
+  const largeArc = norm > 0.5 ? 1 : 0;
+  const gradId = `knob-bg-${label}-${size}`;
+
+  return (
+    <div className="flex flex-col items-center gap-0.5 select-none">
+      <span className="text-[8px] font-bold uppercase tracking-wider text-neutral-500">{label}</span>
+      <div
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onDoubleClick={onDoubleClick}
+        onWheel={onWheel}
+        style={{ width: size, height: size, touchAction: "none", cursor: "ns-resize" }}
+        title={`${label}: ${format ? format(value) : value.toFixed(2)} — arraste ↑↓ · duplo-clique reseta · scroll ajusta`}
+      >
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          <defs>
+            <radialGradient id={gradId} cx="50%" cy="35%" r="65%">
+              <stop offset="0%" stopColor="#3a3a3a" />
+              <stop offset="100%" stopColor="#0a0a0a" />
+            </radialGradient>
+          </defs>
+          <circle cx={cx} cy={cy} r={trackR} fill="none" stroke="#000" strokeWidth={2} opacity={0.6} />
+          <path
+            d={`M ${arcStart.x} ${arcStart.y} A ${trackR} ${trackR} 0 ${largeArc} 1 ${arcEnd.x} ${arcEnd.y}`}
+            fill="none"
+            stroke={color}
+            strokeWidth={2}
+            strokeLinecap="round"
+          />
+          <circle cx={cx} cy={cy} r={r - 6} fill={`url(#${gradId})`} stroke="#000" strokeWidth={1} />
+          <g transform={`rotate(${angle} ${cx} ${cy})`}>
+            <line x1={cx} y1={cy - (r - 8)} x2={cx} y2={cy - (r - 14)} stroke={color} strokeWidth={2} strokeLinecap="round" />
+          </g>
+        </svg>
+      </div>
+      <span className="font-mono text-[8px] text-neutral-400">{format ? format(value) : value.toFixed(2)}</span>
+    </div>
+  );
+}
+
 function EqKnob({
   label,
   value,
@@ -944,24 +1050,18 @@ function EqKnob({
   color?: string;
 }) {
   return (
-    <div className="flex w-full flex-col items-center gap-0.5">
-      <span className="text-[8px] font-bold uppercase tracking-wider text-neutral-500">{label}</span>
-      <input
-        type="range"
-        min={-12}
-        max={12}
-        step={0.5}
-        value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-14"
-        style={{ accentColor: color }}
-        title={`${label}: ${value > 0 ? "+" : ""}${value.toFixed(1)} dB`}
-      />
-      <span className="font-mono text-[8px] text-neutral-400">
-        {value > 0 ? "+" : ""}
-        {value.toFixed(1)}
-      </span>
-    </div>
+    <RotaryKnob
+      label={label}
+      value={value}
+      min={-12}
+      max={12}
+      step={0.5}
+      onChange={onChange}
+      color={color}
+      centerDetent
+      resetValue={0}
+      format={(v) => `${v > 0 ? "+" : ""}${v.toFixed(1)}`}
+    />
   );
 }
 
@@ -981,39 +1081,33 @@ function MixerStrip({ track, onChange }: { track: Track; onChange: (p: Partial<T
         <EqKnob label="Lo" value={track.low} onChange={(v) => onChange({ low: v })} color="#f87171" />
       </div>
 
-      {/* Reverb send */}
-      <div className="flex w-full flex-col items-center gap-0.5 rounded border border-black/60 bg-black/30 p-1">
-        <span className="text-[8px] font-bold uppercase tracking-widest text-neutral-500">Rev</span>
-        <input
-          type="range"
+      {/* Reverb send + Pan (knobs) */}
+      <div className="flex w-full items-start justify-around rounded border border-black/60 bg-black/30 p-1">
+        <RotaryKnob
+          label="Rev"
+          value={track.reverb}
           min={0}
           max={1}
           step={0.01}
-          value={track.reverb}
-          onChange={(e) => onChange({ reverb: parseFloat(e.target.value) })}
-          className="w-16 accent-purple-400"
-          title={`Reverb send: ${Math.round(track.reverb * 100)}%`}
+          onChange={(v) => onChange({ reverb: v })}
+          color="#c084fc"
+          format={(v) => `${Math.round(v * 100)}%`}
+          resetValue={0}
         />
-        <span className="font-mono text-[8px] text-neutral-400">{Math.round(track.reverb * 100)}%</span>
-      </div>
-
-
-      {/* Pan knob (visual) */}
-      <div className="flex flex-col items-center gap-0.5">
-        <input
-          type="range"
+        <RotaryKnob
+          label="Pan"
+          value={track.pan}
           min={-1}
           max={1}
-          step={0.05}
-          value={track.pan}
-          onChange={(e) => onChange({ pan: parseFloat(e.target.value) })}
-          className="w-14 accent-neutral-300"
-          title="Pan"
+          step={0.02}
+          onChange={(v) => onChange({ pan: v })}
+          color="#e5e5e5"
+          centerDetent
+          resetValue={0}
+          format={(v) => (Math.abs(v) < 0.02 ? "C" : v < 0 ? `${Math.round(v * -100)}L` : `${Math.round(v * 100)}R`)}
         />
-        <span className="font-mono text-[9px] text-neutral-500">
-          {track.pan === 0 ? "C" : track.pan < 0 ? `${Math.round(track.pan * -100)}L` : `${Math.round(track.pan * 100)}R`}
-        </span>
       </div>
+
 
       {/* Fader */}
       <div className="relative flex h-32 w-full items-center justify-center rounded bg-black/50">
@@ -1095,20 +1189,21 @@ function MasterStrip({
       </div>
 
       {/* Master Reverb return */}
-      <div className="flex w-full flex-col items-center gap-0.5 rounded border border-emerald-900/60 bg-black/40 p-1">
-        <span className="text-[8px] font-bold uppercase tracking-widest text-emerald-500/80">Rev</span>
-        <input
-          type="range"
+      <div className="flex w-full items-center justify-center rounded border border-emerald-900/60 bg-black/40 p-1">
+        <RotaryKnob
+          label="Rev"
+          value={reverb}
           min={0}
           max={1}
           step={0.01}
-          value={reverb}
-          onChange={(e) => onReverb(parseFloat(e.target.value))}
-          className="w-16 accent-purple-400"
-          title={`Reverb return: ${Math.round(reverb * 100)}%`}
+          onChange={onReverb}
+          color="#c084fc"
+          size={38}
+          format={(v) => `${Math.round(v * 100)}%`}
+          resetValue={0}
         />
-        <span className="font-mono text-[8px] text-neutral-400">{Math.round(reverb * 100)}%</span>
       </div>
+
 
       {/* Master Fader */}
       <div className="relative flex h-32 w-full items-center justify-center rounded bg-black/60">
