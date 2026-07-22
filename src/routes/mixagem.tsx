@@ -27,7 +27,8 @@ export const Route = createFileRoute("/mixagem")({
       {
         name: "description",
         content:
-          "Aprenda mixagem musical: EQ, compressão, reverb, panorâmica, isole instrumentos de músicas do YouTube e grave suas próprias faixas.",
+          "Aprenda mixagem musical: EQ, compressão, reverb, panorâmica e grave suas próprias faixas em uma DAW no navegador.",
+
       },
       { property: "og:title", content: "Estúdio de Mixagem — Solando" },
       {
