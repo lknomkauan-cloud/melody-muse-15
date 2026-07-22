@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Mic, Square, Loader2, Play, RotateCcw, Sparkles, CircleDot } from "lucide-react";
+import { Mic, Square, Loader2, Play, RotateCcw, Sparkles, CircleDot, GraduationCap, Volume2, ArrowRight } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { analyzeSolo } from "@/lib/analyze-solo.functions";
 import { cn } from "@/lib/utils";
