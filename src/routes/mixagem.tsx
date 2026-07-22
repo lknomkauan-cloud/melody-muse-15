@@ -712,19 +712,50 @@ function EstudioPanel() {
           </div>
         </div>
 
-        <div className="mt-6 rounded-lg border border-amber-500/40 bg-amber-500/5 p-4 text-sm">
-          <p className="mb-2 flex items-center gap-2 font-semibold text-amber-600 dark:text-amber-400">
-            <Info className="h-4 w-4" /> Serviços de separação por IA
-          </p>
-          {removed.length > 0 && (
-            <p className="mb-2 text-xs text-muted-foreground">
-              Selecionado para remover: <b className="text-foreground">{removed.map((r) => STEMS.find((s) => s.id === r)?.label).join(", ")}</b>
+        <div className="mt-6 space-y-4">
+          <div className="rounded-lg border border-primary/40 bg-primary/5 p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                🎧 Vocal Remover integrado
+              </p>
+              <a
+                href="https://vocalremover.org/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-muted-foreground underline hover:text-foreground"
+              >
+                Powered by vocalremover.org
+              </a>
+            </div>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Envie um arquivo de áudio (MP3/WAV) e separe vocal, bateria, baixo e outros diretamente aqui. O processamento roda no serviço vocalremover.org — todos os créditos ao criador original.
             </p>
-          )}
-          <div className="grid gap-2 sm:grid-cols-3">
-            <ExternalBtn onClick={() => openExternal("moises")} title="Moises.ai" desc="Melhor qualidade, 5 músicas grátis/mês" />
-            <ExternalBtn onClick={() => openExternal("vocalremover")} title="Vocal Remover" desc="Grátis, remove vocal, bateria, baixo" />
-            <ExternalBtn onClick={() => openExternal("lalal")} title="LALAL.AI" desc="Alta fidelidade, várias stems" />
+            <div className="overflow-hidden rounded-md border border-border bg-background">
+              <iframe
+                src="https://vocalremover.org/"
+                title="Vocal Remover"
+                className="h-[720px] w-full"
+                allow="microphone; clipboard-write"
+              />
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Não carregou? <a href="https://vocalremover.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Abra em nova aba</a>.
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-4 text-sm">
+            <p className="mb-2 flex items-center gap-2 font-semibold text-amber-600 dark:text-amber-400">
+              <Info className="h-4 w-4" /> Outras opções (separação avançada por IA)
+            </p>
+            {removed.length > 0 && (
+              <p className="mb-2 text-xs text-muted-foreground">
+                Selecionado para remover: <b className="text-foreground">{removed.map((r) => STEMS.find((s) => s.id === r)?.label).join(", ")}</b>
+              </p>
+            )}
+            <div className="grid gap-2 sm:grid-cols-2">
+              <ExternalBtn onClick={() => openExternal("moises")} title="Moises.ai" desc="Melhor qualidade, 5 músicas grátis/mês" />
+              <ExternalBtn onClick={() => openExternal("lalal")} title="LALAL.AI" desc="Alta fidelidade, várias stems" />
+            </div>
           </div>
         </div>
       </section>
