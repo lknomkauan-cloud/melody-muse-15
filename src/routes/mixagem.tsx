@@ -1189,20 +1189,21 @@ function MasterStrip({
       </div>
 
       {/* Master Reverb return */}
-      <div className="flex w-full flex-col items-center gap-0.5 rounded border border-emerald-900/60 bg-black/40 p-1">
-        <span className="text-[8px] font-bold uppercase tracking-widest text-emerald-500/80">Rev</span>
-        <input
-          type="range"
+      <div className="flex w-full items-center justify-center rounded border border-emerald-900/60 bg-black/40 p-1">
+        <RotaryKnob
+          label="Rev"
+          value={reverb}
           min={0}
           max={1}
           step={0.01}
-          value={reverb}
-          onChange={(e) => onReverb(parseFloat(e.target.value))}
-          className="w-16 accent-purple-400"
-          title={`Reverb return: ${Math.round(reverb * 100)}%`}
+          onChange={onReverb}
+          color="#c084fc"
+          size={38}
+          format={(v) => `${Math.round(v * 100)}%`}
+          resetValue={0}
         />
-        <span className="font-mono text-[8px] text-neutral-400">{Math.round(reverb * 100)}%</span>
       </div>
+
 
       {/* Master Fader */}
       <div className="relative flex h-32 w-full items-center justify-center rounded bg-black/60">
