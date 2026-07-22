@@ -729,7 +729,18 @@ function EstudioPanel() {
             {tracks.map((t) => (
               <MixerStrip key={t.id} track={t} onChange={(p) => updateTrack(t.id, p)} />
             ))}
-            <MasterStrip volume={masterVol} onChange={setMasterVol} />
+            <MasterStrip
+              volume={masterVol}
+              onVolume={setMasterVol}
+              low={masterLow}
+              mid={masterMid}
+              high={masterHigh}
+              reverb={masterReverb}
+              onLow={setMasterLow}
+              onMid={setMasterMid}
+              onHigh={setMasterHigh}
+              onReverb={setMasterReverb}
+            />
           </div>
         </div>
       </div>
