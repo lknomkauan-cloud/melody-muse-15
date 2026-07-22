@@ -222,8 +222,8 @@ function Piano({ rootPc, pentPcs }: { rootPc: number; pentPcs: Set<number> }) {
               />
               {on && (
                 <>
-                  <circle cx={cx} cy={cy} r={11} fill={isRoot ? C.primary : C.primarySoft} stroke={C.primary} strokeWidth={isRoot ? 2 : 1} />
-                  <text x={cx} y={cy + 4} fontSize={11} textAnchor="middle" fontWeight={700} fill={isRoot ? C.primaryFg : C.primary}>
+                  <circle cx={cx} cy={cy} r={11} fill="#ffffff" stroke="#000000" strokeWidth={isRoot ? 2.6 : 1.4} />
+                  <text x={cx} y={cy + 4} fontSize={11} textAnchor="middle" fontWeight={700} fill="#000000">
                     {CHROMATIC[k.pc]}
                   </text>
                 </>
