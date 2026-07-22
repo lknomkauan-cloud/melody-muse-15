@@ -585,8 +585,39 @@ function EstudioPanel() {
               accent={recording ? "recording" : "red"}
             >
               <Mic className="h-4 w-4" />
+            <TransportBtn
+              onClick={recording ? stopRecording : startRecording}
+              title={recording ? "Parar gravação" : `Gravar (${source === "mic" ? "microfone" : source === "system" ? "áudio do sistema" : "mic + sistema"})`}
+              accent={recording ? "recording" : "red"}
+            >
+              <Mic className="h-4 w-4" />
             </TransportBtn>
           </div>
+
+          <div className="flex items-center gap-1 rounded-md border border-black/70 bg-[#0d0d0d] px-2 py-1 text-[10px] text-neutral-400 shadow-inner">
+            <span className="mr-1 uppercase tracking-wider">Fonte</span>
+            {(["mic", "system", "both"] as const).map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => !recording && setSource(s)}
+                disabled={recording}
+                className={`rounded px-2 py-0.5 font-semibold uppercase transition ${
+                  source === s
+                    ? "bg-emerald-500/80 text-black"
+                    : "text-neutral-400 hover:text-neutral-100"
+                } ${recording ? "opacity-50" : ""}`}
+                title={
+                  s === "mic"
+                    ? "Microfone"
+                    : s === "system"
+                      ? "Áudio do sistema/aba (Chrome/Edge desktop — marque 'Compartilhar áudio')"
+                      : "Microfone + áudio do sistema (mixado)"
+                }
+              >
+                {s === "mic" ? "Mic" : s === "system" ? "Sistema" : "Mic+Sis"}
+              </button>
+            ))}
 
           <div className="ml-2 rounded-md border border-black/70 bg-[#0d0d0d] px-3 py-1 font-mono text-lg tracking-widest text-emerald-400 shadow-inner">
             {mmss(elapsed)}
