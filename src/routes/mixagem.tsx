@@ -1058,11 +1058,59 @@ function MixerStrip({ track, onChange }: { track: Track; onChange: (p: Partial<T
   );
 }
 
-function MasterStrip({ volume, onChange }: { volume: number; onChange: (v: number) => void }) {
+function MasterStrip({
+  volume,
+  onVolume,
+  low,
+  mid,
+  high,
+  reverb,
+  onLow,
+  onMid,
+  onHigh,
+  onReverb,
+}: {
+  volume: number;
+  onVolume: (v: number) => void;
+  low: number;
+  mid: number;
+  high: number;
+  reverb: number;
+  onLow: (v: number) => void;
+  onMid: (v: number) => void;
+  onHigh: (v: number) => void;
+  onReverb: (v: number) => void;
+}) {
   return (
-    <div className="ml-2 flex w-24 shrink-0 flex-col items-center gap-2 rounded-md border border-emerald-900/60 bg-gradient-to-b from-[#1e2a24] to-[#0f1a15] p-2 shadow-inner ring-1 ring-emerald-500/20">
+    <div className="ml-2 flex w-28 shrink-0 flex-col items-center gap-1.5 rounded-md border border-emerald-900/60 bg-gradient-to-b from-[#1e2a24] to-[#0f1a15] p-2 shadow-inner ring-1 ring-emerald-500/20">
       <div className="h-1.5 w-full rounded bg-emerald-400" />
       <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Master</div>
+
+      {/* Master EQ */}
+      <div className="flex w-full flex-col items-center gap-1 rounded border border-emerald-900/60 bg-black/40 p-1">
+        <span className="text-[8px] font-bold uppercase tracking-widest text-emerald-500/80">EQ</span>
+        <EqKnob label="Hi" value={high} onChange={onHigh} color="#22d3ee" />
+        <EqKnob label="Md" value={mid} onChange={onMid} color="#facc15" />
+        <EqKnob label="Lo" value={low} onChange={onLow} color="#f87171" />
+      </div>
+
+      {/* Master Reverb return */}
+      <div className="flex w-full flex-col items-center gap-0.5 rounded border border-emerald-900/60 bg-black/40 p-1">
+        <span className="text-[8px] font-bold uppercase tracking-widest text-emerald-500/80">Rev</span>
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.01}
+          value={reverb}
+          onChange={(e) => onReverb(parseFloat(e.target.value))}
+          className="w-16 accent-purple-400"
+          title={`Reverb return: ${Math.round(reverb * 100)}%`}
+        />
+        <span className="font-mono text-[8px] text-neutral-400">{Math.round(reverb * 100)}%</span>
+      </div>
+
+      {/* Master Fader */}
       <div className="relative flex h-32 w-full items-center justify-center rounded bg-black/60">
         <input
           type="range"
@@ -1070,7 +1118,7 @@ function MasterStrip({ volume, onChange }: { volume: number; onChange: (v: numbe
           max={1.5}
           step={0.01}
           value={volume}
-          onChange={(e) => onChange(parseFloat(e.target.value))}
+          onChange={(e) => onVolume(parseFloat(e.target.value))}
           className="h-28 w-2 appearance-none rounded bg-neutral-700 accent-emerald-400"
           style={{ writingMode: "vertical-lr" as any, direction: "rtl" as any }}
         />
