@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { BookOpen, ChevronDown, ChevronUp, Music2, Youtube, Zap } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, Flame, Music2, Youtube, Zap } from "lucide-react";
+import { NeoSoulGospelPanel } from "@/components/NeoSoulGospel";
 import { cn } from "@/lib/utils";
 import { InstrumentDiagram } from "@/components/InstrumentDiagram";
 import { EarCoach } from "@/components/EarCoach";
