@@ -1,8 +1,52 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GraduationCap, Mic, Square, Volume2, RotateCcw, CheckCircle2, Circle } from "lucide-react";
+import * as Tone from "tone";
 import { InstrumentDiagram, type InstrumentId } from "@/components/InstrumentDiagram";
 import { cn } from "@/lib/utils";
+
+/* ---------- Samples reais por instrumento (FluidR3_GM soundfont) ---------- */
+const GM = "https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM";
+const SAMPLER_CONFIG: Record<InstrumentId, { baseUrl: string; urls: Record<string, string> }> = {
+  violao: { baseUrl: `${GM}/acoustic_guitar_nylon-mp3/`, urls: { E2:"E2.mp3", A2:"A2.mp3", D3:"D3.mp3", G3:"G3.mp3", B3:"B3.mp3", E4:"E4.mp3", A4:"A4.mp3", D5:"D5.mp3" } },
+  guitarra: { baseUrl: `${GM}/electric_guitar_clean-mp3/`, urls: { E2:"E2.mp3", A2:"A2.mp3", D3:"D3.mp3", G3:"G3.mp3", B3:"B3.mp3", E4:"E4.mp3", A4:"A4.mp3", D5:"D5.mp3" } },
+  baixo: { baseUrl: `${GM}/electric_bass_finger-mp3/`, urls: { E1:"E1.mp3", A1:"A1.mp3", D2:"D2.mp3", G2:"G2.mp3", C3:"C3.mp3", E3:"E3.mp3", A3:"A3.mp3" } },
+  piano: { baseUrl: `${GM}/acoustic_grand_piano-mp3/`, urls: { C3:"C3.mp3", C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3", G5:"G5.mp3", C6:"C6.mp3" } },
+  teclado: { baseUrl: `${GM}/electric_piano_1-mp3/`, urls: { C3:"C3.mp3", C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3", C6:"C6.mp3" } },
+  violino: { baseUrl: `${GM}/violin-mp3/`, urls: { G3:"G3.mp3", D4:"D4.mp3", A4:"A4.mp3", E5:"E5.mp3", A5:"A5.mp3", E6:"E6.mp3" } },
+  sax: { baseUrl: `${GM}/alto_sax-mp3/`, urls: { C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3", G5:"G5.mp3" } },
+  banjo: { baseUrl: `${GM}/banjo-mp3/`, urls: { G3:"G3.mp3", C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3" } },
+  flauta: { baseUrl: `${GM}/recorder-mp3/`, urls: { C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3", G5:"G5.mp3", C6:"C6.mp3" } },
+  bateria: { baseUrl: `${GM}/xylophone-mp3/`, urls: { C4:"C4.mp3", G4:"G4.mp3", C5:"C5.mp3", G5:"G5.mp3", C6:"C6.mp3" } },
+};
+
+const INSTRUMENT_OCTAVE: Record<InstrumentId, number> = {
+  violao: 3, guitarra: 3, baixo: 2, piano: 4, teclado: 4, violino: 4, sax: 4, banjo: 4, flauta: 5, bateria: 4,
+};
+
+const samplerCache = new Map<InstrumentId, { sampler: Tone.Sampler; ready: Promise<void> }>();
+async function getSampler(inst: InstrumentId): Promise<Tone.Sampler | null> {
+  const cfg = SAMPLER_CONFIG[inst];
+  if (!cfg) return null;
+  let entry = samplerCache.get(inst);
+  if (!entry) {
+    let resolveReady!: () => void;
+    let rejectReady!: (e: unknown) => void;
+    const ready = new Promise<void>((res, rej) => { resolveReady = res; rejectReady = rej; });
+    const sampler = new Tone.Sampler({
+      urls: cfg.urls, baseUrl: cfg.baseUrl, release: 1,
+      onload: () => resolveReady(), onerror: (e) => rejectReady(e),
+    }).toDestination();
+    entry = { sampler, ready };
+    samplerCache.set(inst, entry);
+  }
+  try { await entry.ready; } catch (e) {
+    console.error(`Sampler load failed for ${inst}`, e);
+    samplerCache.delete(inst);
+    return null;
+  }
+  return entry.sampler;
+}
 
 export const Route = createFileRoute("/professor")({
   head: () => ({
@@ -183,60 +227,55 @@ function usePitchEngine() {
   return { pitch, error, on, start, stop };
 }
 
-/* ---------- Tom de referência (oscilador simples) ---------- */
+/* ---------- Áudio: som real do instrumento ---------- */
 
-function noteToFreq(name: string, octave: number): number {
-  const semi = pcOf(name);
-  const midi = (octave + 1) * 12 + semi;
-  return 440 * Math.pow(2, (midi - 69) / 12);
+
+async function playTone(name: string, octave = 4, durationMs = 900, instrument: InstrumentId = "piano") {
+  try {
+    await Tone.start();
+    const sampler = await getSampler(instrument);
+    const noteName = `${name}${octave}`;
+    if (sampler) {
+      sampler.triggerAttackRelease(noteName, durationMs / 1000);
+      return;
+    }
+    // fallback synth
+    const synth = new Tone.Synth({ oscillator: { type: "triangle" } }).toDestination();
+    synth.triggerAttackRelease(noteName, durationMs / 1000);
+    setTimeout(() => synth.dispose(), durationMs + 400);
+  } catch (e) { console.error("playTone", e); }
 }
 
-function playTone(name: string, octave = 4, durationMs = 800) {
+async function playChord(pcs: number[], root: string, instrument: InstrumentId = "piano", durationMs = 1600) {
   try {
-    const AC: typeof AudioContext | undefined =
-      window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AC) return;
-    const ctx = new AC();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "triangle";
-    osc.frequency.value = noteToFreq(name, octave);
-    gain.gain.setValueAtTime(0, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + durationMs / 1000);
-    osc.connect(gain).connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + durationMs / 1000 + 0.05);
-    setTimeout(() => ctx.close().catch(() => {}), durationMs + 200);
-  } catch { /* noop */ }
-}
-
-function playChord(pcs: number[], root: string, durationMs = 1400) {
-  try {
-    const AC: typeof AudioContext | undefined =
-      window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AC) return;
-    const ctx = new AC();
+    await Tone.start();
+    const sampler = await getSampler(instrument);
+    const octBase = INSTRUMENT_OCTAVE[instrument] ?? 4;
     const rootPc = pcOf(root);
-    const now = ctx.currentTime;
-    pcs.forEach((semi, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "triangle";
-      const noteName = nameOfPc(rootPc + semi);
-      const octave = 4 + Math.floor((semi) / 12);
-      osc.frequency.value = noteToFreq(noteName, octave);
-      const start = now + i * 0.12;
-      gain.gain.setValueAtTime(0, start);
-      gain.gain.linearRampToValueAtTime(0.18, start + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, start + durationMs / 1000);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(start);
-      osc.stop(start + durationMs / 1000 + 0.05);
-    });
-    setTimeout(() => ctx.close().catch(() => {}), durationMs + 400 + pcs.length * 120);
-  } catch { /* noop */ }
+    const notes: string[] = [];
+    let prevPc = -1;
+    let oct = octBase;
+    for (const semi of pcs) {
+      const pc = (rootPc + semi) % 12;
+      if (prevPc !== -1 && pc <= prevPc) oct++;
+      prevPc = pc;
+      notes.push(`${nameOfPc(pc)}${oct}`);
+    }
+    if (sampler) {
+      const now = Tone.now();
+      // strum-like: cordas em arpejo rápido; teclas/sopros: bloco
+      const isString = instrument === "violao" || instrument === "guitarra" || instrument === "banjo" || instrument === "baixo" || instrument === "ukulele" as InstrumentId;
+      const step = isString ? 0.06 : 0;
+      notes.forEach((n, i) => sampler.triggerAttackRelease(n, durationMs / 1000, now + i * step));
+      return;
+    }
+    const synth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "triangle" } }).toDestination();
+    (synth.volume as Tone.Param<"decibels">).value = -8;
+    synth.triggerAttackRelease(notes, durationMs / 1000);
+    setTimeout(() => synth.dispose(), durationMs + 400);
+  } catch (e) { console.error("playChord", e); }
 }
+
 
 /* ---------- Página ---------- */
 
@@ -296,7 +335,7 @@ function ProfessorPage() {
             {instrument.startingNotes.map((n, i) => (
               <button
                 key={`${n}-${i}`}
-                onClick={() => playTone(n, 4)}
+                onClick={() => playTone(n, INSTRUMENT_OCTAVE[instrumentId], 900, instrumentId)}
                 className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-sm font-semibold text-primary hover:bg-primary/20"
                 title="Ouvir referência"
               >
@@ -382,7 +421,7 @@ function ProfessorPage() {
                 </div>
               </div>
               <button
-                onClick={() => playChord(chord.intervals, root)}
+                onClick={() => playChord(chord.intervals, root, instrumentId)}
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
               >
                 <Volume2 className="h-4 w-4" /> Ouvir o acorde
@@ -403,7 +442,7 @@ function ProfessorPage() {
           <p className="mb-3 text-xs text-muted-foreground">
             Toque as notas do acorde <span className="font-semibold text-foreground">{root}{chord.suffix}</span> uma por uma. O Professor marca cada nota conforme você acerta e mostra a direção certa quando erra.
           </p>
-          <ChordListener chord={chord} root={root} />
+          <ChordListener chord={chord} root={root} instrument={instrumentId} />
         </section>
       </div>
     </div>
@@ -468,7 +507,7 @@ function NoteListener({ notes }: { notes: string[] }) {
 }
 
 /* ---------- Componente: escuta e valida um acorde por partes ---------- */
-function ChordListener({ chord, root }: { chord: ChordKind; root: string }) {
+function ChordListener({ chord, root, instrument }: { chord: ChordKind; root: string; instrument: InstrumentId }) {
   const targetPcs = useMemo(() => chord.intervals.map((s) => (pcOf(root) + s + 120) % 12), [chord, root]);
   const targetNames = useMemo(() => targetPcs.map(nameOfPc), [targetPcs]);
   const [hit, setHit] = useState<Set<number>>(new Set());
@@ -519,7 +558,7 @@ function ChordListener({ chord, root }: { chord: ChordKind; root: string }) {
         >
           {on ? <><Square className="h-4 w-4" /> Parar aula</> : <><Mic className="h-4 w-4" /> Iniciar aula</>}
         </button>
-        <button onClick={() => playChord(chord.intervals, root)} className="inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-xs font-medium text-primary hover:bg-primary/20">
+        <button onClick={() => playChord(chord.intervals, root, instrument)} className="inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-xs font-medium text-primary hover:bg-primary/20">
           <Volume2 className="h-3.5 w-3.5" /> Ouvir referência
         </button>
         <button onClick={reset} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs hover:bg-secondary">
