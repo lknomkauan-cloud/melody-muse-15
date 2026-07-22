@@ -335,7 +335,7 @@ function ProfessorPage() {
             {instrument.startingNotes.map((n, i) => (
               <button
                 key={`${n}-${i}`}
-                onClick={() => playTone(n, 4)}
+                onClick={() => playTone(n, INSTRUMENT_OCTAVE[instrumentId], 900, instrumentId)}
                 className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-sm font-semibold text-primary hover:bg-primary/20"
                 title="Ouvir referência"
               >
