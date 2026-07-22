@@ -1081,39 +1081,33 @@ function MixerStrip({ track, onChange }: { track: Track; onChange: (p: Partial<T
         <EqKnob label="Lo" value={track.low} onChange={(v) => onChange({ low: v })} color="#f87171" />
       </div>
 
-      {/* Reverb send */}
-      <div className="flex w-full flex-col items-center gap-0.5 rounded border border-black/60 bg-black/30 p-1">
-        <span className="text-[8px] font-bold uppercase tracking-widest text-neutral-500">Rev</span>
-        <input
-          type="range"
+      {/* Reverb send + Pan (knobs) */}
+      <div className="flex w-full items-start justify-around rounded border border-black/60 bg-black/30 p-1">
+        <RotaryKnob
+          label="Rev"
+          value={track.reverb}
           min={0}
           max={1}
           step={0.01}
-          value={track.reverb}
-          onChange={(e) => onChange({ reverb: parseFloat(e.target.value) })}
-          className="w-16 accent-purple-400"
-          title={`Reverb send: ${Math.round(track.reverb * 100)}%`}
+          onChange={(v) => onChange({ reverb: v })}
+          color="#c084fc"
+          format={(v) => `${Math.round(v * 100)}%`}
+          resetValue={0}
         />
-        <span className="font-mono text-[8px] text-neutral-400">{Math.round(track.reverb * 100)}%</span>
-      </div>
-
-
-      {/* Pan knob (visual) */}
-      <div className="flex flex-col items-center gap-0.5">
-        <input
-          type="range"
+        <RotaryKnob
+          label="Pan"
+          value={track.pan}
           min={-1}
           max={1}
-          step={0.05}
-          value={track.pan}
-          onChange={(e) => onChange({ pan: parseFloat(e.target.value) })}
-          className="w-14 accent-neutral-300"
-          title="Pan"
+          step={0.02}
+          onChange={(v) => onChange({ pan: v })}
+          color="#e5e5e5"
+          centerDetent
+          resetValue={0}
+          format={(v) => (Math.abs(v) < 0.02 ? "C" : v < 0 ? `${Math.round(v * -100)}L` : `${Math.round(v * 100)}R`)}
         />
-        <span className="font-mono text-[9px] text-neutral-500">
-          {track.pan === 0 ? "C" : track.pan < 0 ? `${Math.round(track.pan * -100)}L` : `${Math.round(track.pan * 100)}R`}
-        </span>
       </div>
+
 
       {/* Fader */}
       <div className="relative flex h-32 w-full items-center justify-center rounded bg-black/50">
