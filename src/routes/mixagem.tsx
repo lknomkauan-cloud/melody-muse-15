@@ -232,7 +232,58 @@ function TeoriaPanel() {
           ))}
         </ul>
       </Section>
+
+      <Section icon={<Download className="h-5 w-5" />} title="Apostilas em PDF para baixar" color="from-rose-500/20 to-transparent">
+        <p>
+          Selecionamos guias completos e gratuitos de mixagem para você baixar e estudar off-line. Clique para abrir o
+          PDF em uma nova aba e salvar no seu dispositivo.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <PdfLink
+            href="https://www.izotope.com/en/learn/mixing-guides.html"
+            title="iZotope — Mixing Guides (completo)"
+            desc="Coletânea profissional cobrindo EQ, compressão, reverb, panorâmica e masterização (EN)."
+          />
+          <PdfLink
+            href="https://cdn.shopify.com/s/files/1/0270/1499/files/The_Ultimate_Mixing_Guide.pdf"
+            title="The Ultimate Mixing Guide (PDF)"
+            desc="Manual didático em PDF com passo a passo do mix profissional (EN)."
+          />
+          <PdfLink
+            href="https://www.soundonsound.com/techniques/mixing-essentials"
+            title="Sound on Sound — Mixing Essentials"
+            desc="Série clássica de artigos técnicos usada em faculdades de áudio (EN)."
+          />
+          <PdfLink
+            href="https://producaomusical.com.br/wp-content/uploads/apostila-mixagem.pdf"
+            title="Apostila de Mixagem (PT-BR)"
+            desc="Guia em português com fundamentos, cadeia de sinal e dicas práticas."
+          />
+        </div>
+      </Section>
     </div>
+  );
+}
+
+function PdfLink({ href, title, desc }: { href: string; title: string; desc: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex items-start gap-3 rounded-lg border border-border bg-background p-4 transition-colors hover:border-primary hover:bg-primary/5"
+    >
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-rose-500/10 text-rose-500">
+        <Download className="h-5 w-5" />
+      </div>
+      <div className="min-w-0">
+        <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+          {title}
+          <ExternalLink className="h-3 w-3 opacity-60 group-hover:opacity-100" />
+        </div>
+        <p className="mt-0.5 text-xs text-muted-foreground">{desc}</p>
+      </div>
+    </a>
   );
 }
 
@@ -277,18 +328,7 @@ function Section({
   );
 }
 
-/* ============================== ESTÚDIO ============================== */
-
-function EstudioPanel() {
-  return (
-    <div className="space-y-6">
-      <StemSeparator />
-      <MultiTrackRecorder />
-    </div>
-  );
-}
-
-/* -------- Stem separator (YouTube) -------- */
+/* ============================== ESTÚDIO (DAW skin) ============================== */
 
 function parseYouTubeId(url: string): string | null {
   try {
@@ -312,17 +352,65 @@ const STEMS = [
   { id: "other", label: "Outros instrumentos", emoji: "🎶" },
 ];
 
-function StemSeparator() {
+type Track = {
+  id: string;
+  name: string;
+  blob: Blob;
+  url: string;
+  buffer?: AudioBuffer;
+  duration: number;
+  color: string;
+  volume: number;
+  pan: number;
+  muted: boolean;
+  solo: boolean;
+};
+
+const TRACK_COLORS = [
+  "#22d3ee", // cyan
+  "#a78bfa", // violet
+  "#f472b6", // pink
+  "#facc15", // amber
+  "#34d399", // emerald
+  "#fb923c", // orange
+  "#60a5fa", // blue
+  "#f87171", // red
+];
+
+function EstudioPanel() {
+  // YouTube reference
   const [url, setUrl] = useState("");
   const [videoId, setVideoId] = useState<string | null>(null);
-  const [active, setActive] = useState<Record<string, boolean>>({});
+  const [removeStems, setRemoveStems] = useState<Record<string, boolean>>({});
 
-  const handleLoad = () => {
-    const id = parseYouTubeId(url);
-    setVideoId(id);
-  };
+  // DAW state
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [recording, setRecording] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+  const [masterVol, setMasterVol] = useState(0.9);
+  const [bpm, setBpm] = useState(120);
 
-  const removed = Object.entries(active).filter(([, v]) => v).map(([k]) => k);
+  const mediaRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<BlobPart[]>([]);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const sourcesRef = useRef<AudioBufferSourceNode[]>([]);
+  const startTimeRef = useRef(0);
+  const rafRef = useRef<number | null>(null);
+
+  // Max timeline duration (min 30s)
+  const maxDur = Math.max(30, ...tracks.map((t) => t.duration || 0));
+
+  useEffect(() => {
+    return () => {
+      tracks.forEach((t) => URL.revokeObjectURL(t.url));
+      audioCtxRef.current?.close().catch(() => {});
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleLoadYT = () => setVideoId(parseYouTubeId(url));
 
   const openExternal = (service: "moises" | "vocalremover" | "lalal") => {
     const map = {
@@ -333,152 +421,10 @@ function StemSeparator() {
     window.open(map[service], "_blank", "noopener");
   };
 
-  return (
-    <section className="rounded-xl border border-border bg-card p-6">
-      <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold text-foreground">
-        <Youtube className="h-5 w-5 text-red-500" /> Isolar instrumentos de uma música do YouTube
-      </h2>
-      <p className="mb-4 text-sm text-muted-foreground">
-        Cole o link da música, escolha o que quer <b>tirar</b> (vocal, bateria, etc.) e estude tocando por cima.
-      </p>
-
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <input
-          type="url"
-          placeholder="https://www.youtube.com/watch?v=..."
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-        />
-        <button
-          onClick={handleLoad}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          Carregar
-        </button>
-      </div>
-
-      {videoId && (
-        <div className="mt-4 aspect-video overflow-hidden rounded-lg border border-border bg-black">
-          <iframe
-            key={videoId}
-            src={`https://www.youtube.com/embed/${videoId}`}
-            className="h-full w-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            title="YouTube player"
-          />
-        </div>
-      )}
-
-      <div className="mt-6">
-        <h3 className="mb-2 text-sm font-semibold text-foreground">Selecione o que quer remover:</h3>
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {STEMS.map((s) => {
-            const on = !!active[s.id];
-            return (
-              <button
-                key={s.id}
-                onClick={() => setActive({ ...active, [s.id]: !on })}
-                className={`flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors ${
-                  on
-                    ? "border-primary bg-primary/10 text-foreground"
-                    : "border-border bg-muted/20 text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  <span className="text-lg">{s.emoji}</span>
-                  {s.label}
-                </span>
-                <span className={`text-xs font-semibold ${on ? "text-primary" : ""}`}>
-                  {on ? "REMOVER" : "manter"}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="mt-6 rounded-lg border border-amber-500/40 bg-amber-500/5 p-4 text-sm">
-        <p className="mb-2 flex items-center gap-2 font-semibold text-amber-600 dark:text-amber-400">
-          <Info className="h-4 w-4" /> Como o Solando gera as stems
-        </p>
-        <p className="text-muted-foreground">
-          A separação de faixas usa IA (modelos como <b>Demucs / Spleeter</b>) e não roda dentro do navegador de forma
-          rápida. Escolhemos os melhores serviços gratuitos/pagos para você processar o áudio e voltar aqui para
-          estudar:
-        </p>
-        {removed.length > 0 && (
-          <p className="mt-2 text-xs text-muted-foreground">
-            Selecionado para remover: <b className="text-foreground">{removed.map((r) => STEMS.find((s) => s.id === r)?.label).join(", ")}</b>
-          </p>
-        )}
-        <div className="mt-3 grid gap-2 sm:grid-cols-3">
-          <ExternalBtn onClick={() => openExternal("moises")} title="Moises.ai" desc="Melhor qualidade, 5 músicas grátis/mês" />
-          <ExternalBtn onClick={() => openExternal("vocalremover")} title="Vocal Remover" desc="Grátis, remove vocal, bateria, baixo" />
-          <ExternalBtn onClick={() => openExternal("lalal")} title="LALAL.AI" desc="Alta fidelidade, várias stems" />
-        </div>
-        <p className="mt-3 text-xs text-muted-foreground">
-          Fluxo: baixe o áudio da música → envie no serviço acima → escolha as stems → volte aqui e toque em cima usando
-          o gravador logo abaixo.
-        </p>
-      </div>
-    </section>
-  );
-}
-
-function ExternalBtn({ onClick, title, desc }: { onClick: () => void; title: string; desc: string }) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex items-start gap-2 rounded-md border border-border bg-background p-3 text-left hover:border-primary"
-    >
-      <ExternalLink className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-      <span>
-        <span className="block text-sm font-semibold text-foreground">{title}</span>
-        <span className="block text-xs text-muted-foreground">{desc}</span>
-      </span>
-    </button>
-  );
-}
-
-/* -------- Multi-track recorder / mixer -------- */
-
-type Track = {
-  id: string;
-  name: string;
-  blob: Blob;
-  url: string;
-  volume: number;
-  pan: number;
-  muted: boolean;
-};
-
-function MultiTrackRecorder() {
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [recording, setRecording] = useState(false);
-  const [playing, setPlaying] = useState(false);
-  const mediaRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<BlobPart[]>([]);
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const sourcesRef = useRef<AudioBufferSourceNode[]>([]);
-
-  useEffect(() => {
-    return () => {
-      tracks.forEach((t) => URL.revokeObjectURL(t.url));
-      audioCtxRef.current?.close();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: false,
-          noiseSuppression: false,
-          autoGainControl: false,
-        },
+        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
       });
       chunksRef.current = [];
       const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
@@ -486,9 +432,18 @@ function MultiTrackRecorder() {
         : "audio/webm";
       const rec = new MediaRecorder(stream, { mimeType: mime });
       rec.ondataavailable = (e) => e.data.size && chunksRef.current.push(e.data);
-      rec.onstop = () => {
+      rec.onstop = async () => {
         const blob = new Blob(chunksRef.current, { type: mime });
         const url = URL.createObjectURL(blob);
+        // decode to get duration
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        let buffer: AudioBuffer | undefined;
+        let duration = 0;
+        try {
+          buffer = await ctx.decodeAudioData(await blob.arrayBuffer());
+          duration = buffer.duration;
+        } catch {}
+        ctx.close().catch(() => {});
         setTracks((prev) => [
           ...prev,
           {
@@ -496,9 +451,13 @@ function MultiTrackRecorder() {
             name: `Faixa ${prev.length + 1}`,
             blob,
             url,
+            buffer,
+            duration,
+            color: TRACK_COLORS[prev.length % TRACK_COLORS.length],
             volume: 0.9,
             pan: 0,
             muted: false,
+            solo: false,
           },
         ]);
         stream.getTracks().forEach((t) => t.stop());
@@ -526,29 +485,49 @@ function MultiTrackRecorder() {
     setTracks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
   };
 
+  const stopAll = () => {
+    sourcesRef.current.forEach((s) => {
+      try { s.stop(); } catch {}
+    });
+    sourcesRef.current = [];
+    audioCtxRef.current?.close().catch(() => {});
+    audioCtxRef.current = null;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+    setPlaying(false);
+    setElapsed(0);
+  };
+
   const playAll = async () => {
     if (tracks.length === 0) return;
     stopAll();
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
     audioCtxRef.current = ctx;
 
+    const anySolo = tracks.some((t) => t.solo);
+    const master = ctx.createGain();
+    master.gain.value = masterVol;
+    master.connect(ctx.destination);
+
     const buffers = await Promise.all(
-      tracks.map(async (t) => ctx.decodeAudioData(await t.blob.arrayBuffer())),
+      tracks.map(async (t) => t.buffer ?? ctx.decodeAudioData(await t.blob.arrayBuffer())),
     );
 
     const startAt = ctx.currentTime + 0.1;
+    startTimeRef.current = startAt;
     const srcs: AudioBufferSourceNode[] = [];
     let maxDuration = 0;
 
     tracks.forEach((t, i) => {
-      if (t.muted) return;
+      const shouldPlay = anySolo ? t.solo && !t.muted : !t.muted;
+      if (!shouldPlay) return;
       const src = ctx.createBufferSource();
       src.buffer = buffers[i];
       const gain = ctx.createGain();
       gain.gain.value = t.volume;
       const panner = ctx.createStereoPanner();
       panner.pan.value = t.pan;
-      src.connect(gain).connect(panner).connect(ctx.destination);
+      src.connect(gain).connect(panner).connect(master);
       src.start(startAt);
       srcs.push(src);
       maxDuration = Math.max(maxDuration, buffers[i].duration);
@@ -556,149 +535,477 @@ function MultiTrackRecorder() {
 
     sourcesRef.current = srcs;
     setPlaying(true);
-    setTimeout(() => setPlaying(false), (maxDuration + 0.2) * 1000);
+
+    const tick = () => {
+      if (!audioCtxRef.current) return;
+      const e = audioCtxRef.current.currentTime - startTimeRef.current;
+      setElapsed(Math.max(0, e));
+      if (e >= maxDuration) {
+        stopAll();
+        return;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
   };
 
-  const stopAll = () => {
-    sourcesRef.current.forEach((s) => {
-      try {
-        s.stop();
-      } catch {}
-    });
-    sourcesRef.current = [];
-    audioCtxRef.current?.close().catch(() => {});
-    audioCtxRef.current = null;
-    setPlaying(false);
+  const removed = Object.entries(removeStems).filter(([, v]) => v).map(([k]) => k);
+
+  const mmss = (s: number) => {
+    const m = Math.floor(s / 60).toString().padStart(2, "0");
+    const sec = Math.floor(s % 60).toString().padStart(2, "0");
+    const ms = Math.floor((s % 1) * 1000).toString().padStart(3, "0");
+    return `${m}:${sec}:${ms}`;
   };
 
   return (
-    <section className="rounded-xl border border-border bg-card p-6">
-      <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold text-foreground">
-        <Mic className="h-5 w-5 text-primary" /> Grave suas faixas e mixe
-      </h2>
-      <p className="mb-4 text-sm text-muted-foreground">
-        Toque por cima da música (com o vídeo do YouTube acima) e grave. Cada gravação vira uma faixa com volume,
-        panorâmica e mute — igual a uma mesa de som.
-      </p>
+    <div className="space-y-6">
+      {/* ============================ DAW ============================ */}
+      <div className="overflow-hidden rounded-xl border border-black/70 bg-[#1e1e1e] text-neutral-200 shadow-2xl ring-1 ring-white/5">
+        {/* Transport bar */}
+        <div className="flex flex-wrap items-center gap-3 border-b border-black/80 bg-gradient-to-b from-[#3a3a3a] to-[#252525] px-4 py-2">
+          <div className="flex items-center gap-1">
+            <TransportBtn onClick={stopAll} title="Parar">
+              <Square className="h-4 w-4 fill-current" />
+            </TransportBtn>
+            <TransportBtn onClick={playing ? stopAll : playAll} disabled={tracks.length === 0} title={playing ? "Pausar" : "Tocar"} accent="emerald">
+              {playing ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current" />}
+            </TransportBtn>
+            <TransportBtn
+              onClick={recording ? stopRecording : startRecording}
+              title={recording ? "Parar gravação" : "Gravar"}
+              accent={recording ? "recording" : "red"}
+            >
+              <Mic className="h-4 w-4" />
+            </TransportBtn>
+          </div>
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        {!recording ? (
-          <button
-            onClick={startRecording}
-            className="flex items-center gap-2 rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600"
-          >
-            <Mic className="h-4 w-4" /> Gravar nova faixa
-          </button>
-        ) : (
-          <button
-            onClick={stopRecording}
-            className="flex items-center gap-2 rounded-md bg-red-500/90 px-4 py-2 text-sm font-medium text-white animate-pulse"
-          >
-            <Square className="h-4 w-4" /> Parar gravação
-          </button>
-        )}
+          <div className="ml-2 rounded-md border border-black/70 bg-[#0d0d0d] px-3 py-1 font-mono text-lg tracking-widest text-emerald-400 shadow-inner">
+            {mmss(elapsed)}
+          </div>
 
-        <button
-          onClick={playing ? stopAll : playAll}
-          disabled={tracks.length === 0}
-          className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
-        >
-          {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          {playing ? "Pausar mix" : "Tocar mix completo"}
-        </button>
+          <div className="flex items-center gap-2 rounded-md border border-black/70 bg-[#0d0d0d] px-3 py-1 text-xs text-neutral-400 shadow-inner">
+            <span>BPM</span>
+            <input
+              type="number"
+              min={40}
+              max={240}
+              value={bpm}
+              onChange={(e) => setBpm(parseInt(e.target.value) || 120)}
+              className="w-14 bg-transparent font-mono text-sm text-neutral-100 outline-none"
+            />
+          </div>
 
-        {tracks.length > 0 && (
-          <span className="ml-auto text-xs text-muted-foreground">
-            {tracks.length} faixa{tracks.length > 1 ? "s" : ""}
-          </span>
-        )}
-      </div>
-
-      {tracks.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border py-12 text-center text-sm text-muted-foreground">
-          Nenhuma faixa ainda. Clique em <b>Gravar nova faixa</b> para começar.
+          <div className="ml-auto flex items-center gap-2 text-xs text-neutral-400">
+            <Sliders className="h-3.5 w-3.5" />
+            <span>Solando DAW</span>
+            <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400">
+              {recording ? "REC" : playing ? "PLAY" : "IDLE"}
+            </span>
+          </div>
         </div>
-      ) : (
-        <div className="space-y-3">
+
+        {/* Arrangement view: track headers + timeline lanes */}
+        <div className="grid grid-cols-[220px_1fr] border-b border-black/80">
+          {/* Ruler row */}
+          <div className="border-b border-r border-black/70 bg-[#2a2a2a] px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
+            Faixas
+          </div>
+          <TimelineRuler duration={maxDur} />
+
+          {/* Empty state */}
+          {tracks.length === 0 && (
+            <>
+              <div className="col-span-2 border-b border-black/70 bg-[#1a1a1a] py-10 text-center text-xs text-neutral-500">
+                Nenhuma faixa. Clique no <Mic className="inline h-3 w-3" /> vermelho na barra de transporte para gravar sua primeira faixa.
+              </div>
+            </>
+          )}
+
+          {/* Tracks */}
           {tracks.map((t) => (
-            <TrackRow key={t.id} track={t} onChange={(p) => updateTrack(t.id, p)} onDelete={() => removeTrack(t.id)} />
+            <TrackLane
+              key={t.id}
+              track={t}
+              duration={maxDur}
+              elapsed={elapsed}
+              onChange={(p) => updateTrack(t.id, p)}
+              onDelete={() => removeTrack(t.id)}
+            />
           ))}
         </div>
-      )}
-    </section>
+
+        {/* Mixer console */}
+        <div className="overflow-x-auto bg-[#161616]">
+          <div className="flex min-w-full items-stretch gap-1 p-3">
+            {tracks.map((t) => (
+              <MixerStrip key={t.id} track={t} onChange={(p) => updateTrack(t.id, p)} />
+            ))}
+            <MasterStrip volume={masterVol} onChange={setMasterVol} />
+          </div>
+        </div>
+      </div>
+
+      {/* ============================ Reference: YouTube ============================ */}
+      <section className="rounded-xl border border-border bg-card p-6">
+        <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold text-foreground">
+          <Youtube className="h-5 w-5 text-red-500" /> Faixa de referência (YouTube)
+        </h2>
+        <p className="mb-4 text-sm text-muted-foreground">
+          Cole o link, toque a música e grave por cima usando a DAW acima — como se fosse um <b>backing track</b>.
+        </p>
+
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <input
+            type="url"
+            placeholder="https://www.youtube.com/watch?v=..."
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+          />
+          <button
+            onClick={handleLoadYT}
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            Carregar
+          </button>
+        </div>
+
+        {videoId && (
+          <div className="mt-4 aspect-video overflow-hidden rounded-lg border border-border bg-black">
+            <iframe
+              key={videoId}
+              src={`https://www.youtube.com/embed/${videoId}`}
+              className="h-full w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title="YouTube player"
+            />
+          </div>
+        )}
+
+        <div className="mt-6">
+          <h3 className="mb-2 text-sm font-semibold text-foreground">Isolar / remover instrumentos:</h3>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {STEMS.map((s) => {
+              const on = !!removeStems[s.id];
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => setRemoveStems({ ...removeStems, [s.id]: !on })}
+                  className={`flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors ${
+                    on
+                      ? "border-primary bg-primary/10 text-foreground"
+                      : "border-border bg-muted/20 text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="text-lg">{s.emoji}</span>
+                    {s.label}
+                  </span>
+                  <span className={`text-xs font-semibold ${on ? "text-primary" : ""}`}>
+                    {on ? "REMOVER" : "manter"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mt-6 rounded-lg border border-amber-500/40 bg-amber-500/5 p-4 text-sm">
+          <p className="mb-2 flex items-center gap-2 font-semibold text-amber-600 dark:text-amber-400">
+            <Info className="h-4 w-4" /> Serviços de separação por IA
+          </p>
+          {removed.length > 0 && (
+            <p className="mb-2 text-xs text-muted-foreground">
+              Selecionado para remover: <b className="text-foreground">{removed.map((r) => STEMS.find((s) => s.id === r)?.label).join(", ")}</b>
+            </p>
+          )}
+          <div className="grid gap-2 sm:grid-cols-3">
+            <ExternalBtn onClick={() => openExternal("moises")} title="Moises.ai" desc="Melhor qualidade, 5 músicas grátis/mês" />
+            <ExternalBtn onClick={() => openExternal("vocalremover")} title="Vocal Remover" desc="Grátis, remove vocal, bateria, baixo" />
+            <ExternalBtn onClick={() => openExternal("lalal")} title="LALAL.AI" desc="Alta fidelidade, várias stems" />
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
 
-function TrackRow({
+/* ---------- DAW sub-components ---------- */
+
+function TransportBtn({
+  children,
+  onClick,
+  disabled,
+  title,
+  accent,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+  title: string;
+  accent?: "emerald" | "red" | "recording";
+}) {
+  const accentClass =
+    accent === "emerald"
+      ? "text-emerald-400 hover:bg-emerald-500/10"
+      : accent === "red"
+        ? "text-red-400 hover:bg-red-500/10"
+        : accent === "recording"
+          ? "bg-red-500/20 text-red-400 ring-1 ring-red-500 animate-pulse"
+          : "text-neutral-300 hover:bg-white/5";
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      className={`flex h-9 w-9 items-center justify-center rounded-md border border-black/60 bg-[#1a1a1a] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors disabled:opacity-30 ${accentClass}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function TimelineRuler({ duration }: { duration: number }) {
+  const step = duration > 60 ? 10 : duration > 30 ? 5 : 2;
+  const marks: number[] = [];
+  for (let s = 0; s <= duration; s += step) marks.push(s);
+  return (
+    <div className="relative h-6 border-b border-black/70 bg-[#2a2a2a]">
+      {marks.map((s) => (
+        <div
+          key={s}
+          className="absolute top-0 h-full border-l border-neutral-600/60 pl-1 text-[10px] font-mono text-neutral-500"
+          style={{ left: `${(s / duration) * 100}%` }}
+        >
+          {s}s
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TrackLane({
   track,
+  duration,
+  elapsed,
   onChange,
   onDelete,
 }: {
   track: Track;
+  duration: number;
+  elapsed: number;
   onChange: (p: Partial<Track>) => void;
   onDelete: () => void;
 }) {
+  const clipWidth = duration > 0 ? (track.duration / duration) * 100 : 0;
+  const playheadPct = duration > 0 ? Math.min(100, (elapsed / duration) * 100) : 0;
+  const hasPlayhead = elapsed > 0;
+
   return (
-    <div className="rounded-lg border border-border bg-muted/20 p-4">
-      <div className="flex flex-wrap items-center gap-3">
+    <>
+      {/* Header */}
+      <div className="flex items-center gap-2 border-b border-r border-black/70 bg-[#252525] px-2 py-2">
+        <div className="h-8 w-1 shrink-0 rounded" style={{ background: track.color }} />
         <input
           value={track.name}
           onChange={(e) => onChange({ name: e.target.value })}
-          className="w-40 rounded-md border border-input bg-background px-2 py-1 text-sm"
+          className="min-w-0 flex-1 rounded bg-transparent px-1 py-0.5 text-xs font-semibold text-neutral-100 outline-none hover:bg-white/5 focus:bg-white/10"
         />
-        <audio controls src={track.url} className="h-8 flex-1 min-w-[200px]" />
+        <button
+          onClick={() => onChange({ muted: !track.muted })}
+          title="Mute"
+          className={`flex h-6 w-6 items-center justify-center rounded text-[10px] font-bold ${
+            track.muted ? "bg-red-500 text-white" : "bg-black/40 text-neutral-400 hover:text-white"
+          }`}
+        >
+          M
+        </button>
+        <button
+          onClick={() => onChange({ solo: !track.solo })}
+          title="Solo"
+          className={`flex h-6 w-6 items-center justify-center rounded text-[10px] font-bold ${
+            track.solo ? "bg-yellow-400 text-black" : "bg-black/40 text-neutral-400 hover:text-white"
+          }`}
+        >
+          S
+        </button>
         <a
           href={track.url}
           download={`${track.name}.webm`}
-          className="rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
           title="Baixar"
+          className="flex h-6 w-6 items-center justify-center rounded bg-black/40 text-neutral-400 hover:text-white"
         >
-          <Download className="h-4 w-4" />
+          <Download className="h-3 w-3" />
         </a>
         <button
           onClick={onDelete}
-          className="rounded-md p-2 text-muted-foreground hover:bg-red-500/10 hover:text-red-500"
-          title="Excluir faixa"
+          title="Excluir"
+          className="flex h-6 w-6 items-center justify-center rounded bg-black/40 text-neutral-400 hover:bg-red-500/30 hover:text-red-400"
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-3 w-3" />
         </button>
       </div>
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-3">
-        <label className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Volume2 className="h-3.5 w-3.5" /> Volume {Math.round(track.volume * 100)}%
-          <input
-            type="range"
-            min={0}
-            max={1.5}
-            step={0.01}
-            value={track.volume}
-            onChange={(e) => onChange({ volume: parseFloat(e.target.value) })}
-            className="flex-1 accent-primary"
+      {/* Lane */}
+      <div className="relative h-16 border-b border-black/70 bg-[repeating-linear-gradient(90deg,#1a1a1a_0,#1a1a1a_39px,#222_39px,#222_40px)]">
+        {/* clip */}
+        <div
+          className="absolute top-1 bottom-1 overflow-hidden rounded"
+          style={{
+            left: 0,
+            width: `${clipWidth}%`,
+            background: `linear-gradient(180deg, ${track.color}66, ${track.color}22)`,
+            border: `1px solid ${track.color}`,
+            opacity: track.muted ? 0.3 : 1,
+          }}
+        >
+          <FakeWaveform color={track.color} />
+          <div className="absolute left-1 top-1 text-[10px] font-semibold text-white/90 mix-blend-screen">
+            {track.name}
+          </div>
+        </div>
+        {/* playhead */}
+        {hasPlayhead && (
+          <div
+            className="pointer-events-none absolute top-0 bottom-0 w-px bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]"
+            style={{ left: `${playheadPct}%` }}
           />
-        </label>
-        <label className="flex items-center gap-2 text-xs text-muted-foreground">
-          Pan {track.pan === 0 ? "C" : track.pan < 0 ? `${Math.round(track.pan * -100)}L` : `${Math.round(track.pan * 100)}R`}
-          <input
-            type="range"
-            min={-1}
-            max={1}
-            step={0.05}
-            value={track.pan}
-            onChange={(e) => onChange({ pan: parseFloat(e.target.value) })}
-            className="flex-1 accent-primary"
-          />
-        </label>
-        <label className="flex items-center gap-2 text-xs">
-          <input
-            type="checkbox"
-            checked={track.muted}
-            onChange={(e) => onChange({ muted: e.target.checked })}
-            className="accent-primary"
-          />
-          <span className={track.muted ? "text-red-500 font-semibold" : "text-muted-foreground"}>Mudo</span>
-        </label>
+        )}
       </div>
+    </>
+  );
+}
+
+function FakeWaveform({ color }: { color: string }) {
+  // deterministic pseudo-waveform bars
+  const bars = 60;
+  return (
+    <svg className="h-full w-full" viewBox={`0 0 ${bars} 20`} preserveAspectRatio="none">
+      {Array.from({ length: bars }).map((_, i) => {
+        const h = 4 + Math.abs(Math.sin(i * 0.7) * 8 + Math.cos(i * 1.3) * 6);
+        return (
+          <rect
+            key={i}
+            x={i + 0.2}
+            y={(20 - h) / 2}
+            width={0.6}
+            height={h}
+            fill={color}
+            opacity={0.75}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+function MixerStrip({ track, onChange }: { track: Track; onChange: (p: Partial<Track>) => void }) {
+  return (
+    <div className="flex w-20 shrink-0 flex-col items-center gap-2 rounded-md border border-black/70 bg-gradient-to-b from-[#2a2a2a] to-[#1c1c1c] p-2 shadow-inner">
+      <div className="h-1.5 w-full rounded" style={{ background: track.color }} />
+      <div className="w-full truncate text-center text-[10px] font-semibold text-neutral-200" title={track.name}>
+        {track.name}
+      </div>
+
+      {/* Pan knob (visual) */}
+      <div className="flex flex-col items-center gap-0.5">
+        <input
+          type="range"
+          min={-1}
+          max={1}
+          step={0.05}
+          value={track.pan}
+          onChange={(e) => onChange({ pan: parseFloat(e.target.value) })}
+          className="w-14 accent-neutral-300"
+          title="Pan"
+        />
+        <span className="font-mono text-[9px] text-neutral-500">
+          {track.pan === 0 ? "C" : track.pan < 0 ? `${Math.round(track.pan * -100)}L` : `${Math.round(track.pan * 100)}R`}
+        </span>
+      </div>
+
+      {/* Fader */}
+      <div className="relative flex h-32 w-full items-center justify-center rounded bg-black/50">
+        <input
+          type="range"
+          min={0}
+          max={1.5}
+          step={0.01}
+          value={track.volume}
+          onChange={(e) => onChange({ volume: parseFloat(e.target.value) })}
+          className="h-28 w-2 rotate-0 appearance-none rounded bg-neutral-700 accent-emerald-400"
+          // vertical range
+          style={{ writingMode: "vertical-lr" as any, direction: "rtl" as any }}
+        />
+      </div>
+      <span className="font-mono text-[10px] text-neutral-400">
+        {(20 * Math.log10(Math.max(0.001, track.volume))).toFixed(1)} dB
+      </span>
+
+      <div className="flex w-full gap-1">
+        <button
+          onClick={() => onChange({ muted: !track.muted })}
+          className={`flex-1 rounded py-0.5 text-[9px] font-bold ${
+            track.muted ? "bg-red-500 text-white" : "bg-black/40 text-neutral-400 hover:text-white"
+          }`}
+        >
+          M
+        </button>
+        <button
+          onClick={() => onChange({ solo: !track.solo })}
+          className={`flex-1 rounded py-0.5 text-[9px] font-bold ${
+            track.solo ? "bg-yellow-400 text-black" : "bg-black/40 text-neutral-400 hover:text-white"
+          }`}
+        >
+          S
+        </button>
+      </div>
+
+      {/* Playback preview */}
+      <audio controls src={track.url} className="h-6 w-full" />
     </div>
   );
 }
+
+function MasterStrip({ volume, onChange }: { volume: number; onChange: (v: number) => void }) {
+  return (
+    <div className="ml-2 flex w-24 shrink-0 flex-col items-center gap-2 rounded-md border border-emerald-900/60 bg-gradient-to-b from-[#1e2a24] to-[#0f1a15] p-2 shadow-inner ring-1 ring-emerald-500/20">
+      <div className="h-1.5 w-full rounded bg-emerald-400" />
+      <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Master</div>
+      <div className="relative flex h-32 w-full items-center justify-center rounded bg-black/60">
+        <input
+          type="range"
+          min={0}
+          max={1.5}
+          step={0.01}
+          value={volume}
+          onChange={(e) => onChange(parseFloat(e.target.value))}
+          className="h-28 w-2 appearance-none rounded bg-neutral-700 accent-emerald-400"
+          style={{ writingMode: "vertical-lr" as any, direction: "rtl" as any }}
+        />
+      </div>
+      <span className="font-mono text-[10px] text-emerald-400">
+        {(20 * Math.log10(Math.max(0.001, volume))).toFixed(1)} dB
+      </span>
+      <div className="mt-auto text-[9px] uppercase text-neutral-500">Out</div>
+    </div>
+  );
+}
+
+function ExternalBtn({ onClick, title, desc }: { onClick: () => void; title: string; desc: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-start gap-2 rounded-md border border-border bg-background p-3 text-left hover:border-primary"
+    >
+      <ExternalLink className="mt-0.5 h-4 w-4 text-primary shrink-0" />
+      <span>
+        <span className="block text-sm font-semibold text-foreground">{title}</span>
+        <span className="block text-xs text-muted-foreground">{desc}</span>
+      </span>
+    </button>
+  );
+}
+
