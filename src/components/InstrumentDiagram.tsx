@@ -2,18 +2,18 @@ const CHROMATIC = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "
 const ENHARMONIC: Record<string, string> = { Db: "C#", Eb: "D#", Gb: "F#", Ab: "G#", Bb: "A#", Cb: "B" };
 const pc = (n: string) => CHROMATIC.indexOf(ENHARMONIC[n] ?? n);
 
-// Tokens do design system (Tailwind v4 / oklch) usados como cores CSS diretas em SVG
+// Paleta monocromática (preto e branco) para diagramas de instrumentos
 const C = {
-  primary: "var(--primary)",
-  primaryFg: "var(--primary-foreground)",
-  bg: "var(--background)",
-  fg: "var(--foreground)",
-  muted: "var(--muted)",
-  mutedFg: "var(--muted-foreground)",
-  border: "var(--border)",
-  primarySoft: "color-mix(in oklch, var(--primary) 25%, transparent)",
-  primaryMid: "color-mix(in oklch, var(--primary) 65%, transparent)",
-  fgSoft: "color-mix(in oklch, var(--foreground) 15%, transparent)",
+  primary: "#000000",
+  primaryFg: "#ffffff",
+  bg: "#ffffff",
+  fg: "#000000",
+  muted: "#f4f4f4",
+  mutedFg: "#555555",
+  border: "#999999",
+  primarySoft: "#ffffff",
+  primaryMid: "#e5e5e5",
+  fgSoft: "#00000026",
 };
 
 export type InstrumentId = "violao" | "guitarra" | "baixo" | "piano" | "teclado" | "sax" | "violino" | "bateria" | "banjo" | "flauta";
