@@ -390,32 +390,71 @@ function EstudioPanel() {
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
-      });
+      const audioConstraints: MediaTrackConstraints = {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+      };
+
+      let micStream: MediaStream | null = null;
+      let sysStream: MediaStream | null = null;
+
+      if (source === "mic" || source === "both") {
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
+      }
+      if (source === "system" || source === "both") {
+        // Captura áudio do sistema/aba (Chrome/Edge desktop: escolher "Compartilhar áudio")
+        const gdm = (navigator.mediaDevices as any).getDisplayMedia;
+        if (!gdm) throw new Error("Seu navegador não suporta captura de áudio do sistema. Use Chrome/Edge no desktop.");
+        sysStream = await gdm.call(navigator.mediaDevices, {
+          video: true, // exigido por alguns navegadores; descartamos o vídeo
+          audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+        });
+        const audioTracks = sysStream!.getAudioTracks();
+        if (audioTracks.length === 0) {
+          sysStream!.getTracks().forEach((t) => t.stop());
+          throw new Error("Nenhum áudio do sistema detectado. Marque 'Compartilhar áudio da aba/tela' na janela do navegador.");
+        }
+        // descarta vídeo (só queremos áudio)
+        sysStream!.getVideoTracks().forEach((t) => t.stop());
+      }
+
+      // Mistura streams se necessário (mic + sistema)
+      let finalStream: MediaStream;
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const dest = ctx.createMediaStreamDestination();
+      const attach = (s: MediaStream | null) => {
+        if (!s || s.getAudioTracks().length === 0) return;
+        const src = ctx.createMediaStreamSource(new MediaStream(s.getAudioTracks()));
+        src.connect(dest);
+      };
+      attach(micStream);
+      attach(sysStream);
+      finalStream = dest.stream;
+
       chunksRef.current = [];
       const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? "audio/webm;codecs=opus"
         : "audio/webm";
-      const rec = new MediaRecorder(stream, { mimeType: mime });
+      const rec = new MediaRecorder(finalStream, { mimeType: mime });
+      const srcLabel = source === "mic" ? "Mic" : source === "system" ? "Sistema" : "Mic+Sistema";
       rec.ondataavailable = (e) => e.data.size && chunksRef.current.push(e.data);
       rec.onstop = async () => {
         const blob = new Blob(chunksRef.current, { type: mime });
         const url = URL.createObjectURL(blob);
-        // decode to get duration
-        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const decCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
         let buffer: AudioBuffer | undefined;
         let duration = 0;
         try {
-          buffer = await ctx.decodeAudioData(await blob.arrayBuffer());
+          buffer = await decCtx.decodeAudioData(await blob.arrayBuffer());
           duration = buffer.duration;
         } catch {}
-        ctx.close().catch(() => {});
+        decCtx.close().catch(() => {});
         setTracks((prev) => [
           ...prev,
           {
             id: crypto.randomUUID(),
-            name: `Faixa ${prev.length + 1}`,
+            name: `${srcLabel} ${prev.length + 1}`,
             blob,
             url,
             buffer,
@@ -427,13 +466,15 @@ function EstudioPanel() {
             solo: false,
           },
         ]);
-        stream.getTracks().forEach((t) => t.stop());
+        micStream?.getTracks().forEach((t) => t.stop());
+        sysStream?.getTracks().forEach((t) => t.stop());
+        ctx.close().catch(() => {});
       };
       rec.start();
       mediaRef.current = rec;
       setRecording(true);
     } catch (err) {
-      alert("Não foi possível acessar o microfone: " + (err as Error).message);
+      alert("Não foi possível iniciar a gravação: " + (err as Error).message);
     }
   };
 
