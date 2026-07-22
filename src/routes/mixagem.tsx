@@ -1012,3 +1012,169 @@ function ExternalBtn({ onClick, title, desc }: { onClick: () => void; title: str
   );
 }
 
+/* ---------- Vocal Remover (center-channel cancellation, offline) ---------- */
+
+function audioBufferToWav(buffer: AudioBuffer): Blob {
+  const numCh = buffer.numberOfChannels;
+  const sampleRate = buffer.sampleRate;
+  const length = buffer.length * numCh * 2 + 44;
+  const ab = new ArrayBuffer(length);
+  const view = new DataView(ab);
+  const writeStr = (o: number, s: string) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+  writeStr(0, "RIFF");
+  view.setUint32(4, length - 8, true);
+  writeStr(8, "WAVE"); writeStr(12, "fmt ");
+  view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+  view.setUint16(22, numCh, true); view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * numCh * 2, true);
+  view.setUint16(32, numCh * 2, true); view.setUint16(34, 16, true);
+  writeStr(36, "data"); view.setUint32(40, length - 44, true);
+  let offset = 44;
+  const chans: Float32Array[] = [];
+  for (let c = 0; c < numCh; c++) chans.push(buffer.getChannelData(c));
+  for (let i = 0; i < buffer.length; i++) {
+    for (let c = 0; c < numCh; c++) {
+      const s = Math.max(-1, Math.min(1, chans[c][i]));
+      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+      offset += 2;
+    }
+  }
+  return new Blob([ab], { type: "audio/wav" });
+}
+
+function VocalRemoverPanel() {
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [status, setStatus] = useState<string>("");
+  const [progress, setProgress] = useState(0);
+  const [originalUrl, setOriginalUrl] = useState<string | null>(null);
+  const [processedUrl, setProcessedUrl] = useState<string | null>(null);
+  const [mode, setMode] = useState<"karaoke" | "acapella">("karaoke");
+
+  const processFile = async (file: File) => {
+    setStatus("Lendo arquivo…"); setProgress(10);
+    setProcessedUrl(null);
+    const arrayBuf = await file.arrayBuffer();
+    setStatus("Decodificando áudio…"); setProgress(30);
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const ctx = new AC();
+    const decoded = await ctx.decodeAudioData(arrayBuf.slice(0));
+    setOriginalUrl(URL.createObjectURL(file));
+
+    if (decoded.numberOfChannels < 2) {
+      setStatus("⚠️ Este arquivo é mono. A remoção de vocal por cancelamento de canal exige áudio estéreo.");
+      setProgress(0); ctx.close();
+      return;
+    }
+
+    setStatus(mode === "karaoke" ? "Removendo vocal (L − R)…" : "Isolando vocal (L + R centro)…");
+    setProgress(60);
+
+    const out = ctx.createBuffer(2, decoded.length, decoded.sampleRate);
+    const L = decoded.getChannelData(0);
+    const R = decoded.getChannelData(1);
+    const oL = out.getChannelData(0);
+    const oR = out.getChannelData(1);
+    if (mode === "karaoke") {
+      for (let i = 0; i < decoded.length; i++) {
+        const diff = (L[i] - R[i]) * 0.7;
+        oL[i] = diff; oR[i] = -diff;
+      }
+    } else {
+      for (let i = 0; i < decoded.length; i++) {
+        const side = L[i] - R[i];
+        const center = (L[i] + R[i]) * 0.5 - side * 0.5;
+        oL[i] = center; oR[i] = center;
+      }
+    }
+
+    setStatus("Codificando WAV…"); setProgress(85);
+    const blob = audioBufferToWav(out);
+    setProcessedUrl(URL.createObjectURL(blob));
+    setStatus("✅ Pronto! Ouça abaixo ou baixe o resultado.");
+    setProgress(100);
+    ctx.close();
+  };
+
+  const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setFileName(f.name);
+    processFile(f).catch((err) => setStatus(`Erro: ${err instanceof Error ? err.message : String(err)}`));
+  };
+
+  return (
+    <div className="rounded-lg border border-primary/40 bg-primary/5 p-4">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          🎧 Removedor de Vocal (integrado — processa no seu navegador)
+        </p>
+        <a
+          href="https://vocalremover.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-muted-foreground underline hover:text-foreground"
+        >
+          Técnica inspirada em vocalremover.org
+        </a>
+      </div>
+      <p className="mb-3 text-xs text-muted-foreground">
+        Envie um MP3/WAV <b>estéreo</b>. Usamos cancelamento de canal central (L−R) para remover o vocal, ou isolamento central para extrair só o vocal. Funciona offline, sem enviar áudio para nenhum servidor. Qualidade depende da mixagem original.
+      </p>
+
+      <div className="mb-3 flex gap-2">
+        <button
+          onClick={() => setMode("karaoke")}
+          className={`rounded-md border px-3 py-1.5 text-xs font-medium ${mode === "karaoke" ? "border-primary bg-primary/20 text-foreground" : "border-border text-muted-foreground"}`}
+        >
+          🎤 Remover Vocal (karaokê)
+        </button>
+        <button
+          onClick={() => setMode("acapella")}
+          className={`rounded-md border px-3 py-1.5 text-xs font-medium ${mode === "acapella" ? "border-primary bg-primary/20 text-foreground" : "border-border text-muted-foreground"}`}
+        >
+          🎙️ Isolar Vocal (acapella)
+        </button>
+      </div>
+
+      <label className="mb-3 flex cursor-pointer items-center justify-center gap-2 rounded-md border-2 border-dashed border-border bg-background/50 p-6 text-sm text-muted-foreground hover:border-primary hover:text-foreground">
+        <input type="file" accept="audio/*" onChange={onPick} className="hidden" />
+        📁 {fileName ? `Trocar arquivo (${fileName})` : "Selecionar arquivo de áudio"}
+      </label>
+
+      {status && (
+        <div className="mb-3">
+          <p className="mb-1 text-xs text-muted-foreground">{status}</p>
+          {progress > 0 && progress < 100 && (
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div className="h-full bg-primary transition-all" style={{ width: `${progress}%` }} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {originalUrl && (
+        <div className="mb-2">
+          <p className="mb-1 text-xs font-semibold text-muted-foreground">Original:</p>
+          <audio controls src={originalUrl} className="w-full" />
+        </div>
+      )}
+      {processedUrl && (
+        <div>
+          <p className="mb-1 text-xs font-semibold text-muted-foreground">
+            Resultado ({mode === "karaoke" ? "sem vocal" : "só vocal"}):
+          </p>
+          <audio controls src={processedUrl} className="w-full" />
+          <a
+            href={processedUrl}
+            download={`${fileName?.replace(/\.[^.]+$/, "") ?? "audio"}-${mode}.wav`}
+            className="mt-2 inline-flex items-center gap-2 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            <Download className="h-3.5 w-3.5" /> Baixar WAV
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
