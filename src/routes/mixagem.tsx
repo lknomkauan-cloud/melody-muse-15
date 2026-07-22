@@ -895,6 +895,52 @@ function FakeWaveform({ color }: { color: string }) {
   );
 }
 
+function makeImpulseResponse(ctx: AudioContext, duration = 2.5, decay = 2.2): AudioBuffer {
+  const rate = ctx.sampleRate;
+  const len = Math.max(1, Math.floor(rate * duration));
+  const impulse = ctx.createBuffer(2, len, rate);
+  for (let ch = 0; ch < 2; ch++) {
+    const data = impulse.getChannelData(ch);
+    for (let i = 0; i < len; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
+    }
+  }
+  return impulse;
+}
+
+function EqKnob({
+  label,
+  value,
+  onChange,
+  color = "#a3a3a3",
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  color?: string;
+}) {
+  return (
+    <div className="flex w-full flex-col items-center gap-0.5">
+      <span className="text-[8px] font-bold uppercase tracking-wider text-neutral-500">{label}</span>
+      <input
+        type="range"
+        min={-12}
+        max={12}
+        step={0.5}
+        value={value}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+        className="w-14"
+        style={{ accentColor: color }}
+        title={`${label}: ${value > 0 ? "+" : ""}${value.toFixed(1)} dB`}
+      />
+      <span className="font-mono text-[8px] text-neutral-400">
+        {value > 0 ? "+" : ""}
+        {value.toFixed(1)}
+      </span>
+    </div>
+  );
+}
+
 function MixerStrip({ track, onChange }: { track: Track; onChange: (p: Partial<Track>) => void }) {
   return (
     <div className="flex w-20 shrink-0 flex-col items-center gap-2 rounded-md border border-black/70 bg-gradient-to-b from-[#2a2a2a] to-[#1c1c1c] p-2 shadow-inner">
