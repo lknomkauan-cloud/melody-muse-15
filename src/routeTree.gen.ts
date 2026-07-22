@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as QuizRouteImport } from './routes/quiz'
+import { Route as ProfessorRouteImport } from './routes/professor'
 import { Route as MetronomoRouteImport } from './routes/metronomo'
 import { Route as EstudarRouteImport } from './routes/estudar'
 import { Route as EscalasRouteImport } from './routes/escalas'
@@ -25,6 +26,11 @@ import { Route as EstudarInstrumentoRouteImport } from './routes/estudar.$instru
 const QuizRoute = QuizRouteImport.update({
   id: '/quiz',
   path: '/quiz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfessorRoute = ProfessorRouteImport.update({
+  id: '/professor',
+  path: '/professor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MetronomoRoute = MetronomoRouteImport.update({
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/escalas': typeof EscalasRoute
   '/estudar': typeof EstudarRouteWithChildren
   '/metronomo': typeof MetronomoRoute
+  '/professor': typeof ProfessorRoute
   '/quiz': typeof QuizRoute
   '/estudar/$instrumento': typeof EstudarInstrumentoRoute
   '/sitemap/xml': typeof SitemapXmlRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/escalas': typeof EscalasRoute
   '/estudar': typeof EstudarRouteWithChildren
   '/metronomo': typeof MetronomoRoute
+  '/professor': typeof ProfessorRoute
   '/quiz': typeof QuizRoute
   '/estudar/$instrumento': typeof EstudarInstrumentoRoute
   '/sitemap/xml': typeof SitemapXmlRoute
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/escalas': typeof EscalasRoute
   '/estudar': typeof EstudarRouteWithChildren
   '/metronomo': typeof MetronomoRoute
+  '/professor': typeof ProfessorRoute
   '/quiz': typeof QuizRoute
   '/estudar/$instrumento': typeof EstudarInstrumentoRoute
   '/sitemap/xml': typeof SitemapXmlRoute
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
     | '/escalas'
     | '/estudar'
     | '/metronomo'
+    | '/professor'
     | '/quiz'
     | '/estudar/$instrumento'
     | '/sitemap/xml'
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/escalas'
     | '/estudar'
     | '/metronomo'
+    | '/professor'
     | '/quiz'
     | '/estudar/$instrumento'
     | '/sitemap/xml'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/escalas'
     | '/estudar'
     | '/metronomo'
+    | '/professor'
     | '/quiz'
     | '/estudar/$instrumento'
     | '/sitemap/xml'
@@ -181,6 +193,7 @@ export interface RootRouteChildren {
   EscalasRoute: typeof EscalasRoute
   EstudarRoute: typeof EstudarRouteWithChildren
   MetronomoRoute: typeof MetronomoRoute
+  ProfessorRoute: typeof ProfessorRoute
   QuizRoute: typeof QuizRoute
   SitemapXmlRoute: typeof SitemapXmlRoute
 }
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       path: '/quiz'
       fullPath: '/quiz'
       preLoaderRoute: typeof QuizRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/professor': {
+      id: '/professor'
+      path: '/professor'
+      fullPath: '/professor'
+      preLoaderRoute: typeof ProfessorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/metronomo': {
@@ -295,6 +315,7 @@ const rootRouteChildren: RootRouteChildren = {
   EscalasRoute: EscalasRoute,
   EstudarRoute: EstudarRouteWithChildren,
   MetronomoRoute: MetronomoRoute,
+  ProfessorRoute: ProfessorRoute,
   QuizRoute: QuizRoute,
   SitemapXmlRoute: SitemapXmlRoute,
 }
