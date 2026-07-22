@@ -255,32 +255,52 @@ function playTone(name: string, octave = 4, durationMs = 800) {
   } catch { /* noop */ }
 }
 
-function playChord(pcs: number[], root: string, durationMs = 1400) {
+async function playTone(name: string, octave = 4, durationMs = 900, instrument: InstrumentId = "piano") {
   try {
-    const AC: typeof AudioContext | undefined =
-      window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AC) return;
-    const ctx = new AC();
-    const rootPc = pcOf(root);
-    const now = ctx.currentTime;
-    pcs.forEach((semi, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "triangle";
-      const noteName = nameOfPc(rootPc + semi);
-      const octave = 4 + Math.floor((semi) / 12);
-      osc.frequency.value = noteToFreq(noteName, octave);
-      const start = now + i * 0.12;
-      gain.gain.setValueAtTime(0, start);
-      gain.gain.linearRampToValueAtTime(0.18, start + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, start + durationMs / 1000);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(start);
-      osc.stop(start + durationMs / 1000 + 0.05);
-    });
-    setTimeout(() => ctx.close().catch(() => {}), durationMs + 400 + pcs.length * 120);
-  } catch { /* noop */ }
+    await Tone.start();
+    const sampler = await getSampler(instrument);
+    const noteName = `${name}${octave}`;
+    if (sampler) {
+      sampler.triggerAttackRelease(noteName, durationMs / 1000);
+      return;
+    }
+    // fallback synth
+    const synth = new Tone.Synth({ oscillator: { type: "triangle" } }).toDestination();
+    synth.triggerAttackRelease(noteName, durationMs / 1000);
+    setTimeout(() => synth.dispose(), durationMs + 400);
+  } catch (e) { console.error("playTone", e); }
 }
+
+async function playChord(pcs: number[], root: string, instrument: InstrumentId = "piano", durationMs = 1600) {
+  try {
+    await Tone.start();
+    const sampler = await getSampler(instrument);
+    const octBase = INSTRUMENT_OCTAVE[instrument] ?? 4;
+    const rootPc = pcOf(root);
+    const notes: string[] = [];
+    let prevPc = -1;
+    let oct = octBase;
+    for (const semi of pcs) {
+      const pc = (rootPc + semi) % 12;
+      if (prevPc !== -1 && pc <= prevPc) oct++;
+      prevPc = pc;
+      notes.push(`${nameOfPc(pc)}${oct}`);
+    }
+    if (sampler) {
+      const now = Tone.now();
+      // strum-like: cordas em arpejo rápido; teclas/sopros: bloco
+      const isString = instrument === "violao" || instrument === "guitarra" || instrument === "banjo" || instrument === "baixo" || instrument === "ukulele" as InstrumentId;
+      const step = isString ? 0.06 : 0;
+      notes.forEach((n, i) => sampler.triggerAttackRelease(n, durationMs / 1000, now + i * step));
+      return;
+    }
+    const synth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "triangle" } }).toDestination();
+    (synth.volume as Tone.Param<"decibels">).value = -8;
+    synth.triggerAttackRelease(notes, durationMs / 1000);
+    setTimeout(() => synth.dispose(), durationMs + 400);
+  } catch (e) { console.error("playChord", e); }
+}
+
 
 /* ---------- Página ---------- */
 
