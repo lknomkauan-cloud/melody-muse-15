@@ -135,16 +135,16 @@ function Fretboard({
                       cx={cx}
                       cy={y}
                       r={10}
-                      fill={isRoot ? C.primary : C.bg}
-                      stroke={C.primary}
-                      strokeWidth={1.8}
+                      fill="#ffffff"
+                      stroke="#000000"
+                      strokeWidth={isRoot ? 2.6 : 1.4}
                     />
                     <text
                       x={cx}
                       y={y + 3.5}
                       fontSize={9}
                       textAnchor="middle"
-                      fill={isRoot ? C.primaryFg : C.primary}
+                      fill="#000000"
                       fontWeight={700}
                     >
                       {CHROMATIC[note]}
@@ -222,8 +222,8 @@ function Piano({ rootPc, pentPcs }: { rootPc: number; pentPcs: Set<number> }) {
               />
               {on && (
                 <>
-                  <circle cx={cx} cy={cy} r={11} fill={isRoot ? C.primary : C.primarySoft} stroke={C.primary} strokeWidth={isRoot ? 2 : 1} />
-                  <text x={cx} y={cy + 4} fontSize={11} textAnchor="middle" fontWeight={700} fill={isRoot ? C.primaryFg : C.primary}>
+                  <circle cx={cx} cy={cy} r={11} fill="#ffffff" stroke="#000000" strokeWidth={isRoot ? 2.6 : 1.4} />
+                  <text x={cx} y={cy + 4} fontSize={11} textAnchor="middle" fontWeight={700} fill="#000000">
                     {CHROMATIC[k.pc]}
                   </text>
                 </>
@@ -301,9 +301,9 @@ function Sax({ rootPc, pentPcs }: { rootPc: number; pentPcs: Set<number> }) {
               cx={130}
               cy={y}
               r={12}
-              fill={on ? (isRoot ? C.primary : C.primarySoft) : C.muted}
-              stroke={on ? C.primary : C.border}
-              strokeWidth={1.5}
+              fill={on ? "#ffffff" : C.muted}
+              stroke={on ? "#000000" : C.border}
+              strokeWidth={on ? (isRoot ? 2.6 : 1.4) : 1}
             />
             {on && (
               <text
@@ -312,7 +312,7 @@ function Sax({ rootPc, pentPcs }: { rootPc: number; pentPcs: Set<number> }) {
                 fontSize={10}
                 textAnchor="middle"
                 fontWeight={700}
-                fill={isRoot ? C.primaryFg : C.primary}
+                fill="#000000"
               >
                 {CHROMATIC[k.pc]}
               </text>
@@ -376,11 +376,11 @@ function Recorder({ rootPc, pentPcs }: { rootPc: number; pentPcs: Set<number> })
           return (
             <div
               key={idx}
-              className="flex flex-col items-center rounded-lg border p-2 min-w-[54px]"
+              className="flex flex-col items-center rounded-lg p-2 min-w-[54px]"
               style={{
-                background: isRoot ? C.primary : C.bg,
-                borderColor: C.primary,
-                color: isRoot ? C.primaryFg : C.primary,
+                background: "#ffffff",
+                border: `${isRoot ? 2 : 1}px solid #000000`,
+                color: "#000000",
               }}
             >
               <span className="font-display text-sm font-bold">{n.name}</span>
@@ -401,8 +401,8 @@ function Recorder({ rootPc, pentPcs }: { rootPc: number; pentPcs: Set<number> })
 
 function FingerChart({ fing, filled }: { fing: string; filled: boolean }) {
   const chars = fing.split("");
-  const stroke = filled ? C.primaryFg : C.primary;
-  const solid = filled ? C.primaryFg : C.primary;
+  const stroke = "#000000";
+  const solid = "#000000";
   return (
     <svg viewBox="0 0 20 96" width={20} height={96} className="mt-1">
       {chars.map((ch, i) => {
