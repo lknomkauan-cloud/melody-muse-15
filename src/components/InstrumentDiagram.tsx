@@ -135,16 +135,16 @@ function Fretboard({
                       cx={cx}
                       cy={y}
                       r={10}
-                      fill={isRoot ? C.primary : C.bg}
-                      stroke={C.primary}
-                      strokeWidth={1.8}
+                      fill="#ffffff"
+                      stroke="#000000"
+                      strokeWidth={isRoot ? 2.6 : 1.4}
                     />
                     <text
                       x={cx}
                       y={y + 3.5}
                       fontSize={9}
                       textAnchor="middle"
-                      fill={isRoot ? C.primaryFg : C.primary}
+                      fill="#000000"
                       fontWeight={700}
                     >
                       {CHROMATIC[note]}
