@@ -525,6 +525,13 @@ function EstudioPanel() {
     master.gain.value = masterVol;
     master.connect(ctx.destination);
 
+    // Shared reverb bus (generated impulse response)
+    const convolver = ctx.createConvolver();
+    convolver.buffer = makeImpulseResponse(ctx, 2.5, 2.2);
+    const reverbReturn = ctx.createGain();
+    reverbReturn.gain.value = 0.9;
+    convolver.connect(reverbReturn).connect(master);
+
     const buffers = await Promise.all(
       tracks.map(async (t) => t.buffer ?? ctx.decodeAudioData(await t.blob.arrayBuffer())),
     );
@@ -539,11 +546,36 @@ function EstudioPanel() {
       if (!shouldPlay) return;
       const src = ctx.createBufferSource();
       src.buffer = buffers[i];
+
+      // 3-band EQ: low shelf → peaking mid → high shelf
+      const low = ctx.createBiquadFilter();
+      low.type = "lowshelf";
+      low.frequency.value = 120;
+      low.gain.value = t.low;
+      const mid = ctx.createBiquadFilter();
+      mid.type = "peaking";
+      mid.frequency.value = 1000;
+      mid.Q.value = 0.9;
+      mid.gain.value = t.mid;
+      const high = ctx.createBiquadFilter();
+      high.type = "highshelf";
+      high.frequency.value = 8000;
+      high.gain.value = t.high;
+
       const gain = ctx.createGain();
       gain.gain.value = t.volume;
       const panner = ctx.createStereoPanner();
       panner.pan.value = t.pan;
-      src.connect(gain).connect(panner).connect(master);
+
+      src.connect(low).connect(mid).connect(high).connect(gain).connect(panner).connect(master);
+
+      // Reverb send (post-fader)
+      if (t.reverb > 0) {
+        const send = ctx.createGain();
+        send.gain.value = t.reverb;
+        panner.connect(send).connect(convolver);
+      }
+
       src.start(startAt);
       srcs.push(src);
       maxDuration = Math.max(maxDuration, buffers[i].duration);
