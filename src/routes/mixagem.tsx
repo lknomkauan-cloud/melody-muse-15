@@ -368,6 +368,10 @@ function EstudioPanel() {
   const [playing, setPlaying] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [masterVol, setMasterVol] = useState(0.9);
+  const [masterLow, setMasterLow] = useState(0);
+  const [masterMid, setMasterMid] = useState(0);
+  const [masterHigh, setMasterHigh] = useState(0);
+  const [masterReverb, setMasterReverb] = useState(0.15);
   const [bpm, setBpm] = useState(120);
   const [source, setSource] = useState<"mic" | "system" | "both">("mic");
 
@@ -521,16 +525,25 @@ function EstudioPanel() {
     audioCtxRef.current = ctx;
 
     const anySolo = tracks.some((t) => t.solo);
+
+    // Master chain: busIn -> mLow -> mMid -> mHigh -> masterGain -> destination
+    const busIn = ctx.createGain();
+    const mLow = ctx.createBiquadFilter();
+    mLow.type = "lowshelf"; mLow.frequency.value = 120; mLow.gain.value = masterLow;
+    const mMid = ctx.createBiquadFilter();
+    mMid.type = "peaking"; mMid.frequency.value = 1000; mMid.Q.value = 0.9; mMid.gain.value = masterMid;
+    const mHigh = ctx.createBiquadFilter();
+    mHigh.type = "highshelf"; mHigh.frequency.value = 8000; mHigh.gain.value = masterHigh;
     const master = ctx.createGain();
     master.gain.value = masterVol;
-    master.connect(ctx.destination);
+    busIn.connect(mLow).connect(mMid).connect(mHigh).connect(master).connect(ctx.destination);
 
-    // Shared reverb bus (generated impulse response)
+    // Shared reverb bus (generated impulse response) + master reverb amount
     const convolver = ctx.createConvolver();
     convolver.buffer = makeImpulseResponse(ctx, 2.5, 2.2);
     const reverbReturn = ctx.createGain();
-    reverbReturn.gain.value = 0.9;
-    convolver.connect(reverbReturn).connect(master);
+    reverbReturn.gain.value = masterReverb;
+    convolver.connect(reverbReturn).connect(busIn);
 
     const buffers = await Promise.all(
       tracks.map(async (t) => t.buffer ?? ctx.decodeAudioData(await t.blob.arrayBuffer())),
@@ -567,7 +580,7 @@ function EstudioPanel() {
       const panner = ctx.createStereoPanner();
       panner.pan.value = t.pan;
 
-      src.connect(low).connect(mid).connect(high).connect(gain).connect(panner).connect(master);
+      src.connect(low).connect(mid).connect(high).connect(gain).connect(panner).connect(busIn);
 
       // Reverb send (post-fader)
       if (t.reverb > 0) {
@@ -716,7 +729,18 @@ function EstudioPanel() {
             {tracks.map((t) => (
               <MixerStrip key={t.id} track={t} onChange={(p) => updateTrack(t.id, p)} />
             ))}
-            <MasterStrip volume={masterVol} onChange={setMasterVol} />
+            <MasterStrip
+              volume={masterVol}
+              onVolume={setMasterVol}
+              low={masterLow}
+              mid={masterMid}
+              high={masterHigh}
+              reverb={masterReverb}
+              onLow={setMasterLow}
+              onMid={setMasterMid}
+              onHigh={setMasterHigh}
+              onReverb={setMasterReverb}
+            />
           </div>
         </div>
       </div>
@@ -1034,11 +1058,59 @@ function MixerStrip({ track, onChange }: { track: Track; onChange: (p: Partial<T
   );
 }
 
-function MasterStrip({ volume, onChange }: { volume: number; onChange: (v: number) => void }) {
+function MasterStrip({
+  volume,
+  onVolume,
+  low,
+  mid,
+  high,
+  reverb,
+  onLow,
+  onMid,
+  onHigh,
+  onReverb,
+}: {
+  volume: number;
+  onVolume: (v: number) => void;
+  low: number;
+  mid: number;
+  high: number;
+  reverb: number;
+  onLow: (v: number) => void;
+  onMid: (v: number) => void;
+  onHigh: (v: number) => void;
+  onReverb: (v: number) => void;
+}) {
   return (
-    <div className="ml-2 flex w-24 shrink-0 flex-col items-center gap-2 rounded-md border border-emerald-900/60 bg-gradient-to-b from-[#1e2a24] to-[#0f1a15] p-2 shadow-inner ring-1 ring-emerald-500/20">
+    <div className="ml-2 flex w-28 shrink-0 flex-col items-center gap-1.5 rounded-md border border-emerald-900/60 bg-gradient-to-b from-[#1e2a24] to-[#0f1a15] p-2 shadow-inner ring-1 ring-emerald-500/20">
       <div className="h-1.5 w-full rounded bg-emerald-400" />
       <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Master</div>
+
+      {/* Master EQ */}
+      <div className="flex w-full flex-col items-center gap-1 rounded border border-emerald-900/60 bg-black/40 p-1">
+        <span className="text-[8px] font-bold uppercase tracking-widest text-emerald-500/80">EQ</span>
+        <EqKnob label="Hi" value={high} onChange={onHigh} color="#22d3ee" />
+        <EqKnob label="Md" value={mid} onChange={onMid} color="#facc15" />
+        <EqKnob label="Lo" value={low} onChange={onLow} color="#f87171" />
+      </div>
+
+      {/* Master Reverb return */}
+      <div className="flex w-full flex-col items-center gap-0.5 rounded border border-emerald-900/60 bg-black/40 p-1">
+        <span className="text-[8px] font-bold uppercase tracking-widest text-emerald-500/80">Rev</span>
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.01}
+          value={reverb}
+          onChange={(e) => onReverb(parseFloat(e.target.value))}
+          className="w-16 accent-purple-400"
+          title={`Reverb return: ${Math.round(reverb * 100)}%`}
+        />
+        <span className="font-mono text-[8px] text-neutral-400">{Math.round(reverb * 100)}%</span>
+      </div>
+
+      {/* Master Fader */}
       <div className="relative flex h-32 w-full items-center justify-center rounded bg-black/60">
         <input
           type="range"
@@ -1046,7 +1118,7 @@ function MasterStrip({ volume, onChange }: { volume: number; onChange: (v: numbe
           max={1.5}
           step={0.01}
           value={volume}
-          onChange={(e) => onChange(parseFloat(e.target.value))}
+          onChange={(e) => onVolume(parseFloat(e.target.value))}
           className="h-28 w-2 appearance-none rounded bg-neutral-700 accent-emerald-400"
           style={{ writingMode: "vertical-lr" as any, direction: "rtl" as any }}
         />
