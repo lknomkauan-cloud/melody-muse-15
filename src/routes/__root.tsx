@@ -95,6 +95,7 @@ function Header() {
     { to: "/acordes", label: "Acordes" },
     { to: "/metronomo", label: "Metrônomo" },
     { to: "/afinador", label: "Afinador" },
+    { to: "/mixagem", label: "Mixagem" },
   ];
 
   const handleSignOut = async () => {
