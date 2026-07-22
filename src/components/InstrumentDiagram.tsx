@@ -206,6 +206,8 @@ function Piano({ rootPc, pentPcs }: { rootPc: number; pentPcs: Set<number> }) {
         {whites.map((k, i) => {
           const on = pentPcs.has(k.pc);
           const isRoot = k.pc === rootPc;
+          const cx = k.x + (whiteW - 2) / 2;
+          const cy = 10 + whiteH - 22;
           return (
             <g key={`w-${i}`}>
               <rect
@@ -214,20 +216,17 @@ function Piano({ rootPc, pentPcs }: { rootPc: number; pentPcs: Set<number> }) {
                 width={whiteW - 2}
                 height={whiteH}
                 rx={3}
-                fill={on ? (isRoot ? C.primary : C.primarySoft) : "#ffffff"}
-                stroke={C.border}
+                fill="#ffffff"
+                stroke="#333"
+                strokeWidth={1}
               />
               {on && (
-                <text
-                  x={k.x + (whiteW - 2) / 2}
-                  y={10 + whiteH - 10}
-                  fontSize={11}
-                  textAnchor="middle"
-                  fontWeight={700}
-                  fill={isRoot ? C.primaryFg : C.primary}
-                >
-                  {CHROMATIC[k.pc]}
-                </text>
+                <>
+                  <circle cx={cx} cy={cy} r={11} fill={isRoot ? C.primary : C.primarySoft} stroke={C.primary} strokeWidth={isRoot ? 2 : 1} />
+                  <text x={cx} y={cy + 4} fontSize={11} textAnchor="middle" fontWeight={700} fill={isRoot ? C.primaryFg : C.primary}>
+                    {CHROMATIC[k.pc]}
+                  </text>
+                </>
               )}
             </g>
           );
@@ -235,6 +234,8 @@ function Piano({ rootPc, pentPcs }: { rootPc: number; pentPcs: Set<number> }) {
         {blacks.map((k, i) => {
           const on = pentPcs.has(k.pc);
           const isRoot = k.pc === rootPc;
+          const cx = k.x + blackW / 2;
+          const cy = 10 + blackH - 16;
           return (
             <g key={`b-${i}`}>
               <rect
@@ -243,20 +244,17 @@ function Piano({ rootPc, pentPcs }: { rootPc: number; pentPcs: Set<number> }) {
                 width={blackW}
                 height={blackH}
                 rx={2}
-                fill={on ? (isRoot ? C.primary : C.primaryMid) : "#111"}
-                stroke={C.border}
+                fill="#111"
+                stroke="#000"
+                strokeWidth={1}
               />
               {on && (
-                <text
-                  x={k.x + blackW / 2}
-                  y={10 + blackH - 8}
-                  fontSize={9}
-                  textAnchor="middle"
-                  fontWeight={700}
-                  fill={C.primaryFg}
-                >
-                  {CHROMATIC[k.pc]}
-                </text>
+                <>
+                  <circle cx={cx} cy={cy} r={9} fill={isRoot ? C.primary : C.primaryMid} stroke="#ffffff" strokeWidth={1} />
+                  <text x={cx} y={cy + 3} fontSize={9} textAnchor="middle" fontWeight={700} fill={C.primaryFg}>
+                    {CHROMATIC[k.pc]}
+                  </text>
+                </>
               )}
             </g>
           );
