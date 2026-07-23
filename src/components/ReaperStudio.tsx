@@ -800,12 +800,13 @@ export default function ReaperStudio() {
       </div>
 
       {/* MAIN AREA: TCP + Arrange */}
-      <div className="flex" style={{ height: 460, background: R.bg }}>
+      <div className="flex" style={{ height: isMobile ? 380 : 460, background: R.bg }}>
         {/* TCP - Track Control Panels */}
+        {showTcp && (
         <div
           className="overflow-y-auto"
           style={{
-            width: 260,
+            width: isMobile ? 180 : 260,
             background: R.panel,
             borderRight: `2px solid ${R.border}`,
             flexShrink: 0,
