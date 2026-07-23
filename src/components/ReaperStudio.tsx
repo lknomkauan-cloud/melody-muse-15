@@ -706,7 +706,7 @@ export default function ReaperStudio() {
             { label: "▶ Play", action: () => play() },
             { label: "■ Stop", action: () => stop() },
             { label: "⏮ Rewind", action: rewind },
-            { label: "● Record", action: () => startRecording() },
+            { label: "● Record…", action: () => openRecPicker() },
           ]}
         />
         <MenuDropdown
