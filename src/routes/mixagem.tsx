@@ -51,8 +51,8 @@ function MixagemPage() {
 
   return (
     <div className="min-h-screen bg-background pt-20 pb-24">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <header className="mb-8">
+      <div className={tab === "estudio" ? "mx-auto max-w-[1600px] px-2 sm:px-4" : "mx-auto max-w-6xl px-4 sm:px-6"}>
+        <header className="mb-6">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Sliders className="h-6 w-6" />
@@ -60,7 +60,7 @@ function MixagemPage() {
             <div>
               <h1 className="font-display text-3xl font-bold text-foreground">Mixagem</h1>
               <p className="text-sm text-muted-foreground">
-                Aprenda a mixar, isole instrumentos e grave suas próprias faixas.
+                Aprenda a mixar e produza no estúdio estilo Reaper com plugins Web (WAM).
               </p>
             </div>
           </div>
@@ -71,11 +71,11 @@ function MixagemPage() {
             Teoria & Guia
           </TabButton>
           <TabButton active={tab === "estudio"} onClick={() => setTab("estudio")} icon={<Layers className="h-4 w-4" />}>
-            Estúdio (isolar + gravar)
+            Estúdio (DAW)
           </TabButton>
         </div>
 
-        {tab === "teoria" ? <TeoriaPanel /> : <EstudioPanel />}
+        {tab === "teoria" ? <TeoriaPanel /> : <ReaperStudio />}
       </div>
     </div>
   );
