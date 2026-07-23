@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Loader2, Shield, Bot, Megaphone, Users, Trash2, Plus, Save, ShieldOff, ShieldCheck } from "lucide-react";
-import { AgentesIAView } from "@/components/AgentesIAView";
+import AgentesIAView from "@/components/AgentesIAView";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
