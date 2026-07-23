@@ -84,7 +84,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 function Header() {
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const navItems = [
     { to: "/", label: "Início" },
     { to: "/estudar", label: "Estudar" },
@@ -123,6 +123,15 @@ function Header() {
               {item.label}
             </Link>
           ))}
+          {isAdmin && (
+            <Link
+              to="/admin"
+              activeProps={{ className: "text-primary bg-primary/10" }}
+              className="rounded-md px-3 py-1.5 text-sm font-semibold text-amber-500 transition-colors hover:text-amber-400"
+            >
+              ADM
+            </Link>
+          )}
           {user ? (
             <div className="ml-2 flex items-center gap-1.5 border-l border-border pl-3">
               <Link
@@ -150,13 +159,13 @@ function Header() {
             </Link>
           )}
         </nav>
-        <MobileNav navItems={navItems} user={user} onSignOut={handleSignOut} avatarUrl={profile?.avatar_url ?? null} initials={initials} />
+        <MobileNav navItems={navItems} user={user} onSignOut={handleSignOut} avatarUrl={profile?.avatar_url ?? null} initials={initials} isAdmin={isAdmin} />
       </div>
     </header>
   );
 }
 
-function MobileNav({ navItems, user, onSignOut, avatarUrl, initials }: { navItems: { to: string; label: string }[]; user: ReturnType<typeof useAuth>["user"]; onSignOut: () => void; avatarUrl: string | null; initials: string }) {
+function MobileNav({ navItems, user, onSignOut, avatarUrl, initials, isAdmin }: { navItems: { to: string; label: string }[]; user: ReturnType<typeof useAuth>["user"]; onSignOut: () => void; avatarUrl: string | null; initials: string; isAdmin: boolean }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -181,6 +190,15 @@ function MobileNav({ navItems, user, onSignOut, avatarUrl, initials }: { navItem
                 {item.label}
               </Link>
             ))}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                onClick={() => setOpen(false)}
+                className="rounded-md px-3 py-2 text-sm font-semibold text-amber-500 hover:bg-muted"
+              >
+                ADM — Painel
+              </Link>
+            )}
             <div className="mt-2 border-t border-border pt-2">
               {user ? (
                 <>
