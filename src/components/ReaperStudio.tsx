@@ -2299,8 +2299,27 @@ function scheduleSynthNote(
   gain.gain.setValueAtTime(susLevel, when + dur);
   gain.gain.exponentialRampToValueAtTime(0.0001, when + dur + release);
 
+  // 3-band EQ: LOW (low-shelf ~120Hz), MID (peaking ~1kHz), HIGH (high-shelf ~6kHz)
+  // Param range 0..1 mapped to -18..+18 dB (0.5 = flat).
+  const low = ctx.createBiquadFilter();
+  low.type = "lowshelf";
+  low.frequency.value = 120;
+  low.gain.value = ((params?.LOW ?? 0.5) - 0.5) * 36;
+  const mid = ctx.createBiquadFilter();
+  mid.type = "peaking";
+  mid.frequency.value = 1000;
+  mid.Q.value = 1;
+  mid.gain.value = ((params?.MID ?? 0.5) - 0.5) * 36;
+  const high = ctx.createBiquadFilter();
+  high.type = "highshelf";
+  high.frequency.value = 6000;
+  high.gain.value = ((params?.HIGH ?? 0.5) - 0.5) * 36;
+
   osc.connect(filter);
-  filter.connect(gain);
+  filter.connect(low);
+  low.connect(mid);
+  mid.connect(high);
+  high.connect(gain);
   gain.connect(dest);
   osc.start(when);
   osc.stop(when + dur + release + 0.05);
