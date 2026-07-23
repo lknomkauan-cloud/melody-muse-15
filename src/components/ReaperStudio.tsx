@@ -852,6 +852,14 @@ export default function ReaperStudio() {
           >
             <Sliders className="w-3 h-3" /> Mixer
           </button>
+          <button
+            onClick={() => setShowFlMixer(true)}
+            className="px-2 py-1 text-xs rounded flex items-center gap-1"
+            style={{ background: "linear-gradient(180deg,#ff8a3d,#e65a1a)", border: `1px solid ${R.border}`, color: "#fff" }}
+            title="Mesa de som estilo FL Studio"
+          >
+            <Sliders className="w-3 h-3" /> FL Mixer
+          </button>
         </div>
       </div>
 
