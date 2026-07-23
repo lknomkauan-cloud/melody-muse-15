@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
   GraduationCap, Music, Loader2, Camera, Save, LogOut,
-  BookOpen, Trophy, Users, Sparkles, Mic2, PenLine,
+  BookOpen, Trophy, Users, Sparkles, Mic2, PenLine, Shield,
 } from "lucide-react";
 
 export const Route = createFileRoute("/conta")({
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/conta")({
 
 function ContaPage() {
   const navigate = useNavigate();
-  const { user, role, profile, loading } = useAuth();
+  const { user, role, profile, isAdmin, loading } = useAuth();
   const [saving, setSaving] = useState(false);
   const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
@@ -116,7 +116,14 @@ function ContaPage() {
               </div>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            {isAdmin && (
+              <Button asChild size="sm" className="bg-primary text-primary-foreground">
+                <Link to="/admin">
+                  <Shield className="h-4 w-4 mr-1" /> Painel de ADM
+                </Link>
+              </Button>
+            )}
             <Button variant="ghost" size="sm" onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-1" /> Sair
             </Button>
