@@ -1352,13 +1352,13 @@ function TrackControlPanel({
 
       {track.type === "midi" && (
         <div
-          className="mt-1 grid grid-cols-4 gap-1 rounded p-1"
+          className="mt-1 grid grid-cols-7 gap-1 rounded p-1"
           style={{ background: R.panelDark, border: `1px solid ${R.border}` }}
           onClick={(e) => e.stopPropagation()}
           title="Timbragem do instrumento"
         >
-          {(["CUTOFF", "RESO", "ATTACK", "RELEASE"] as const).map((k) => {
-            const defaults: Record<string, number> = { CUTOFF: 0.7, RESO: 0.2, ATTACK: 0.05, RELEASE: 0.2 };
+          {(["CUTOFF", "RESO", "ATTACK", "RELEASE", "LOW", "MID", "HIGH"] as const).map((k) => {
+            const defaults: Record<string, number> = { CUTOFF: 0.7, RESO: 0.2, ATTACK: 0.05, RELEASE: 0.2, LOW: 0.5, MID: 0.5, HIGH: 0.5 };
             const value = track.instParams?.[k] ?? defaults[k];
             const angle = -135 + value * 270;
             return (
