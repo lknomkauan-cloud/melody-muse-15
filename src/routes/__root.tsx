@@ -256,7 +256,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Header />
-      <AnnouncementBanner />
+      
       <div className="pt-16">
         <Outlet />
       </div>
