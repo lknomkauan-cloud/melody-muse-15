@@ -114,16 +114,24 @@ function Header() {
           <span className="font-display text-lg font-bold">Solando</span>
         </Link>
         <nav className="hidden items-center gap-1 sm:flex">
-          {navItems.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              activeProps={{ className: "text-primary bg-primary/10" }}
-              className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {item.label}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const isAdmLink = item.to === "/admin";
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                activeProps={{ className: isAdmLink ? "ring-2 ring-primary" : "text-primary bg-primary/10" }}
+                className={
+                  isAdmLink
+                    ? "inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-bold text-primary-foreground shadow-sm shadow-primary/40 hover:bg-primary/90 transition-colors"
+                    : "rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                }
+              >
+                {isAdmLink && <span aria-hidden>⚙</span>}
+                {item.label}
+              </Link>
+            );
+          })}
           {user ? (
             <div className="ml-2 flex items-center gap-1.5 border-l border-border pl-3">
               <Link
