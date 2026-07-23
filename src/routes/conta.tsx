@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
   GraduationCap, Music, Loader2, Camera, Save, LogOut,
-  BookOpen, Trophy, Users, Sparkles, Mic2, PenLine,
+  BookOpen, Trophy, Users, Sparkles, Mic2, PenLine, Shield,
 } from "lucide-react";
 
 export const Route = createFileRoute("/conta")({
