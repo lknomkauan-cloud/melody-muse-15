@@ -2695,17 +2695,18 @@ function FLChannel({
             value={volume}
             onChange={(e) => onVolume(Number(e.target.value))}
             onClick={(e) => e.stopPropagation()}
-            style={{
-              WebkitAppearance: "slider-vertical" as unknown as string,
-              width: 24,
-              height: "100%",
-              accentColor: FL.accent,
-              // @ts-expect-error non-standard attribute for vertical sliders
-              orient: "vertical",
-              writingMode: "vertical-lr" as unknown as string,
-              direction: "rtl",
-            }}
+            style={
+              {
+                WebkitAppearance: "slider-vertical",
+                width: 24,
+                height: "100%",
+                accentColor: FL.accent,
+                writingMode: "vertical-lr",
+                direction: "rtl",
+              } as React.CSSProperties
+            }
           />
+
         </div>
 
         {/* Right meter */}
