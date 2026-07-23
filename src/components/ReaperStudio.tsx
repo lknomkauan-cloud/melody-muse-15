@@ -984,6 +984,22 @@ export default function ReaperStudio() {
         </div>
       )}
 
+      {/* KNOB BAR — timbragem da track selecionada (fixo no rodapé) */}
+      <KnobBar
+        track={
+          tracks.find((t) => t.id === selectedTrack && t.type === "midi") ??
+          tracks.find((t) => t.type === "midi") ??
+          null
+        }
+        onChange={(p) => {
+          const target =
+            tracks.find((t) => t.id === selectedTrack && t.type === "midi") ??
+            tracks.find((t) => t.type === "midi");
+          if (target) updateTrack(target.id, p);
+        }}
+      />
+
+
       {/* FX Panel */}
       {openFxTrack && (
         <FxPanel
