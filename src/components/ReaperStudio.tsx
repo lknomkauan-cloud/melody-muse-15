@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as Tone from "tone";
 import { Midi } from "@tonejs/midi";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Play,
   Square,
@@ -186,7 +187,56 @@ export default function ReaperStudio() {
   const [showFlMixer, setShowFlMixer] = useState(false);
   const [flSelected, setFlSelected] = useState<string | "master">("master");
   const [showPluginLib, setShowPluginLib] = useState(false);
-  const [pluginLib, setPluginLib] = useState<{ id: string; name: string; blobUrl?: string; isNative: boolean }[]>([]);
+  const [pluginBundles, setPluginBundles] = useState<PluginEntry[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  const refreshPluginBundles = React.useCallback(async () => {
+    const { data: auth } = await supabase.auth.getUser();
+    const uid = auth.user?.id ?? null;
+    setUserId(uid);
+    if (!uid) { setPluginBundles([]); return; }
+    const { data } = await supabase
+      .from("plugin_bundles")
+      .select("id, name, entry_path, is_native")
+      .order("created_at", { ascending: false });
+    setPluginBundles(
+      (data ?? []).map((b) => ({
+        id: b.id as string,
+        name: b.name as string,
+        entryPath: (b.entry_path as string | null) ?? null,
+        isNative: Boolean(b.is_native),
+      }))
+    );
+  }, []);
+
+  useEffect(() => { refreshPluginBundles(); }, [refreshPluginBundles]);
+
+  const resolveBundleFx = React.useCallback(async (bundle: PluginEntry) => {
+    if (!userId || bundle.isNative || !bundle.entryPath) {
+      return {
+        id: nid(),
+        type: "wam" as const,
+        bypass: bundle.isNative,
+        label: bundle.isNative ? `VST nativo: ${bundle.name}` : `WAM: ${bundle.name}`,
+        wamUrl: "",
+        params: {},
+      };
+    }
+    const path = `${userId}/${bundle.id}/${bundle.entryPath}`;
+    const { data, error } = await supabase.storage
+      .from("user-plugins")
+      .download(path);
+    let wamUrl = "";
+    if (!error && data) wamUrl = URL.createObjectURL(data);
+    return {
+      id: nid(),
+      type: "wam" as const,
+      bypass: false,
+      label: `WAM: ${bundle.name}`,
+      wamUrl,
+      params: {},
+    };
+  }, [userId]);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
@@ -1030,6 +1080,15 @@ export default function ReaperStudio() {
         <FxPanel
           track={tracks.find((t) => t.id === openFxTrack)!}
           onChange={(p) => updateTrack(openFxTrack, p)}
+          savedBundles={pluginBundles}
+          onAddSavedBundle={async (bundle) => {
+            const slot = await resolveBundleFx(bundle);
+            const tid = openFxTrack;
+            setTracks((prev) =>
+              prev.map((t) => (t.id === tid ? { ...t, fx: [...t.fx, slot] } : t)),
+            );
+          }}
+          onOpenLibrary={() => setShowPluginLib(true)}
           onClose={() => setOpenFxTrack(null)}
         />
       )}
@@ -1059,30 +1118,15 @@ export default function ReaperStudio() {
 
       {showPluginLib && (
         <PluginLibraryModal
-          lib={pluginLib}
-          setLib={setPluginLib}
+          bundles={pluginBundles}
+          userId={userId}
+          onChanged={refreshPluginBundles}
           tracks={tracks}
           selectedTrack={selectedTrack}
-          onAddToTrack={(trackId, entry) => {
+          onAddToTrack={async (trackId, entry) => {
+            const slot = await resolveBundleFx(entry);
             setTracks((prev) =>
-              prev.map((t) =>
-                t.id === trackId
-                  ? {
-                      ...t,
-                      fx: [
-                        ...t.fx,
-                        {
-                          id: nid(),
-                          type: "wam",
-                          bypass: entry.isNative,
-                          label: entry.isNative ? `VST nativo: ${entry.name}` : `WAM: ${entry.name}`,
-                          wamUrl: entry.blobUrl ?? "",
-                          params: {},
-                        },
-                      ],
-                    }
-                  : t,
-              ),
+              prev.map((t) => (t.id === trackId ? { ...t, fx: [...t.fx, slot] } : t)),
             );
           }}
           onClose={() => setShowPluginLib(false)}
@@ -1895,10 +1939,16 @@ function FxPanel({
   track,
   onChange,
   onClose,
+  savedBundles,
+  onAddSavedBundle,
+  onOpenLibrary,
 }: {
   track: Track;
   onChange: (p: Partial<Track>) => void;
   onClose: () => void;
+  savedBundles: PluginEntry[];
+  onAddSavedBundle: (bundle: PluginEntry) => void | Promise<void>;
+  onOpenLibrary: () => void;
 }) {
   const addFx = (type: FxSlot["type"]) => {
     const slot: FxSlot = {
@@ -2024,6 +2074,42 @@ function FxPanel({
               WAM v2 (.js/.mjs) roda no navegador. VST nativo (.dll/.vst3) só executa em build desktop com host nativo.
             </span>
           </div>
+
+          <div className="flex flex-wrap items-center gap-2 mb-3 p-2 rounded" style={{ background: R.panelDark, border: `1px solid ${R.borderLight}` }}>
+            <span className="text-[11px] opacity-70 flex items-center gap-1">
+              <Cpu className="w-3 h-3" /> Meus plugins salvos:
+            </span>
+            {savedBundles.length === 0 ? (
+              <span className="text-[10px] opacity-60">
+                Nenhum ainda. <button className="underline" onClick={onOpenLibrary}>Importar do PC</button>
+              </span>
+            ) : (
+              <>
+                <select
+                  className="text-xs px-1 py-1 rounded"
+                  style={{ background: R.bg, border: `1px solid ${R.borderLight}`, color: R.text }}
+                  defaultValue=""
+                  onChange={(e) => {
+                    const b = savedBundles.find((x) => x.id === e.target.value);
+                    if (b) onAddSavedBundle(b);
+                    e.target.value = "";
+                  }}
+                >
+                  <option value="">Escolher da biblioteca…</option>
+                  {savedBundles.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.isNative ? "🎛️" : "🎚️"} {b.name}
+                    </option>
+                  ))}
+                </select>
+                <button className="text-[10px] underline opacity-70 hover:opacity-100" onClick={onOpenLibrary}>
+                  gerenciar biblioteca
+                </button>
+              </>
+            )}
+          </div>
+
+
 
 
           <div className="space-y-2 overflow-y-auto" style={{ maxHeight: "55vh" }}>
@@ -3023,65 +3109,113 @@ function FLChannel({
 
 
 /* ============================================================
-   PLUGIN LIBRARY MODAL — carregar VSTs/WAMs do PC
+   PLUGIN LIBRARY MODAL — pastas de plugins salvas na conta
 ============================================================ */
 
 interface PluginEntry {
   id: string;
   name: string;
-  blobUrl?: string;
+  entryPath: string | null;
   isNative: boolean;
 }
 
 function PluginLibraryModal({
-  lib,
-  setLib,
+  bundles,
+  userId,
+  onChanged,
   tracks,
   selectedTrack,
   onAddToTrack,
   onClose,
 }: {
-  lib: PluginEntry[];
-  setLib: React.Dispatch<React.SetStateAction<PluginEntry[]>>;
+  bundles: PluginEntry[];
+  userId: string | null;
+  onChanged: () => Promise<void> | void;
   tracks: Track[];
   selectedTrack: string | null;
-  onAddToTrack: (trackId: string, entry: PluginEntry) => void;
+  onAddToTrack: (trackId: string, entry: PluginEntry) => void | Promise<void>;
   onClose: () => void;
 }) {
-  const ingest = (files: FileList | null) => {
+  const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<string>("");
+
+  const ingest = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
+    if (!userId) { alert("Faça login para salvar plugins na sua conta."); return; }
     const arr = Array.from(files);
-    const entries: PluginEntry[] = [];
-    const jsEntry =
+
+    // detectar entry
+    const jsFiles = arr.filter((f) => /\.m?js$/i.test(f.name));
+    const nativeFiles = arr.filter((f) => /\.(dll|vst3?|component|so|dylib)$/i.test(f.name));
+    const entry =
       arr.find((f) => /(^|\/)index\.js$/i.test((f as any).webkitRelativePath || f.name)) ||
-      arr.find((f) => /\.m?js$/i.test(f.name));
-    for (const f of arr) {
-      const lower = f.name.toLowerCase();
-      const isNative = /\.(dll|vst3?|component|so|dylib)$/i.test(lower);
-      const isJs = /\.m?js$/i.test(lower);
-      if (!isNative && !isJs) continue;
-      const isEntry = isJs && f === jsEntry;
-      if (isJs && !isEntry) continue;
-      entries.push({
-        id: nid(),
-        name: f.name,
-        blobUrl: isEntry ? URL.createObjectURL(f) : undefined,
-        isNative,
-      });
-    }
-    if (entries.length === 0) {
-      alert("Nenhum arquivo compatível encontrado. Aceita .js/.mjs (WAM) ou .dll/.vst3/.component (nativo).");
+      jsFiles[0];
+    const isNative = !entry && nativeFiles.length > 0;
+    if (!entry && !isNative) {
+      alert("Nenhum arquivo compatível na pasta. Aceita .js/.mjs (WAM) ou .dll/.vst3.");
       return;
     }
-    setLib((prev) => [...prev, ...entries]);
+
+    // nome do bundle: pasta raiz do primeiro arquivo com webkitRelativePath
+    const firstRel = (arr[0] as any).webkitRelativePath as string | undefined;
+    const bundleName = firstRel && firstRel.includes("/")
+      ? firstRel.split("/")[0]
+      : (entry?.name ?? nativeFiles[0]?.name ?? "Plugin");
+
+    setBusy(true);
+    try {
+      // criar registro
+      const { data: row, error: insErr } = await supabase
+        .from("plugin_bundles")
+        .insert({
+          user_id: userId,
+          name: bundleName,
+          entry_path: entry
+            ? ((entry as any).webkitRelativePath || entry.name).replace(/^[^/]+\//, "")
+            : null,
+          is_native: isNative,
+          file_count: arr.length,
+        })
+        .select("id")
+        .single();
+      if (insErr || !row) throw insErr ?? new Error("insert failed");
+
+      // upload de cada arquivo
+      let done = 0;
+      for (const f of arr) {
+        const rel = ((f as any).webkitRelativePath as string | undefined) || f.name;
+        const stripped = rel.includes("/") ? rel.replace(/^[^/]+\//, "") : rel;
+        const path = `${userId}/${row.id}/${stripped}`;
+        setProgress(`${++done}/${arr.length} — ${stripped}`);
+        const { error: upErr } = await supabase.storage
+          .from("user-plugins")
+          .upload(path, f, { upsert: true, contentType: f.type || "application/octet-stream" });
+        if (upErr) console.warn("upload err", stripped, upErr);
+      }
+      await onChanged();
+    } catch (e) {
+      console.error(e);
+      alert("Falha ao salvar o plugin. Verifique sua conexão e tente novamente.");
+    } finally {
+      setBusy(false);
+      setProgress("");
+    }
   };
 
-  const removeEntry = (id: string) => {
-    setLib((prev) => {
-      const target = prev.find((p) => p.id === id);
-      if (target?.blobUrl) URL.revokeObjectURL(target.blobUrl);
-      return prev.filter((p) => p.id !== id);
-    });
+  const removeBundle = async (id: string) => {
+    if (!userId) return;
+    if (!confirm("Remover este plugin da sua biblioteca?")) return;
+    // remove storage folder
+    const { data: list } = await supabase.storage
+      .from("user-plugins")
+      .list(`${userId}/${id}`, { limit: 1000 });
+    if (list && list.length) {
+      await supabase.storage
+        .from("user-plugins")
+        .remove(list.map((f) => `${userId}/${id}/${f.name}`));
+    }
+    await supabase.from("plugin_bundles").delete().eq("id", id);
+    await onChanged();
   };
 
   return (
@@ -3095,7 +3229,7 @@ function PluginLibraryModal({
         style={{
           background: R.panel,
           border: `1px solid ${R.border}`,
-          width: 720,
+          width: 760,
           maxHeight: "85vh",
           color: R.text,
         }}
@@ -3107,56 +3241,67 @@ function PluginLibraryModal({
         >
           <div className="flex items-center gap-2 text-sm">
             <Cpu className="w-4 h-4" style={{ color: R.accent }} />
-            <b>Biblioteca de Plugins</b>
+            <b>Meus Plugins</b>
+            <span className="text-[10px] opacity-60">salvos na sua conta</span>
           </div>
           <button onClick={onClose} className="opacity-60 hover:opacity-100 text-xs">✕</button>
         </div>
 
         <div className="p-3 space-y-3 overflow-y-auto">
+          {!userId && (
+            <div className="text-xs p-2 rounded" style={{ background: R.panelDark, border: `1px solid ${R.border}` }}>
+              Faça login para importar e salvar seus plugins na conta.
+            </div>
+          )}
+
           <div className="flex flex-wrap items-center gap-2 p-2 rounded" style={{ background: R.panelDark, border: `1px dashed ${R.borderLight}` }}>
-            <label className="px-2 py-1 text-xs rounded cursor-pointer flex items-center gap-1" style={{ background: R.bg, border: `1px solid ${R.borderLight}` }}>
-              <Plus className="w-3 h-3" /> Selecionar arquivos
-              <input
-                type="file"
-                multiple
-                accept=".js,.mjs,.wasm,.dll,.vst,.vst3,.component,.so,.dylib"
-                className="hidden"
-                onChange={(e) => { ingest(e.target.files); e.currentTarget.value = ""; }}
-              />
-            </label>
-            <label className="px-2 py-1 text-xs rounded cursor-pointer flex items-center gap-1" style={{ background: R.bg, border: `1px solid ${R.borderLight}` }}>
-              <Plus className="w-3 h-3" /> Selecionar pasta
+            <label className={`px-2 py-1 text-xs rounded flex items-center gap-1 ${busy || !userId ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`} style={{ background: R.bg, border: `1px solid ${R.borderLight}` }}>
+              <Plus className="w-3 h-3" /> Importar pasta do PC
               <input
                 type="file"
                 // @ts-expect-error non-standard directory attrs
                 webkitdirectory=""
                 directory=""
                 multiple
+                disabled={busy || !userId}
+                className="hidden"
+                onChange={(e) => { ingest(e.target.files); e.currentTarget.value = ""; }}
+              />
+            </label>
+            <label className={`px-2 py-1 text-xs rounded flex items-center gap-1 ${busy || !userId ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`} style={{ background: R.bg, border: `1px solid ${R.borderLight}` }}>
+              <Plus className="w-3 h-3" /> Importar arquivo(s)
+              <input
+                type="file"
+                multiple
+                accept=".js,.mjs,.wasm,.dll,.vst,.vst3,.component,.so,.dylib"
+                disabled={busy || !userId}
                 className="hidden"
                 onChange={(e) => { ingest(e.target.files); e.currentTarget.value = ""; }}
               />
             </label>
             <span className="text-[10px] opacity-70">
-              Plugins WAM v2 (.js/.mjs) rodam no navegador. VSTs nativos (.dll/.vst3) ficam listados e serão executados no build desktop com host nativo.
+              A pasta inteira vira 1 plugin. WAM v2 (.js/.mjs) toca no navegador; VSTs nativos ficam salvos e rodam no build desktop.
             </span>
+            {busy && <span className="text-[10px]" style={{ color: R.accent }}>Enviando… {progress}</span>}
           </div>
 
-          {lib.length === 0 ? (
+          {bundles.length === 0 ? (
             <div className="text-xs opacity-60 text-center py-8">
-              Nenhum plugin carregado. Escolha arquivos ou uma pasta do seu PC acima.
+              Nenhum plugin salvo. Importe uma pasta de plugins do seu PC acima.
             </div>
           ) : (
             <div className="space-y-1">
-              {lib.map((p) => (
+              {bundles.map((p) => (
                 <div
                   key={p.id}
                   className="flex items-center gap-2 p-2 rounded"
                   style={{ background: R.panelDark, border: `1px solid ${R.borderLight}` }}
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-medium truncate">{p.name}</div>
+                    <div className="text-xs font-medium truncate">📁 {p.name}</div>
                     <div className="text-[10px] opacity-60">
                       {p.isNative ? "VST nativo — requer build desktop" : "WAM v2 — pronto para uso"}
+                      {p.entryPath ? ` · entry: ${p.entryPath}` : ""}
                     </div>
                   </div>
                   <select
@@ -3175,7 +3320,7 @@ function PluginLibraryModal({
                     ))}
                   </select>
                   <button
-                    onClick={() => removeEntry(p.id)}
+                    onClick={() => removeBundle(p.id)}
                     className="opacity-60 hover:opacity-100"
                     title="Remover"
                   >

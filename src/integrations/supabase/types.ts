@@ -94,6 +94,36 @@ export type Database = {
           },
         ]
       }
+      plugin_bundles: {
+        Row: {
+          created_at: string
+          entry_path: string | null
+          file_count: number
+          id: string
+          is_native: boolean
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entry_path?: string | null
+          file_count?: number
+          id?: string
+          is_native?: boolean
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entry_path?: string | null
+          file_count?: number
+          id?: string
+          is_native?: boolean
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
