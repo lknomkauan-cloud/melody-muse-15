@@ -525,7 +525,54 @@ export default function ReaperStudio() {
     }
   };
 
+  /* -------- Export mix (WAV via OfflineAudioContext) -------- */
+
+  const exportMix = async () => {
+    const duration = Math.max(2, totalDur);
+    const sampleRate = 44100;
+    const off = new OfflineAudioContext(2, Math.ceil(duration * sampleRate), sampleRate);
+    const anySolo = tracks.some((t) => t.solo);
+    for (const track of tracks) {
+      if (track.mute) continue;
+      if (anySolo && !track.solo) continue;
+      const gain = off.createGain();
+      gain.gain.value = track.volume;
+      const panner = off.createStereoPanner();
+      panner.pan.value = track.pan;
+      let head: AudioNode = gain;
+      for (const fx of track.fx) {
+        if (fx.bypass) continue;
+        const node = buildFxNode(off as unknown as AudioContext, fx);
+        if (node) { head.connect(node.input); head = node.output; }
+      }
+      head.connect(panner);
+      panner.connect(off.destination);
+      for (const clip of track.clips) {
+        if (clip.kind === "audio") {
+          const src = off.createBufferSource();
+          src.buffer = clip.buffer;
+          src.connect(gain);
+          src.start(clip.start);
+        } else {
+          for (const n of clip.notes) {
+            scheduleSynthNote(off as unknown as AudioContext, gain, track.instrument ?? "arturia-mini", n.midi, n.velocity, clip.start + n.time, n.duration, track.instParams);
+          }
+        }
+      }
+    }
+    const rendered = await off.startRendering();
+    const wav = audioBufferToWav(rendered);
+    const blob = new Blob([wav], { type: "audio/wav" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `solando-mix-${Date.now()}.wav`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  };
+
   /* -------- Render -------- */
+
 
   return (
     <div
