@@ -469,6 +469,8 @@ export default function ReaperStudio() {
       height: 80,
       clips: [],
       fx: [],
+      meterL: 0,
+      meterR: 0,
     };
     setTracks((prev) => [...prev, newTrack]);
     return newTrack;
