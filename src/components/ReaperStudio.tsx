@@ -1842,39 +1842,59 @@ function InstrumentRackPanel({
             ))}
           </div>
 
-          {/* Fake VST controls */}
+          {/* VST controls (mapped to synth ADSR + filter) */}
           <div
-            className="rounded p-4 grid grid-cols-6 gap-3"
+            className="rounded p-4 grid grid-cols-3 sm:grid-cols-6 gap-3"
             style={{ background: "#00000066", border: `1px solid ${inst.accent}33` }}
           >
-            {["CUTOFF", "RESO", "ATTACK", "DECAY", "SUSTAIN", "RELEASE"].map((k) => (
-              <div key={k} className="flex flex-col items-center gap-1">
-                <div
-                  className="relative rounded-full"
-                  style={{
-                    width: 50,
-                    height: 50,
-                    background: `radial-gradient(circle at 30% 30%, ${inst.accent}66, #000)`,
-                    border: `2px solid ${inst.accent}88`,
-                  }}
-                >
+            {(["CUTOFF", "RESO", "ATTACK", "DECAY", "SUSTAIN", "RELEASE"] as const).map((k) => {
+              const defaults: Record<string, number> = { CUTOFF: 0.7, RESO: 0.2, ATTACK: 0.05, DECAY: 0.2, SUSTAIN: 0.7, RELEASE: 0.2 };
+              const value = track.instParams?.[k] ?? defaults[k];
+              const angle = -135 + value * 270;
+              return (
+                <div key={k} className="flex flex-col items-center gap-1">
                   <div
+                    className="relative rounded-full"
                     style={{
-                      position: "absolute",
-                      left: "50%",
-                      top: 4,
-                      width: 2,
-                      height: 18,
-                      background: inst.accent,
-                      transformOrigin: "1px 21px",
-                      transform: `rotate(${-90 + Math.random() * 180}deg)`,
+                      width: 50,
+                      height: 50,
+                      background: `radial-gradient(circle at 30% 30%, ${inst.accent}66, #000)`,
+                      border: `2px solid ${inst.accent}88`,
                     }}
+                  >
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: "50%",
+                        top: 4,
+                        width: 2,
+                        height: 18,
+                        background: inst.accent,
+                        transformOrigin: "1px 21px",
+                        transform: `rotate(${angle}deg)`,
+                      }}
+                    />
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    value={value}
+                    onChange={(e) =>
+                      onChange({
+                        instParams: { ...(track.instParams ?? {}), [k]: Number(e.target.value) },
+                      })
+                    }
+                    style={{ width: 50 }}
                   />
+                  <div className="text-[9px] opacity-70">{k}</div>
+                  <div className="text-[9px] font-mono opacity-70">{value.toFixed(2)}</div>
                 </div>
-                <div className="text-[9px] opacity-70">{k}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
+
 
           <div className="mt-3 text-[11px] opacity-60">
             Sons por SoundFont interno. Para carregar VSTs reais no navegador, abra o painel FX de uma track e cole a URL de um plugin <b>WAM v2</b>.
