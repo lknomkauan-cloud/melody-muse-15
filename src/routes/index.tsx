@@ -64,7 +64,7 @@ function HomePage() {
         <Link
           to="/admin"
           title="Painel do Administrador"
-          className="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 font-display text-sm font-bold text-primary-foreground shadow-lg shadow-primary/40 ring-2 ring-primary/50 transition-all hover:scale-105 hover:bg-primary/90"
+          className="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-4 font-display text-base font-bold text-primary-foreground shadow-xl shadow-primary/50 ring-4 ring-primary/30 transition-all hover:scale-105 hover:bg-primary/90"
         >
           <Settings className="h-5 w-5" />
           Painel ADM
