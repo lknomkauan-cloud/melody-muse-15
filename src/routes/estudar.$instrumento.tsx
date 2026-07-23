@@ -17,8 +17,10 @@ import {
   Mic2,
   Music4,
   Wind,
+  Lock,
 } from "lucide-react";
 import { HarmonicField } from "@/components/HarmonicField";
+import { useContentAccess } from "@/hooks/use-content-access";
 
 type Section = {
   id: string;
