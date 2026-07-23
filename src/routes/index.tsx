@@ -8,8 +8,10 @@ import {
   Music2,
   Piano,
   Music,
+  Settings,
 } from "lucide-react";
 import heroImage from "../assets/hero-music.png";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -55,8 +57,19 @@ const features = [
 ];
 
 function HomePage() {
+  const { isAdmin } = useAuth();
   return (
     <div className="min-h-screen">
+      {isAdmin && (
+        <Link
+          to="/admin"
+          title="Painel do Administrador"
+          className="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 font-display text-sm font-bold text-primary-foreground shadow-lg shadow-primary/40 ring-2 ring-primary/50 transition-all hover:scale-105 hover:bg-primary/90"
+        >
+          <Settings className="h-5 w-5 animate-spin-slow" />
+          Painel ADM
+        </Link>
+      )}
       {/* Hero */}
       <section className="relative flex min-h-[80vh] items-center justify-center overflow-hidden px-4">
         <div className="absolute inset-0 z-0">
