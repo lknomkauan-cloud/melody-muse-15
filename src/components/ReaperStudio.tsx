@@ -447,13 +447,35 @@ export default function ReaperStudio() {
 
   /* -------- Recording (mic) -------- */
 
-  const openRecPicker = async () => {
-    const armed = tracks.find((t) => t.arm && t.type === "audio");
-    if (!armed) {
-      alert("Ative o botão R (arm) de uma track de áudio antes de gravar.");
-      return;
+  const ensureArmedAudioTrack = (): Track | null => {
+    let armed = tracks.find((t) => t.arm && t.type === "audio") ?? null;
+    if (armed) return armed;
+    const firstAudio = tracks.find((t) => t.type === "audio");
+    if (firstAudio) {
+      setTracks((prev) => prev.map((t) => (t.id === firstAudio.id ? { ...t, arm: true } : t)));
+      return { ...firstAudio, arm: true };
     }
-    // Enumerar entradas (pode retornar labels vazios sem permissão prévia)
+    // criar uma nova track de áudio e armá-la
+    const newTrack: Track = {
+      id: nid(),
+      name: `Audio ${tracks.filter((t) => t.type === "audio").length + 1}`,
+      color: "#e94e3b",
+      type: "audio",
+      volume: 0.9,
+      pan: 0,
+      mute: false,
+      solo: false,
+      arm: true,
+      height: 80,
+      clips: [],
+      fx: [],
+    };
+    setTracks((prev) => [...prev, newTrack]);
+    return newTrack;
+  };
+
+  const openRecPicker = async () => {
+    ensureArmedAudioTrack();
     try {
       const devs = await navigator.mediaDevices.enumerateDevices();
       setAudioInputs(devs.filter((d) => d.kind === "audioinput"));
@@ -467,9 +489,9 @@ export default function ReaperStudio() {
     source: "mic" | "system" = "mic",
     deviceId?: string,
   ) => {
-    const armed = tracks.find((t) => t.arm && t.type === "audio");
+    const armed = ensureArmedAudioTrack();
     if (!armed) {
-      alert("Ative o botão R (arm) de uma track de áudio antes de gravar.");
+      alert("Não foi possível preparar uma track de áudio para gravação.");
       return;
     }
     try {
