@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as Tone from "tone";
 import { Midi } from "@tonejs/midi";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Play,
   Square,
@@ -26,6 +27,7 @@ import {
   Upload,
   Sliders,
   Cpu,
+  Download,
 } from "lucide-react";
 
 /* ============================================================
@@ -88,6 +90,7 @@ interface Track {
   fx: FxSlot[];
   meterL: number; // 0..1 (visual)
   meterR: number;
+  instParams?: Record<string, number>;
 }
 
 type InstrumentKind =
@@ -162,28 +165,36 @@ function computeWaveform(buffer: AudioBuffer, targetPeaks = 800): number[] {
 ============================================================ */
 
 export default function ReaperStudio() {
+  const isMobile = useIsMobile();
   const [tracks, setTracks] = useState<Track[]>(() => makeDefaultTracks());
   const [playing, setPlaying] = useState(false);
   const [recording, setRecording] = useState(false);
   const [position, setPosition] = useState(0); // seg
   const [bpm, setBpm] = useState(120);
   const [zoom, setZoom] = useState(60); // px por segundo
-  const [showMixer, setShowMixer] = useState(true);
+  const [showMixer, setShowMixer] = useState(!isMobile);
   const [metronome, setMetronome] = useState(false);
   const [loopEnabled, setLoopEnabled] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<string | null>(null);
   const [openFxTrack, setOpenFxTrack] = useState<string | null>(null);
   const [openInstrumentTrack, setOpenInstrumentTrack] = useState<string | null>(null);
+  const [masterVol, setMasterVol] = useState(0.9);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [showTcp, setShowTcp] = useState(!isMobile);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const masterGainRef = useRef<GainNode | null>(null);
   const playStartRef = useRef(0);
   const posStartRef = useRef(0);
   const rafRef = useRef<number | null>(null);
   const activeNodesRef = useRef<AudioBufferSourceNode[]>([]);
+  const metronomeNodesRef = useRef<OscillatorNode[]>([]);
   const mediaRecRef = useRef<MediaRecorder | null>(null);
   const recChunksRef = useRef<BlobPart[]>([]);
   const recTrackIdRef = useRef<string | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const midiInputRef = useRef<HTMLInputElement | null>(null);
 
   const totalDur = Math.max(
     60,
@@ -192,11 +203,22 @@ export default function ReaperStudio() {
 
   const getCtx = () => {
     if (!audioCtxRef.current) {
-      audioCtxRef.current = new (window.AudioContext ||
+      const ctx = new (window.AudioContext ||
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      audioCtxRef.current = ctx;
+      const master = ctx.createGain();
+      master.gain.value = masterVol;
+      master.connect(ctx.destination);
+      masterGainRef.current = master;
     }
     return audioCtxRef.current;
   };
+
+  // Sync master gain
+  useEffect(() => {
+    if (masterGainRef.current) masterGainRef.current.gain.value = masterVol;
+  }, [masterVol]);
+
 
   /* -------- Transport -------- */
 
@@ -232,7 +254,7 @@ export default function ReaperStudio() {
         }
       }
       head.connect(panner);
-      panner.connect(ctx.destination);
+      panner.connect(masterGainRef.current ?? ctx.destination);
 
       for (const clip of track.clips) {
         const clipStart = clip.start;
@@ -254,15 +276,39 @@ export default function ReaperStudio() {
             if (noteStart + n.duration < offsetInClip) continue;
             const startAt = now + whenOffset + Math.max(0, noteStart - offsetInClip);
             const dur = Math.max(0.05, n.duration - Math.max(0, offsetInClip - noteStart));
-            scheduleSynthNote(ctx, gain, track.instrument ?? "arturia-mini", n.midi, n.velocity, startAt, dur);
+            scheduleSynthNote(ctx, gain, track.instrument ?? "arturia-mini", n.midi, n.velocity, startAt, dur, track.instParams);
           }
         }
+      }
+    }
+
+    // Metrônomo
+    if (metronome) {
+      const secPerBeat = 60 / bpm;
+      const endT = totalDur;
+      const startBeat = Math.floor((position) / secPerBeat);
+      for (let b = startBeat; b * secPerBeat < endT + 8; b++) {
+        const t = now + (b * secPerBeat - position);
+        if (t < now) continue;
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        const strong = b % 4 === 0;
+        osc.frequency.value = strong ? 1600 : 1000;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(strong ? 0.35 : 0.2, t + 0.001);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+        osc.connect(g);
+        g.connect(masterGainRef.current ?? ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.06);
+        metronomeNodesRef.current.push(osc);
       }
     }
 
     setPlaying(true);
     tick();
   };
+
 
   const tick = () => {
     const ctx = audioCtxRef.current;
@@ -288,6 +334,8 @@ export default function ReaperStudio() {
       }
     });
     activeNodesRef.current = [];
+    metronomeNodesRef.current.forEach((n) => { try { n.stop(); } catch { /* ignore */ } });
+    metronomeNodesRef.current = [];
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     setPlaying(false);
   };
@@ -477,7 +525,54 @@ export default function ReaperStudio() {
     }
   };
 
+  /* -------- Export mix (WAV via OfflineAudioContext) -------- */
+
+  const exportMix = async () => {
+    const duration = Math.max(2, totalDur);
+    const sampleRate = 44100;
+    const off = new OfflineAudioContext(2, Math.ceil(duration * sampleRate), sampleRate);
+    const anySolo = tracks.some((t) => t.solo);
+    for (const track of tracks) {
+      if (track.mute) continue;
+      if (anySolo && !track.solo) continue;
+      const gain = off.createGain();
+      gain.gain.value = track.volume;
+      const panner = off.createStereoPanner();
+      panner.pan.value = track.pan;
+      let head: AudioNode = gain;
+      for (const fx of track.fx) {
+        if (fx.bypass) continue;
+        const node = buildFxNode(off as unknown as AudioContext, fx);
+        if (node) { head.connect(node.input); head = node.output; }
+      }
+      head.connect(panner);
+      panner.connect(off.destination);
+      for (const clip of track.clips) {
+        if (clip.kind === "audio") {
+          const src = off.createBufferSource();
+          src.buffer = clip.buffer;
+          src.connect(gain);
+          src.start(clip.start);
+        } else {
+          for (const n of clip.notes) {
+            scheduleSynthNote(off as unknown as AudioContext, gain, track.instrument ?? "arturia-mini", n.midi, n.velocity, clip.start + n.time, n.duration, track.instParams);
+          }
+        }
+      }
+    }
+    const rendered = await off.startRendering();
+    const wav = audioBufferToWav(rendered);
+    const blob = new Blob([wav], { type: "audio/wav" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `solando-mix-${Date.now()}.wav`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  };
+
   /* -------- Render -------- */
+
 
   return (
     <div
@@ -486,22 +581,108 @@ export default function ReaperStudio() {
     >
       {/* MENU BAR */}
       <div
-        className="flex items-center gap-4 px-3 py-1 text-[11px]"
+        className="flex flex-wrap items-center gap-1 px-2 sm:px-3 py-1 text-[11px] relative"
         style={{ background: R.panelDark, borderBottom: `1px solid ${R.border}` }}
       >
-        <div className="font-bold text-[13px]" style={{ color: R.accent }}>
+        <div className="font-bold text-[13px] mr-2" style={{ color: R.accent }}>
           SOLANDO DAW
         </div>
-        {["File", "Edit", "View", "Insert", "Track", "Options", "Actions", "Help"].map((m) => (
-          <button
-            key={m}
-            className="px-2 py-0.5 hover:bg-white/10 rounded"
-            style={{ color: R.text }}
-          >
-            {m}
-          </button>
-        ))}
+        <MenuDropdown
+          label="File"
+          open={openMenu === "File"}
+          onOpen={() => setOpenMenu(openMenu === "File" ? null : "File")}
+          onClose={() => setOpenMenu(null)}
+          items={[
+            { label: "Novo projeto", action: () => { stop(); setTracks(makeDefaultTracks()); setPosition(0); } },
+            { label: "Importar áudio…", action: () => fileInputRef.current?.click() },
+            { label: "Importar MIDI…", action: () => midiInputRef.current?.click() },
+            { label: "Exportar mix (WAV)", action: () => exportMix() },
+          ]}
+        />
+        <MenuDropdown
+          label="Edit"
+          open={openMenu === "Edit"}
+          onOpen={() => setOpenMenu(openMenu === "Edit" ? null : "Edit")}
+          onClose={() => setOpenMenu(null)}
+          items={[
+            { label: "Limpar clips da track selecionada", action: () => { if (selectedTrack) updateTrack(selectedTrack, { clips: [] }); } },
+            { label: "Remover track selecionada", action: () => { if (selectedTrack) { removeTrack(selectedTrack); setSelectedTrack(null); } } },
+          ]}
+        />
+        <MenuDropdown
+          label="View"
+          open={openMenu === "View"}
+          onOpen={() => setOpenMenu(openMenu === "View" ? null : "View")}
+          onClose={() => setOpenMenu(null)}
+          items={[
+            { label: (showMixer ? "✓ " : "") + "Mixer", action: () => setShowMixer((v) => !v) },
+            { label: (showTcp ? "✓ " : "") + "Track panels", action: () => setShowTcp((v) => !v) },
+            { label: "Zoom +", action: () => setZoom((z) => Math.min(200, z + 20)) },
+            { label: "Zoom -", action: () => setZoom((z) => Math.max(20, z - 20)) },
+          ]}
+        />
+        <MenuDropdown
+          label="Insert"
+          open={openMenu === "Insert"}
+          onOpen={() => setOpenMenu(openMenu === "Insert" ? null : "Insert")}
+          onClose={() => setOpenMenu(null)}
+          items={[
+            { label: "Nova track de áudio", action: addAudioTrack },
+            { label: "Nova track MIDI (Piano)", action: () => addMidiTrack("kontakt-piano") },
+            { label: "Nova track MIDI (Synth)", action: () => addMidiTrack("arturia-mini") },
+            { label: "Nova track MIDI (Drums)", action: () => addMidiTrack("808-drums") },
+          ]}
+        />
+        <MenuDropdown
+          label="Options"
+          open={openMenu === "Options"}
+          onOpen={() => setOpenMenu(openMenu === "Options" ? null : "Options")}
+          onClose={() => setOpenMenu(null)}
+          items={[
+            { label: (metronome ? "✓ " : "") + "Metrônomo", action: () => setMetronome((v) => !v) },
+            { label: (loopEnabled ? "✓ " : "") + "Loop", action: () => setLoopEnabled((v) => !v) },
+          ]}
+        />
+        <MenuDropdown
+          label="Actions"
+          open={openMenu === "Actions"}
+          onOpen={() => setOpenMenu(openMenu === "Actions" ? null : "Actions")}
+          onClose={() => setOpenMenu(null)}
+          items={[
+            { label: "▶ Play", action: () => play() },
+            { label: "■ Stop", action: () => stop() },
+            { label: "⏮ Rewind", action: rewind },
+            { label: "● Record", action: () => startRecording() },
+          ]}
+        />
+        <MenuDropdown
+          label="Help"
+          open={openMenu === "Help"}
+          onOpen={() => setOpenMenu(openMenu === "Help" ? null : "Help")}
+          onClose={() => setOpenMenu(null)}
+          items={[
+            { label: "Sobre a Solando DAW", action: () => alert("Solando DAW — estúdio multipista integrado ao app.") },
+            { label: "Docs WAM v2 ↗", action: () => window.open("https://www.webaudiomodules.com", "_blank") },
+          ]}
+        />
+        {/* Inputs ocultos para menu File */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="audio/*"
+          multiple
+          className="hidden"
+          onChange={(e) => e.target.files && importAudioFiles(Array.from(e.target.files))}
+        />
+        <input
+          ref={midiInputRef}
+          type="file"
+          accept=".mid,.midi"
+          className="hidden"
+          onChange={(e) => e.target.files?.[0] && importMidiFile(e.target.files[0])}
+        />
       </div>
+
 
       {/* TRANSPORT BAR */}
       <div
@@ -619,12 +800,13 @@ export default function ReaperStudio() {
       </div>
 
       {/* MAIN AREA: TCP + Arrange */}
-      <div className="flex" style={{ height: 460, background: R.bg }}>
+      <div className="flex" style={{ height: isMobile ? 380 : 460, background: R.bg }}>
         {/* TCP - Track Control Panels */}
+        {showTcp && (
         <div
           className="overflow-y-auto"
           style={{
-            width: 260,
+            width: isMobile ? 180 : 260,
             background: R.panel,
             borderRight: `2px solid ${R.border}`,
             flexShrink: 0,
@@ -661,6 +843,9 @@ export default function ReaperStudio() {
             </button>
           </div>
         </div>
+        )}
+
+
 
         {/* Arrange view */}
         <div
@@ -723,14 +908,14 @@ export default function ReaperStudio() {
           style={{
             background: R.panelDark,
             borderTop: `2px solid ${R.border}`,
-            height: 260,
+            height: isMobile ? 200 : 260,
           }}
         >
           <div className="flex gap-1 p-2 h-full">
             {tracks.map((t) => (
               <MixerStrip key={t.id} track={t} onChange={(p) => updateTrack(t.id, p)} />
             ))}
-            <MasterStrip />
+            <MasterStrip volume={masterVol} onChange={setMasterVol} />
           </div>
         </div>
       )}
@@ -1294,8 +1479,7 @@ function MixerStrip({ track, onChange }: { track: Track; onChange: (p: Partial<T
   );
 }
 
-function MasterStrip() {
-  const [vol, setVol] = useState(0.9);
+function MasterStrip({ volume, onChange }: { volume: number; onChange: (v: number) => void }) {
   return (
     <div
       style={{
@@ -1328,8 +1512,8 @@ function MasterStrip() {
           min={0}
           max={1.2}
           step={0.01}
-          value={vol}
-          onChange={(e) => setVol(Number(e.target.value))}
+          value={volume}
+          onChange={(e) => onChange(Number(e.target.value))}
           style={{
             position: "absolute",
             width: 100,
@@ -1342,7 +1526,7 @@ function MasterStrip() {
         />
       </div>
       <div className="text-[10px] font-mono text-center" style={{ color: R.text }}>
-        {(20 * Math.log10(vol || 0.0001)).toFixed(1)}dB
+        {(20 * Math.log10(volume || 0.0001)).toFixed(1)}dB
       </div>
     </div>
   );
@@ -1658,39 +1842,59 @@ function InstrumentRackPanel({
             ))}
           </div>
 
-          {/* Fake VST controls */}
+          {/* VST controls (mapped to synth ADSR + filter) */}
           <div
-            className="rounded p-4 grid grid-cols-6 gap-3"
+            className="rounded p-4 grid grid-cols-3 sm:grid-cols-6 gap-3"
             style={{ background: "#00000066", border: `1px solid ${inst.accent}33` }}
           >
-            {["CUTOFF", "RESO", "ATTACK", "DECAY", "SUSTAIN", "RELEASE"].map((k) => (
-              <div key={k} className="flex flex-col items-center gap-1">
-                <div
-                  className="relative rounded-full"
-                  style={{
-                    width: 50,
-                    height: 50,
-                    background: `radial-gradient(circle at 30% 30%, ${inst.accent}66, #000)`,
-                    border: `2px solid ${inst.accent}88`,
-                  }}
-                >
+            {(["CUTOFF", "RESO", "ATTACK", "DECAY", "SUSTAIN", "RELEASE"] as const).map((k) => {
+              const defaults: Record<string, number> = { CUTOFF: 0.7, RESO: 0.2, ATTACK: 0.05, DECAY: 0.2, SUSTAIN: 0.7, RELEASE: 0.2 };
+              const value = track.instParams?.[k] ?? defaults[k];
+              const angle = -135 + value * 270;
+              return (
+                <div key={k} className="flex flex-col items-center gap-1">
                   <div
+                    className="relative rounded-full"
                     style={{
-                      position: "absolute",
-                      left: "50%",
-                      top: 4,
-                      width: 2,
-                      height: 18,
-                      background: inst.accent,
-                      transformOrigin: "1px 21px",
-                      transform: `rotate(${-90 + Math.random() * 180}deg)`,
+                      width: 50,
+                      height: 50,
+                      background: `radial-gradient(circle at 30% 30%, ${inst.accent}66, #000)`,
+                      border: `2px solid ${inst.accent}88`,
                     }}
+                  >
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: "50%",
+                        top: 4,
+                        width: 2,
+                        height: 18,
+                        background: inst.accent,
+                        transformOrigin: "1px 21px",
+                        transform: `rotate(${angle}deg)`,
+                      }}
+                    />
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    value={value}
+                    onChange={(e) =>
+                      onChange({
+                        instParams: { ...(track.instParams ?? {}), [k]: Number(e.target.value) },
+                      })
+                    }
+                    style={{ width: 50 }}
                   />
+                  <div className="text-[9px] opacity-70">{k}</div>
+                  <div className="text-[9px] font-mono opacity-70">{value.toFixed(2)}</div>
                 </div>
-                <div className="text-[9px] opacity-70">{k}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
+
 
           <div className="mt-3 text-[11px] opacity-60">
             Sons por SoundFont interno. Para carregar VSTs reais no navegador, abra o painel FX de uma track e cole a URL de um plugin <b>WAM v2</b>.
@@ -1835,10 +2039,18 @@ function scheduleSynthNote(
   velocity: number,
   when: number,
   dur: number,
+  params?: Record<string, number>,
 ) {
   const freq = 440 * Math.pow(2, (midi - 69) / 12);
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+  filter.type = "lowpass";
+  const cutoff = params?.CUTOFF ?? 0.7; // 0..1
+  const reso = params?.RESO ?? 0.2; // 0..1
+  filter.frequency.value = 80 + Math.pow(cutoff, 2) * 12000;
+  filter.Q.value = reso * 20;
+
   const type: OscillatorType =
     inst === "kontakt-piano"
       ? "triangle"
@@ -1850,16 +2062,26 @@ function scheduleSynthNote(
   osc.type = type;
   osc.frequency.value = inst === "808-drums" ? 60 : freq;
 
-  const peak = Math.min(0.6, velocity * 0.6);
-  gain.gain.setValueAtTime(0, when);
-  gain.gain.linearRampToValueAtTime(peak, when + 0.005);
-  gain.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+  const attack = Math.max(0.002, (params?.ATTACK ?? 0.05) * 1.5);
+  const decay = Math.max(0.01, (params?.DECAY ?? 0.2) * 1.2);
+  const sustain = Math.min(1, params?.SUSTAIN ?? 0.7);
+  const release = Math.max(0.02, (params?.RELEASE ?? 0.2) * 1.5);
 
-  osc.connect(gain);
+  const peak = Math.min(0.6, velocity * 0.6);
+  const susLevel = peak * sustain;
+  gain.gain.setValueAtTime(0, when);
+  gain.gain.linearRampToValueAtTime(peak, when + attack);
+  gain.gain.linearRampToValueAtTime(susLevel, when + attack + decay);
+  gain.gain.setValueAtTime(susLevel, when + dur);
+  gain.gain.exponentialRampToValueAtTime(0.0001, when + dur + release);
+
+  osc.connect(filter);
+  filter.connect(gain);
   gain.connect(dest);
   osc.start(when);
-  osc.stop(when + dur + 0.05);
+  osc.stop(when + dur + release + 0.05);
 }
+
 
 function instrumentLabel(k?: InstrumentKind) {
   const i = INSTRUMENTS.find((x) => x.id === k);
@@ -1869,4 +2091,91 @@ function instrumentLabel(k?: InstrumentKind) {
 function instrumentShortName(k?: InstrumentKind) {
   const i = INSTRUMENTS.find((x) => x.id === k);
   return i ? i.brand : "INST";
+}
+
+/* ============================================================
+   MENU DROPDOWN
+============================================================ */
+
+function MenuDropdown({
+  label,
+  open,
+  onOpen,
+  onClose,
+  items,
+}: {
+  label: string;
+  open: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  items: { label: string; action: () => void }[];
+}) {
+  return (
+    <div className="relative">
+      <button
+        onClick={onOpen}
+        className="px-2 py-0.5 hover:bg-white/10 rounded"
+        style={{ color: R.text }}
+      >
+        {label}
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={onClose} />
+          <div
+            className="absolute left-0 top-full mt-1 min-w-[220px] rounded shadow-2xl z-50 py-1"
+            style={{ background: R.panelDark, border: `1px solid ${R.borderLight}` }}
+          >
+            {items.map((it, i) => (
+              <button
+                key={i}
+                onClick={() => { onClose(); it.action(); }}
+                className="block w-full text-left px-3 py-1.5 text-[11px] hover:bg-white/10"
+                style={{ color: R.text }}
+              >
+                {it.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================
+   AUDIO BUFFER -> WAV (16-bit PCM)
+============================================================ */
+
+function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
+  const numCh = buffer.numberOfChannels;
+  const sr = buffer.sampleRate;
+  const len = buffer.length * numCh * 2 + 44;
+  const ab = new ArrayBuffer(len);
+  const view = new DataView(ab);
+  const writeStr = (o: number, s: string) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+  writeStr(0, "RIFF");
+  view.setUint32(4, len - 8, true);
+  writeStr(8, "WAVE");
+  writeStr(12, "fmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, numCh, true);
+  view.setUint32(24, sr, true);
+  view.setUint32(28, sr * numCh * 2, true);
+  view.setUint16(32, numCh * 2, true);
+  view.setUint16(34, 16, true);
+  writeStr(36, "data");
+  view.setUint32(40, buffer.length * numCh * 2, true);
+  const channels: Float32Array[] = [];
+  for (let c = 0; c < numCh; c++) channels.push(buffer.getChannelData(c));
+  let off = 44;
+  for (let i = 0; i < buffer.length; i++) {
+    for (let c = 0; c < numCh; c++) {
+      const s = Math.max(-1, Math.min(1, channels[c][i]));
+      view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+      off += 2;
+    }
+  }
+  return ab;
 }
