@@ -90,6 +90,7 @@ interface Track {
   fx: FxSlot[];
   meterL: number; // 0..1 (visual)
   meterR: number;
+  instParams?: Record<string, number>;
 }
 
 type InstrumentKind =
