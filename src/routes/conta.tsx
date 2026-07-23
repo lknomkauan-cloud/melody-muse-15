@@ -105,14 +105,6 @@ function ContaPage() {
           <div>
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="font-display text-3xl font-bold">{displayName}</h1>
-              {isAdmin && (
-                <Link
-                  to="/admin"
-                  className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-md hover:opacity-90 transition"
-                >
-                  <Shield className="h-3.5 w-3.5" /> Painel de ADM
-                </Link>
-              )}
             </div>
             <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
               <RoleIcon className="h-4 w-4 text-primary" />
@@ -132,6 +124,28 @@ function ContaPage() {
             </Button>
           </div>
         </div>
+
+        {/* Botão de acesso ao painel ADM */}
+        {isAdmin && (
+          <div className="mb-6">
+            <Link
+              to="/admin"
+              className="flex items-center justify-between gap-4 rounded-2xl border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-5 hover:border-amber-500 hover:from-amber-500/20 transition-all"
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500 text-background shadow-lg">
+                  <Shield className="h-6 w-6" />
+                </div>
+                <div>
+                  <div className="font-display text-lg font-bold text-amber-500">Painel de Administração</div>
+                  <div className="text-xs text-muted-foreground">Controle total: usuários, papéis, anúncios e agentes IA</div>
+                </div>
+              </div>
+              <div className="text-amber-500 text-sm font-semibold">Acessar →</div>
+            </Link>
+          </div>
+        )}
+
 
 
         {/* Bio */}
