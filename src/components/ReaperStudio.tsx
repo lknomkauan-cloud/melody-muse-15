@@ -185,6 +185,8 @@ export default function ReaperStudio() {
   const [audioInputs, setAudioInputs] = useState<MediaDeviceInfo[]>([]);
   const [showFlMixer, setShowFlMixer] = useState(false);
   const [flSelected, setFlSelected] = useState<string | "master">("master");
+  const [showPluginLib, setShowPluginLib] = useState(false);
+  const [pluginLib, setPluginLib] = useState<{ id: string; name: string; blobUrl?: string; isNative: boolean }[]>([]);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
