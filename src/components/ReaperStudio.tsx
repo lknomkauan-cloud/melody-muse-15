@@ -991,6 +991,86 @@ export default function ReaperStudio() {
           onClose={() => setOpenInstrumentTrack(null)}
         />
       )}
+
+      {/* Rec Source Picker */}
+      {recPickerOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setRecPickerOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-lg border p-5 shadow-xl"
+            style={{ background: R.panel, borderColor: R.border, color: R.text }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center gap-2">
+              <Mic className="h-4 w-4" style={{ color: R.rec }} />
+              <h3 className="text-sm font-semibold">Escolha a entrada de áudio</h3>
+            </div>
+            <p className="mb-4 text-xs opacity-70">
+              Selecione se deseja gravar do microfone (interno/externo) ou capturar o áudio do sistema/aba.
+            </p>
+
+            <div className="mb-4">
+              <div className="mb-2 text-xs font-semibold uppercase opacity-70">Microfone</div>
+              <div className="space-y-1.5">
+                <button
+                  onClick={() => {
+                    setRecPickerOpen(false);
+                    startRecording("mic");
+                  }}
+                  className="w-full rounded border px-3 py-2 text-left text-sm hover:opacity-90"
+                  style={{ borderColor: R.border, background: R.bg }}
+                >
+                  🎙️ Microfone padrão do dispositivo
+                </button>
+                {audioInputs
+                  .filter((d) => d.deviceId && d.deviceId !== "default")
+                  .map((d) => (
+                    <button
+                      key={d.deviceId}
+                      onClick={() => {
+                        setRecPickerOpen(false);
+                        startRecording("mic", d.deviceId);
+                      }}
+                      className="w-full rounded border px-3 py-2 text-left text-xs hover:opacity-90"
+                      style={{ borderColor: R.border, background: R.bg }}
+                    >
+                      🎤 {d.label || `Entrada ${d.deviceId.slice(0, 6)}`}
+                    </button>
+                  ))}
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <div className="mb-2 text-xs font-semibold uppercase opacity-70">Sistema</div>
+              <button
+                onClick={() => {
+                  setRecPickerOpen(false);
+                  startRecording("system");
+                }}
+                className="w-full rounded border px-3 py-2 text-left text-sm hover:opacity-90"
+                style={{ borderColor: R.border, background: R.bg }}
+              >
+                🔊 Áudio do sistema / aba
+                <div className="mt-0.5 text-[10px] opacity-60">
+                  Marque "Compartilhar áudio" no diálogo do navegador.
+                </div>
+              </button>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                onClick={() => setRecPickerOpen(false)}
+                className="rounded border px-3 py-1.5 text-xs hover:opacity-90"
+                style={{ borderColor: R.border }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
