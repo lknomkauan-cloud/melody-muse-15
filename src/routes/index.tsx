@@ -66,7 +66,7 @@ function HomePage() {
           title="Painel do Administrador"
           className="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 font-display text-sm font-bold text-primary-foreground shadow-lg shadow-primary/40 ring-2 ring-primary/50 transition-all hover:scale-105 hover:bg-primary/90"
         >
-          <Settings className="h-5 w-5 animate-spin-slow" />
+          <Settings className="h-5 w-5" />
           Painel ADM
         </Link>
       )}
