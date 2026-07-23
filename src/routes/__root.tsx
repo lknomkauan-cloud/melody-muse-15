@@ -165,7 +165,7 @@ function Header() {
   );
 }
 
-function MobileNav({ navItems, user, onSignOut, avatarUrl, initials }: { navItems: { to: string; label: string }[]; user: ReturnType<typeof useAuth>["user"]; onSignOut: () => void; avatarUrl: string | null; initials: string }) {
+function MobileNav({ navItems, user, onSignOut, avatarUrl, initials, isAdmin }: { navItems: { to: string; label: string }[]; user: ReturnType<typeof useAuth>["user"]; onSignOut: () => void; avatarUrl: string | null; initials: string; isAdmin: boolean }) {
   const [open, setOpen] = useState(false);
 
   return (
