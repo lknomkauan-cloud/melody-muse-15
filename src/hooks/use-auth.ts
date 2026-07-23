@@ -63,8 +63,6 @@ export function useAuth() {
     if (!user) return;
 
     let cancelled = false;
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => controller.abort(), 7000);
     const emailIsAdmin = ADMIN_EMAILS.has(user.email?.toLowerCase() ?? "");
 
     setIsAdmin(emailIsAdmin);
@@ -72,13 +70,18 @@ export function useAuth() {
 
     const loadUserData = async () => {
       try {
-        const [{ data: roles, error: rolesError }, { data: prof, error: profileError }] = await Promise.all([
-          supabase.from("user_roles").select("role").eq("user_id", user.id).abortSignal(controller.signal),
-          supabase.from("profiles").select("id, full_name, avatar_url, bio, instrument").eq("id", user.id).maybeSingle().abortSignal(controller.signal),
+        const [{ data: roles, error: rolesError }, { data: prof, error: profileError }] = await Promise.race([
+          Promise.all([
+            supabase.from("user_roles").select("role").eq("user_id", user.id),
+            supabase.from("profiles").select("id, full_name, avatar_url, bio, instrument").eq("id", user.id).maybeSingle(),
+          ]),
+          new Promise<never>((_, reject) => {
+            window.setTimeout(() => reject(new Error("Tempo esgotado ao carregar dados da conta")), 7000);
+          }),
         ]);
 
         if (cancelled) return;
-        const rs = (roles ?? []).map((r) => r.role as AppRole);
+        const rs = (roles ?? []).map((r: { role: string }) => r.role as AppRole);
         const admin = emailIsAdmin || rs.includes("admin");
         setIsAdmin(admin);
         setRole(admin ? "admin" : rs.includes("teacher") ? "teacher" : rs.includes("student") ? "student" : null);
@@ -91,7 +94,6 @@ export function useAuth() {
           console.error("Erro ao carregar dados da conta", error);
         }
       } finally {
-        window.clearTimeout(timeoutId);
       }
     };
 
@@ -99,8 +101,6 @@ export function useAuth() {
 
     return () => {
       cancelled = true;
-      controller.abort();
-      window.clearTimeout(timeoutId);
     };
   }, [user]);
 
