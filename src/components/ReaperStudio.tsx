@@ -1109,30 +1109,15 @@ export default function ReaperStudio() {
 
       {showPluginLib && (
         <PluginLibraryModal
-          lib={pluginLib}
-          setLib={setPluginLib}
+          bundles={pluginBundles}
+          userId={userId}
+          onChanged={refreshPluginBundles}
           tracks={tracks}
           selectedTrack={selectedTrack}
-          onAddToTrack={(trackId, entry) => {
+          onAddToTrack={async (trackId, entry) => {
+            const slot = await resolveBundleFx(entry);
             setTracks((prev) =>
-              prev.map((t) =>
-                t.id === trackId
-                  ? {
-                      ...t,
-                      fx: [
-                        ...t.fx,
-                        {
-                          id: nid(),
-                          type: "wam",
-                          bypass: entry.isNative,
-                          label: entry.isNative ? `VST nativo: ${entry.name}` : `WAM: ${entry.name}`,
-                          wamUrl: entry.blobUrl ?? "",
-                          params: {},
-                        },
-                      ],
-                    }
-                  : t,
-              ),
+              prev.map((t) => (t.id === trackId ? { ...t, fx: [...t.fx, slot] } : t)),
             );
           }}
           onClose={() => setShowPluginLib(false)}
