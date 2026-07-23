@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
   GraduationCap, Music, Loader2, Camera, Save, LogOut,
-  BookOpen, Trophy, Users, Sparkles, Mic2, PenLine,
+  BookOpen, Trophy, Users, Sparkles, Mic2, PenLine, ShieldCheck,
 } from "lucide-react";
 
 export const Route = createFileRoute("/conta")({
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/conta")({
 
 function ContaPage() {
   const navigate = useNavigate();
-  const { user, role, profile, loading } = useAuth();
+  const { user, role, isAdmin, profile, loading } = useAuth();
   const [saving, setSaving] = useState(false);
   const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
@@ -74,10 +74,11 @@ function ContaPage() {
   };
 
   const isTeacher = role === "teacher";
+  const isOwner = user.email?.toLowerCase() === "luan-kauan1@hotmail.com";
   const displayName = fullName || user.email?.split("@")[0] || "Usuário";
   const initials = displayName.slice(0, 2).toUpperCase();
-  const roleLabel = isTeacher ? "Professor" : "Aluno";
-  const RoleIcon = isTeacher ? Music : GraduationCap;
+  const roleLabel = isAdmin ? (isOwner ? "Dono do App" : "ADM") : isTeacher ? "Professor" : "Aluno";
+  const RoleIcon = isAdmin ? ShieldCheck : isTeacher ? Music : GraduationCap;
 
   return (
     <div className="min-h-[calc(100vh-4rem)] px-4 py-8">
