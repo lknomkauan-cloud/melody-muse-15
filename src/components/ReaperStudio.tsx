@@ -2069,3 +2069,90 @@ function instrumentShortName(k?: InstrumentKind) {
   const i = INSTRUMENTS.find((x) => x.id === k);
   return i ? i.brand : "INST";
 }
+
+/* ============================================================
+   MENU DROPDOWN
+============================================================ */
+
+function MenuDropdown({
+  label,
+  open,
+  onOpen,
+  onClose,
+  items,
+}: {
+  label: string;
+  open: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  items: { label: string; action: () => void }[];
+}) {
+  return (
+    <div className="relative">
+      <button
+        onClick={onOpen}
+        className="px-2 py-0.5 hover:bg-white/10 rounded"
+        style={{ color: R.text }}
+      >
+        {label}
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={onClose} />
+          <div
+            className="absolute left-0 top-full mt-1 min-w-[220px] rounded shadow-2xl z-50 py-1"
+            style={{ background: R.panelDark, border: `1px solid ${R.borderLight}` }}
+          >
+            {items.map((it, i) => (
+              <button
+                key={i}
+                onClick={() => { onClose(); it.action(); }}
+                className="block w-full text-left px-3 py-1.5 text-[11px] hover:bg-white/10"
+                style={{ color: R.text }}
+              >
+                {it.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================
+   AUDIO BUFFER -> WAV (16-bit PCM)
+============================================================ */
+
+function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
+  const numCh = buffer.numberOfChannels;
+  const sr = buffer.sampleRate;
+  const len = buffer.length * numCh * 2 + 44;
+  const ab = new ArrayBuffer(len);
+  const view = new DataView(ab);
+  const writeStr = (o: number, s: string) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+  writeStr(0, "RIFF");
+  view.setUint32(4, len - 8, true);
+  writeStr(8, "WAVE");
+  writeStr(12, "fmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, numCh, true);
+  view.setUint32(24, sr, true);
+  view.setUint32(28, sr * numCh * 2, true);
+  view.setUint16(32, numCh * 2, true);
+  view.setUint16(34, 16, true);
+  writeStr(36, "data");
+  view.setUint32(40, buffer.length * numCh * 2, true);
+  const channels: Float32Array[] = [];
+  for (let c = 0; c < numCh; c++) channels.push(buffer.getChannelData(c));
+  let off = 44;
+  for (let i = 0; i < buffer.length; i++) {
+    for (let c = 0; c < numCh; c++) {
+      const s = Math.max(-1, Math.min(1, channels[c][i]));
+      view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+      off += 2;
+    }
+  }
+  return ab;
+}
