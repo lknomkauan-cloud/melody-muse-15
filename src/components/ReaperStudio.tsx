@@ -2075,6 +2075,42 @@ function FxPanel({
             </span>
           </div>
 
+          <div className="flex flex-wrap items-center gap-2 mb-3 p-2 rounded" style={{ background: R.panelDark, border: `1px solid ${R.borderLight}` }}>
+            <span className="text-[11px] opacity-70 flex items-center gap-1">
+              <Cpu className="w-3 h-3" /> Meus plugins salvos:
+            </span>
+            {savedBundles.length === 0 ? (
+              <span className="text-[10px] opacity-60">
+                Nenhum ainda. <button className="underline" onClick={onOpenLibrary}>Importar do PC</button>
+              </span>
+            ) : (
+              <>
+                <select
+                  className="text-xs px-1 py-1 rounded"
+                  style={{ background: R.bg, border: `1px solid ${R.borderLight}`, color: R.text }}
+                  defaultValue=""
+                  onChange={(e) => {
+                    const b = savedBundles.find((x) => x.id === e.target.value);
+                    if (b) onAddSavedBundle(b);
+                    e.target.value = "";
+                  }}
+                >
+                  <option value="">Escolher da biblioteca…</option>
+                  {savedBundles.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.isNative ? "🎛️" : "🎚️"} {b.name}
+                    </option>
+                  ))}
+                </select>
+                <button className="text-[10px] underline opacity-70 hover:opacity-100" onClick={onOpenLibrary}>
+                  gerenciar biblioteca
+                </button>
+              </>
+            )}
+          </div>
+
+
+
 
           <div className="space-y-2 overflow-y-auto" style={{ maxHeight: "55vh" }}>
             {track.fx.length === 0 && (
