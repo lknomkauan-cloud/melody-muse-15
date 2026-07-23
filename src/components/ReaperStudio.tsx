@@ -2068,11 +2068,11 @@ function InstrumentRackPanel({
 
           {/* VST controls (mapped to synth ADSR + filter) */}
           <div
-            className="rounded p-4 grid grid-cols-3 sm:grid-cols-6 gap-3"
+            className="rounded p-4 grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-9 gap-3"
             style={{ background: "#00000066", border: `1px solid ${inst.accent}33` }}
           >
-            {(["CUTOFF", "RESO", "ATTACK", "DECAY", "SUSTAIN", "RELEASE"] as const).map((k) => {
-              const defaults: Record<string, number> = { CUTOFF: 0.7, RESO: 0.2, ATTACK: 0.05, DECAY: 0.2, SUSTAIN: 0.7, RELEASE: 0.2 };
+            {(["CUTOFF", "RESO", "ATTACK", "DECAY", "SUSTAIN", "RELEASE", "LOW", "MID", "HIGH"] as const).map((k) => {
+              const defaults: Record<string, number> = { CUTOFF: 0.7, RESO: 0.2, ATTACK: 0.05, DECAY: 0.2, SUSTAIN: 0.7, RELEASE: 0.2, LOW: 0.5, MID: 0.5, HIGH: 0.5 };
               const value = track.instParams?.[k] ?? defaults[k];
               const angle = -135 + value * 270;
               return (
