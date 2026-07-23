@@ -18,7 +18,7 @@ import "@fontsource/dm-sans/700.css";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { Music, Menu, X, LogOut, User as UserIcon } from "lucide-react";
+import { Music, Menu, X, LogOut, User as UserIcon, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -95,7 +95,7 @@ function Header() {
     { to: "/metronomo", label: "Metrônomo" },
     { to: "/afinador", label: "Afinador" },
     { to: "/mixagem", label: "Mixagem" },
-    ...(isAdmin ? [{ to: "/admin", label: "ADM" }] : []),
+    ...(isAdmin ? [{ to: "/admin", label: "Painel ADM" }] : []),
   ];
 
   const handleSignOut = async () => {
@@ -127,7 +127,7 @@ function Header() {
                     : "rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                 }
               >
-                {isAdmLink && <span aria-hidden>⚙</span>}
+                {isAdmLink && <Settings className="h-4 w-4" />}
                 {item.label}
               </Link>
             );
@@ -180,16 +180,22 @@ function MobileNav({ navItems, user, onSignOut, avatarUrl, initials }: { navItem
       {open && (
         <div className="absolute left-0 right-0 top-16 border-t border-border glass">
           <nav className="flex flex-col p-4 gap-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                onClick={() => setOpen(false)}
-                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const isAdmLink = item.to === "/admin";
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setOpen(false)}
+                  className={isAdmLink
+                    ? "flex items-center gap-2 rounded-md bg-primary px-3 py-3 text-sm font-bold text-primary-foreground shadow-sm shadow-primary/40"
+                    : "rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"}
+                >
+                  {isAdmLink && <Settings className="h-4 w-4" />}
+                  {item.label}
+                </Link>
+              );
+            })}
             <div className="mt-2 border-t border-border pt-2">
               {user ? (
                 <>

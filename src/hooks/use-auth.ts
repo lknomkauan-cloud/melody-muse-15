@@ -12,6 +12,11 @@ export type Profile = {
   instrument: string | null;
 };
 
+const ADMIN_EMAILS = new Set([
+  "luan-kauan1@hotmail.com",
+  "odamarasenganchidori@gmail.com",
+]);
+
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -41,9 +46,11 @@ export function useAuth() {
         supabase.from("profiles").select("id, full_name, avatar_url, bio, instrument").eq("id", u.id).maybeSingle(),
       ]);
       if (cancelled || currentLoad !== loadId) return;
+      const emailIsAdmin = ADMIN_EMAILS.has(u.email?.toLowerCase() ?? "");
       const rs = (roles ?? []).map((r) => r.role as AppRole);
-      setIsAdmin(rs.includes("admin"));
-      setRole(rs.includes("admin") ? "admin" : rs.includes("teacher") ? "teacher" : rs.includes("student") ? "student" : null);
+      const admin = emailIsAdmin || rs.includes("admin");
+      setIsAdmin(admin);
+      setRole(admin ? "admin" : rs.includes("teacher") ? "teacher" : rs.includes("student") ? "student" : null);
       setProfile(prof ?? null);
       if (rolesError || profileError) {
         console.error("Erro ao carregar dados da conta", rolesError ?? profileError);

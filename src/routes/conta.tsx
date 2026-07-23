@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
   GraduationCap, Music, Loader2, Camera, Save, LogOut,
-  BookOpen, Trophy, Users, Sparkles, Mic2, PenLine, ShieldCheck,
+  BookOpen, Trophy, Users, Sparkles, Mic2, PenLine, ShieldCheck, Settings,
 } from "lucide-react";
 
 export const Route = createFileRoute("/conta")({
@@ -106,6 +106,15 @@ function ContaPage() {
           <div>
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="font-display text-3xl font-bold">{displayName}</h1>
+              {isAdmin && (
+                <Button
+                  onClick={() => navigate({ to: "/admin" })}
+                  className="h-10 rounded-full px-4 font-display font-bold shadow-lg shadow-primary/30"
+                >
+                  <Settings className="h-4 w-4" />
+                  Painel ADM
+                </Button>
+              )}
             </div>
             <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
               <RoleIcon className="h-4 w-4 text-primary" />
@@ -143,7 +152,22 @@ function ContaPage() {
 
         {/* Estatísticas por papel */}
         <div className="mb-8 grid gap-3 sm:grid-cols-3">
-          {isTeacher ? (
+          {isAdmin ? (
+            <>
+              <StatCard icon={ShieldCheck} label="Perfil" value={isOwner ? "Dono" : "ADM"} hint="Controle administrativo ativo" />
+              <StatCard icon={Users} label="Usuários" value="Painel" hint="Gerenciar papéis e acesso" />
+              <button
+                onClick={() => navigate({ to: "/admin" })}
+                className="rounded-2xl border border-primary/40 bg-primary/15 p-4 text-left transition hover:bg-primary/20"
+              >
+                <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-primary">
+                  <Settings className="h-3.5 w-3.5" /> Acesso direto
+                </div>
+                <div className="mt-2 font-display text-2xl font-bold">Abrir ADM</div>
+                <div className="mt-0.5 text-xs text-muted-foreground">Entrar no painel agora</div>
+              </button>
+            </>
+          ) : isTeacher ? (
             <>
               <StatCard icon={Users} label="Alunos" value="—" hint="Em breve" />
               <StatCard icon={BookOpen} label="Aulas publicadas" value="—" hint="Em breve" />
