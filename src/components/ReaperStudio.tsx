@@ -443,16 +443,68 @@ export default function ReaperStudio() {
 
   /* -------- Recording (mic) -------- */
 
-  const startRecording = async () => {
+  const openRecPicker = async () => {
+    const armed = tracks.find((t) => t.arm && t.type === "audio");
+    if (!armed) {
+      alert("Ative o botão R (arm) de uma track de áudio antes de gravar.");
+      return;
+    }
+    // Enumerar entradas (pode retornar labels vazios sem permissão prévia)
+    try {
+      const devs = await navigator.mediaDevices.enumerateDevices();
+      setAudioInputs(devs.filter((d) => d.kind === "audioinput"));
+    } catch {
+      setAudioInputs([]);
+    }
+    setRecPickerOpen(true);
+  };
+
+  const startRecording = async (
+    source: "mic" | "system" = "mic",
+    deviceId?: string,
+  ) => {
     const armed = tracks.find((t) => t.arm && t.type === "audio");
     if (!armed) {
       alert("Ative o botão R (arm) de uma track de áudio antes de gravar.");
       return;
     }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
-      });
+      let stream: MediaStream;
+      if (source === "system") {
+        // Áudio do sistema: em navegadores/Electron requer getDisplayMedia com audio:true
+        // (o usuário deve marcar "Compartilhar áudio da aba/sistema").
+        const gdm = navigator.mediaDevices as MediaDevices & {
+          getDisplayMedia?: (c: DisplayMediaStreamOptions) => Promise<MediaStream>;
+        };
+        if (!gdm.getDisplayMedia) {
+          alert("Este dispositivo não suporta captura de áudio do sistema. Use o microfone.");
+          return;
+        }
+        const ds = await gdm.getDisplayMedia({
+          video: true,
+          audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+        });
+        const audioTracks = ds.getAudioTracks();
+        if (audioTracks.length === 0) {
+          ds.getTracks().forEach((t) => t.stop());
+          alert(
+            'Nenhum áudio do sistema foi compartilhado. Ao aparecer o diálogo, marque "Compartilhar áudio".',
+          );
+          return;
+        }
+        // Descarta o vídeo — só queremos o áudio
+        ds.getVideoTracks().forEach((t) => t.stop());
+        stream = new MediaStream(audioTracks);
+      } else {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            deviceId: deviceId ? { exact: deviceId } : undefined,
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
+          },
+        });
+      }
       recChunksRef.current = [];
       const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? "audio/webm;codecs=opus"
@@ -469,7 +521,7 @@ export default function ReaperStudio() {
           const clip: AudioClip = {
             kind: "audio",
             id: nid(),
-            name: `Rec ${new Date().toLocaleTimeString()}`,
+            name: `${source === "system" ? "Sys" : "Mic"} ${new Date().toLocaleTimeString()}`,
             start: posStartRef.current,
             duration: buf.duration,
             buffer: buf,
@@ -493,7 +545,7 @@ export default function ReaperStudio() {
       posStartRef.current = position;
       await play();
     } catch (err) {
-      alert("Erro ao acessar microfone: " + (err as Error).message);
+      alert("Erro ao acessar entrada de áudio: " + (err as Error).message);
     }
   };
 
