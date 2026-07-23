@@ -1002,6 +1002,21 @@ export default function ReaperStudio() {
         />
       )}
 
+      {/* FL Studio Mixer Console */}
+      {showFlMixer && (
+        <FLMixerConsole
+          tracks={tracks}
+          selected={flSelected}
+          onSelect={setFlSelected}
+          onChange={updateTrack}
+          masterVol={masterVol}
+          onMasterChange={setMasterVol}
+          onClose={() => setShowFlMixer(false)}
+          onOpenFx={(id) => setOpenFxTrack(id)}
+        />
+      )}
+
+
       {/* Rec Source Picker */}
       {recPickerOpen && (
         <div
