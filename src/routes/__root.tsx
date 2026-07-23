@@ -84,7 +84,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 function Header() {
-  const { user, profile, isAdmin } = useAuth();
+  const { user, profile, isAdmin, role } = useAuth();
+  const isTeacher = role === "teacher" || isAdmin;
+  const hasTeacher = !!profile?.teacher_id;
   const navItems = [
     { to: "/", label: "Início" },
     { to: "/estudar", label: "Estudar" },
@@ -95,6 +97,8 @@ function Header() {
     { to: "/metronomo", label: "Metrônomo" },
     { to: "/afinador", label: "Afinador" },
     { to: "/mixagem", label: "Mixagem" },
+    ...(hasTeacher && !isTeacher ? [{ to: "/apostilas", label: "Apostilas" }] : []),
+    ...(isTeacher ? [{ to: "/regencia", label: "Regência" }] : []),
     ...(isAdmin ? [{ to: "/admin", label: "Painel ADM" }] : []),
   ];
 
