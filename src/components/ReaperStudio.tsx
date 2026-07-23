@@ -183,6 +183,8 @@ export default function ReaperStudio() {
   const [showTcp, setShowTcp] = useState(!isMobile);
   const [recPickerOpen, setRecPickerOpen] = useState(false);
   const [audioInputs, setAudioInputs] = useState<MediaDeviceInfo[]>([]);
+  const [showFlMixer, setShowFlMixer] = useState(false);
+  const [flSelected, setFlSelected] = useState<string | "master">("master");
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
@@ -850,6 +852,14 @@ export default function ReaperStudio() {
           >
             <Sliders className="w-3 h-3" /> Mixer
           </button>
+          <button
+            onClick={() => setShowFlMixer(true)}
+            className="px-2 py-1 text-xs rounded flex items-center gap-1"
+            style={{ background: "linear-gradient(180deg,#ff8a3d,#e65a1a)", border: `1px solid ${R.border}`, color: "#fff" }}
+            title="Mesa de som estilo FL Studio"
+          >
+            <Sliders className="w-3 h-3" /> FL Mixer
+          </button>
         </div>
       </div>
 
@@ -991,6 +1001,21 @@ export default function ReaperStudio() {
           onClose={() => setOpenInstrumentTrack(null)}
         />
       )}
+
+      {/* FL Studio Mixer Console */}
+      {showFlMixer && (
+        <FLMixerConsole
+          tracks={tracks}
+          selected={flSelected}
+          onSelect={setFlSelected}
+          onChange={updateTrack}
+          masterVol={masterVol}
+          onMasterChange={setMasterVol}
+          onClose={() => setShowFlMixer(false)}
+          onOpenFx={(id) => setOpenFxTrack(id)}
+        />
+      )}
+
 
       {/* Rec Source Picker */}
       {recPickerOpen && (
@@ -2313,3 +2338,413 @@ function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
   }
   return ab;
 }
+
+/* ============================================================
+   FL STUDIO STYLE MIXER CONSOLE
+============================================================ */
+
+const FL = {
+  bg: "#1a1a1a",
+  panel: "#2a2a2a",
+  panelDark: "#151515",
+  border: "#0a0a0a",
+  borderLight: "#3a3a3a",
+  text: "#e8e8e8",
+  textDim: "#8a8a8a",
+  accent: "#ff8a3d",
+  selected: "#3d5a80",
+  fader: "#c8c8c8",
+  faderTrack: "#0a0a0a",
+};
+
+function FLMixerConsole({
+  tracks,
+  selected,
+  onSelect,
+  onChange,
+  masterVol,
+  onMasterChange,
+  onClose,
+  onOpenFx,
+}: {
+  tracks: Track[];
+  selected: string | "master";
+  onSelect: (id: string | "master") => void;
+  onChange: (id: string, p: Partial<Track>) => void;
+  masterVol: number;
+  onMasterChange: (v: number) => void;
+  onClose: () => void;
+  onOpenFx: (id: string) => void;
+}) {
+  const selTrack = selected !== "master" ? tracks.find((t) => t.id === selected) : null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: FL.bg, color: FL.text }}>
+      {/* Title bar */}
+      <div
+        className="flex items-center justify-between px-3 py-1.5"
+        style={{ background: "linear-gradient(180deg,#3a3a3a,#1a1a1a)", borderBottom: `1px solid ${FL.border}` }}
+      >
+        <div className="flex items-center gap-2">
+          <Sliders className="w-4 h-4" style={{ color: FL.accent }} />
+          <span className="text-sm font-bold tracking-wide">MIXER</span>
+          <span className="text-[10px] opacity-60 ml-2">FL Studio Style Console</span>
+        </div>
+        <button
+          onClick={onClose}
+          className="text-xs px-3 py-1 rounded"
+          style={{ background: FL.panel, border: `1px solid ${FL.border}` }}
+        >
+          ✕ Fechar
+        </button>
+      </div>
+
+      {/* Console body */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Channel rack (scroll horizontal) */}
+        <div className="flex-1 overflow-x-auto overflow-y-hidden" style={{ background: FL.bg }}>
+          <div className="flex h-full items-stretch p-3 gap-[3px]">
+            <FLChannel
+              name="MASTER"
+              color={FL.accent}
+              volume={masterVol}
+              pan={0}
+              mute={false}
+              solo={false}
+              isMaster
+              isSelected={selected === "master"}
+              onSelect={() => onSelect("master")}
+              onVolume={onMasterChange}
+              onPan={() => {}}
+              onMute={() => {}}
+              onSolo={() => {}}
+            />
+            <div style={{ width: 6 }} />
+            {tracks.map((t, i) => (
+              <FLChannel
+                key={t.id}
+                index={i + 1}
+                name={t.name}
+                color={t.color}
+                volume={t.volume}
+                pan={t.pan}
+                mute={t.mute}
+                solo={t.solo}
+                isSelected={selected === t.id}
+                onSelect={() => onSelect(t.id)}
+                onVolume={(v) => onChange(t.id, { volume: v })}
+                onPan={(v) => onChange(t.id, { pan: v })}
+                onMute={() => onChange(t.id, { mute: !t.mute })}
+                onSolo={() => onChange(t.id, { solo: !t.solo })}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Insert / FX inspector panel (right) */}
+        <div
+          style={{
+            width: 260,
+            background: FL.panel,
+            borderLeft: `2px solid ${FL.border}`,
+            flexShrink: 0,
+          }}
+          className="flex flex-col"
+        >
+          <div
+            className="px-3 py-2 text-[11px] font-bold uppercase tracking-wide"
+            style={{ background: FL.panelDark, borderBottom: `1px solid ${FL.border}`, color: FL.accent }}
+          >
+            Inserts / Efeitos
+          </div>
+          <div className="p-3 flex-1 overflow-y-auto text-xs">
+            {selected === "master" && (
+              <div className="opacity-70">
+                <div className="mb-2 font-semibold" style={{ color: FL.text }}>MASTER BUS</div>
+                <div>Volume: {(20 * Math.log10(masterVol || 0.0001)).toFixed(1)} dB</div>
+                <div className="mt-3 opacity-60">Selecione um insert (canal) à esquerda para gerenciar seus efeitos.</div>
+              </div>
+            )}
+            {selTrack && (
+              <div>
+                <div className="mb-2 font-semibold flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-sm" style={{ background: selTrack.color }} />
+                  <span>{selTrack.name}</span>
+                </div>
+                <div className="mb-3 opacity-70">
+                  Vol: {(20 * Math.log10(selTrack.volume || 0.0001)).toFixed(1)} dB
+                  &nbsp;·&nbsp; Pan: {selTrack.pan === 0 ? "C" : `${selTrack.pan > 0 ? "R" : "L"}${Math.round(Math.abs(selTrack.pan) * 100)}`}
+                </div>
+
+                <div className="space-y-1 mb-3">
+                  {selTrack.fx.length === 0 && (
+                    <div className="opacity-50 italic text-[11px]">Nenhum efeito inserido.</div>
+                  )}
+                  {selTrack.fx.map((f, idx) => (
+                    <div
+                      key={f.id}
+                      className="flex items-center gap-2 px-2 py-1 rounded"
+                      style={{ background: FL.panelDark, border: `1px solid ${FL.border}` }}
+                    >
+                      <span className="text-[10px] opacity-60 w-4">{idx + 1}</span>
+                      <span className="flex-1 truncate">{f.label}</span>
+                      <span
+                        className="text-[9px] px-1.5 py-0.5 rounded"
+                        style={{
+                          background: f.bypass ? FL.panelDark : "#4a7c4a",
+                          color: f.bypass ? FL.textDim : "#fff",
+                        }}
+                      >
+                        {f.bypass ? "OFF" : "ON"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => onOpenFx(selTrack.id)}
+                  className="w-full px-2 py-1.5 text-xs rounded"
+                  style={{ background: FL.accent, color: "#fff", border: `1px solid ${FL.border}` }}
+                >
+                  Abrir Rack de Efeitos
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FLChannel({
+  index,
+  name,
+  color,
+  volume,
+  pan,
+  mute,
+  solo,
+  isMaster,
+  isSelected,
+  onSelect,
+  onVolume,
+  onPan,
+  onMute,
+  onSolo,
+}: {
+  index?: number;
+  name: string;
+  color: string;
+  volume: number;
+  pan: number;
+  mute: boolean;
+  solo: boolean;
+  isMaster?: boolean;
+  isSelected: boolean;
+  onSelect: () => void;
+  onVolume: (v: number) => void;
+  onPan: (v: number) => void;
+  onMute: () => void;
+  onSolo: () => void;
+}) {
+  const db = 20 * Math.log10(volume || 0.0001);
+  // Fake meter animation based on volume (visual only)
+  const meterPct = Math.min(1, volume * (0.6 + 0.4 * Math.random()));
+
+  return (
+    <div
+      onClick={onSelect}
+      style={{
+        width: 66,
+        background: isSelected ? FL.selected : FL.panel,
+        border: `1px solid ${isSelected ? FL.accent : FL.border}`,
+        boxShadow: isSelected ? `inset 0 0 0 1px ${FL.accent}55` : "none",
+        display: "flex",
+        flexDirection: "column",
+        cursor: "pointer",
+        flexShrink: 0,
+      }}
+    >
+      {/* Top label plate with slanted color */}
+      <div
+        style={{
+          height: 20,
+          background: `linear-gradient(90deg, ${color} 0%, ${color}aa 100%)`,
+          borderBottom: `1px solid ${FL.border}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <span className="text-[9px] font-bold text-white/90 truncate px-1">
+          {isMaster ? "★" : index}
+        </span>
+      </div>
+
+      {/* Name */}
+      <div
+        className="text-[10px] font-semibold text-center py-1 truncate px-1"
+        style={{ background: FL.panelDark, color: FL.text, borderBottom: `1px solid ${FL.border}` }}
+      >
+        {name}
+      </div>
+
+      {/* Pan knob */}
+      {!isMaster && (
+        <div className="flex flex-col items-center py-1" style={{ background: FL.panelDark }}>
+          <input
+            type="range"
+            min={-1}
+            max={1}
+            step={0.01}
+            value={pan}
+            onChange={(e) => onPan(Number(e.target.value))}
+            onClick={(e) => e.stopPropagation()}
+            style={{ width: 50, accentColor: FL.accent }}
+          />
+          <div className="text-[8px]" style={{ color: FL.textDim }}>
+            {pan === 0 ? "C" : `${pan > 0 ? "R" : "L"}${Math.round(Math.abs(pan) * 100)}`}
+          </div>
+        </div>
+      )}
+
+      {/* M/S buttons */}
+      {!isMaster && (
+        <div className="flex justify-center gap-1 py-1" style={{ background: FL.panelDark, borderTop: `1px solid ${FL.border}` }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); onMute(); }}
+            className="text-[9px] font-bold w-6 rounded"
+            style={{
+              background: mute ? "#e0a020" : FL.bg,
+              color: mute ? "#000" : FL.textDim,
+              border: `1px solid ${FL.border}`,
+            }}
+          >
+            M
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onSolo(); }}
+            className="text-[9px] font-bold w-6 rounded"
+            style={{
+              background: solo ? "#4ec14e" : FL.bg,
+              color: solo ? "#000" : FL.textDim,
+              border: `1px solid ${FL.border}`,
+            }}
+          >
+            S
+          </button>
+        </div>
+      )}
+
+      {/* Fader area with meters */}
+      <div
+        style={{
+          flex: 1,
+          minHeight: 220,
+          background: FL.panelDark,
+          borderTop: `1px solid ${FL.border}`,
+          position: "relative",
+          display: "flex",
+          alignItems: "stretch",
+          padding: "8px 4px",
+          gap: 4,
+        }}
+      >
+        {/* Left meter */}
+        <div
+          style={{
+            flex: "0 0 6px",
+            background: FL.bg,
+            border: `1px solid ${FL.border}`,
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: `${meterPct * 100}%`,
+              background: "linear-gradient(0deg,#4ec14e 0%,#4ec14e 60%,#e0d155 80%,#e05555 100%)",
+              transition: "height 0.15s",
+            }}
+          />
+        </div>
+
+        {/* Fader track */}
+        <div style={{ flex: 1, position: "relative", display: "flex", justifyContent: "center" }}>
+          <div
+            style={{
+              position: "absolute",
+              top: 4,
+              bottom: 4,
+              width: 4,
+              background: FL.faderTrack,
+              borderRadius: 2,
+              border: `1px solid ${FL.border}`,
+            }}
+          />
+          <input
+            type="range"
+            min={0}
+            max={1.2}
+            step={0.001}
+            value={volume}
+            onChange={(e) => onVolume(Number(e.target.value))}
+            onClick={(e) => e.stopPropagation()}
+            style={
+              {
+                WebkitAppearance: "slider-vertical",
+                width: 24,
+                height: "100%",
+                accentColor: FL.accent,
+                writingMode: "vertical-lr",
+                direction: "rtl",
+              } as React.CSSProperties
+            }
+          />
+
+        </div>
+
+        {/* Right meter */}
+        <div
+          style={{
+            flex: "0 0 6px",
+            background: FL.bg,
+            border: `1px solid ${FL.border}`,
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: `${meterPct * 0.9 * 100}%`,
+              background: "linear-gradient(0deg,#4ec14e 0%,#4ec14e 60%,#e0d155 80%,#e05555 100%)",
+              transition: "height 0.15s",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* dB readout */}
+      <div
+        className="text-[9px] font-mono text-center py-1"
+        style={{
+          background: FL.bg,
+          color: db > 0 ? "#e05555" : FL.text,
+          borderTop: `1px solid ${FL.border}`,
+        }}
+      >
+        {db > -60 ? db.toFixed(1) : "-∞"}
+      </div>
+    </div>
+  );
+}
+
