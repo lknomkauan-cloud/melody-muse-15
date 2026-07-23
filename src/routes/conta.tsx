@@ -116,7 +116,14 @@ function ContaPage() {
               </div>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            {isAdmin && (
+              <Button asChild size="sm" className="bg-primary text-primary-foreground">
+                <Link to="/admin">
+                  <Shield className="h-4 w-4 mr-1" /> Painel de ADM
+                </Link>
+              </Button>
+            )}
             <Button variant="ghost" size="sm" onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-1" /> Sair
             </Button>
