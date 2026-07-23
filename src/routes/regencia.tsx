@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import {
   Loader2, Users, BookOpen, Plus, Trash2, FileText, Upload, LayoutList, PenSquare,
   Download, Lock, Unlock, Music, ArrowLeft, Bold, Italic, Heading1, List, Save,
+} from "lucide-react";
 import { exportContentAsPdf } from "@/lib/apostila-export";
 
 export const Route = createFileRoute("/regencia")({
