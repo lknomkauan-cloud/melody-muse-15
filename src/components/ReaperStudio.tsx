@@ -2997,3 +2997,172 @@ function FLChannel({
   );
 }
 
+
+/* ============================================================
+   PLUGIN LIBRARY MODAL — carregar VSTs/WAMs do PC
+============================================================ */
+
+interface PluginEntry {
+  id: string;
+  name: string;
+  blobUrl?: string;
+  isNative: boolean;
+}
+
+function PluginLibraryModal({
+  lib,
+  setLib,
+  tracks,
+  selectedTrack,
+  onAddToTrack,
+  onClose,
+}: {
+  lib: PluginEntry[];
+  setLib: React.Dispatch<React.SetStateAction<PluginEntry[]>>;
+  tracks: Track[];
+  selectedTrack: string | null;
+  onAddToTrack: (trackId: string, entry: PluginEntry) => void;
+  onClose: () => void;
+}) {
+  const ingest = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const arr = Array.from(files);
+    const entries: PluginEntry[] = [];
+    const jsEntry =
+      arr.find((f) => /(^|\/)index\.js$/i.test((f as any).webkitRelativePath || f.name)) ||
+      arr.find((f) => /\.m?js$/i.test(f.name));
+    for (const f of arr) {
+      const lower = f.name.toLowerCase();
+      const isNative = /\.(dll|vst3?|component|so|dylib)$/i.test(lower);
+      const isJs = /\.m?js$/i.test(lower);
+      if (!isNative && !isJs) continue;
+      const isEntry = isJs && f === jsEntry;
+      if (isJs && !isEntry) continue;
+      entries.push({
+        id: nid(),
+        name: f.name,
+        blobUrl: isEntry ? URL.createObjectURL(f) : undefined,
+        isNative,
+      });
+    }
+    if (entries.length === 0) {
+      alert("Nenhum arquivo compatível encontrado. Aceita .js/.mjs (WAM) ou .dll/.vst3/.component (nativo).");
+      return;
+    }
+    setLib((prev) => [...prev, ...entries]);
+  };
+
+  const removeEntry = (id: string) => {
+    setLib((prev) => {
+      const target = prev.find((p) => p.id === id);
+      if (target?.blobUrl) URL.revokeObjectURL(target.blobUrl);
+      return prev.filter((p) => p.id !== id);
+    });
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.65)" }}
+      onClick={onClose}
+    >
+      <div
+        className="rounded-md shadow-2xl overflow-hidden flex flex-col"
+        style={{
+          background: R.panel,
+          border: `1px solid ${R.border}`,
+          width: 720,
+          maxHeight: "85vh",
+          color: R.text,
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          className="flex items-center justify-between px-3 py-2"
+          style={{ background: R.panelDark, borderBottom: `1px solid ${R.border}` }}
+        >
+          <div className="flex items-center gap-2 text-sm">
+            <Cpu className="w-4 h-4" style={{ color: R.accent }} />
+            <b>Biblioteca de Plugins</b>
+          </div>
+          <button onClick={onClose} className="opacity-60 hover:opacity-100 text-xs">✕</button>
+        </div>
+
+        <div className="p-3 space-y-3 overflow-y-auto">
+          <div className="flex flex-wrap items-center gap-2 p-2 rounded" style={{ background: R.panelDark, border: `1px dashed ${R.borderLight}` }}>
+            <label className="px-2 py-1 text-xs rounded cursor-pointer flex items-center gap-1" style={{ background: R.bg, border: `1px solid ${R.borderLight}` }}>
+              <Plus className="w-3 h-3" /> Selecionar arquivos
+              <input
+                type="file"
+                multiple
+                accept=".js,.mjs,.wasm,.dll,.vst,.vst3,.component,.so,.dylib"
+                className="hidden"
+                onChange={(e) => { ingest(e.target.files); e.currentTarget.value = ""; }}
+              />
+            </label>
+            <label className="px-2 py-1 text-xs rounded cursor-pointer flex items-center gap-1" style={{ background: R.bg, border: `1px solid ${R.borderLight}` }}>
+              <Plus className="w-3 h-3" /> Selecionar pasta
+              <input
+                type="file"
+                // @ts-expect-error non-standard directory attrs
+                webkitdirectory=""
+                directory=""
+                multiple
+                className="hidden"
+                onChange={(e) => { ingest(e.target.files); e.currentTarget.value = ""; }}
+              />
+            </label>
+            <span className="text-[10px] opacity-70">
+              Plugins WAM v2 (.js/.mjs) rodam no navegador. VSTs nativos (.dll/.vst3) ficam listados e serão executados no build desktop com host nativo.
+            </span>
+          </div>
+
+          {lib.length === 0 ? (
+            <div className="text-xs opacity-60 text-center py-8">
+              Nenhum plugin carregado. Escolha arquivos ou uma pasta do seu PC acima.
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {lib.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex items-center gap-2 p-2 rounded"
+                  style={{ background: R.panelDark, border: `1px solid ${R.borderLight}` }}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-medium truncate">{p.name}</div>
+                    <div className="text-[10px] opacity-60">
+                      {p.isNative ? "VST nativo — requer build desktop" : "WAM v2 — pronto para uso"}
+                    </div>
+                  </div>
+                  <select
+                    className="text-xs px-1 py-1 rounded"
+                    style={{ background: R.bg, border: `1px solid ${R.borderLight}`, color: R.text }}
+                    defaultValue={selectedTrack ?? ""}
+                    onChange={(e) => {
+                      if (!e.target.value) return;
+                      onAddToTrack(e.target.value, p);
+                      e.target.value = "";
+                    }}
+                  >
+                    <option value="">Adicionar à trilha…</option>
+                    {tracks.map((t) => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => removeEntry(p.id)}
+                    className="opacity-60 hover:opacity-100"
+                    title="Remover"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
