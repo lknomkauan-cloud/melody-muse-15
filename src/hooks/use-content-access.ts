@@ -40,11 +40,14 @@ function slugMatchesAlias(slug: string, value: string): boolean {
  * - Aluno SEM professor vinculado: liberado (ainda escolhendo caminho).
  * - Aluno COM professor: só o instrumento do perfil + unlocked_instruments.
  */
+const OWNER_EMAILS = new Set(["luan-kauan1@hotmail.com", "odamarasenganchidori@gmail.com"]);
+
 export function useContentAccess(instrumentSlug?: string) {
   const { user, role, isAdmin, profile, loading } = useAuth();
 
   if (!instrumentSlug) return { locked: false, ready: !loading };
   if (loading || !user) return { locked: false, ready: !loading };
+  if (OWNER_EMAILS.has(user.email?.toLowerCase() ?? "")) return { locked: false, ready: true };
   if (isAdmin || role === "teacher") return { locked: false, ready: true };
   if (!profile || !profile.teacher_id) return { locked: false, ready: true };
 
