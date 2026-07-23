@@ -181,6 +181,8 @@ export default function ReaperStudio() {
   const [masterVol, setMasterVol] = useState(0.9);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [showTcp, setShowTcp] = useState(!isMobile);
+  const [recPickerOpen, setRecPickerOpen] = useState(false);
+  const [audioInputs, setAudioInputs] = useState<MediaDeviceInfo[]>([]);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
@@ -441,16 +443,68 @@ export default function ReaperStudio() {
 
   /* -------- Recording (mic) -------- */
 
-  const startRecording = async () => {
+  const openRecPicker = async () => {
+    const armed = tracks.find((t) => t.arm && t.type === "audio");
+    if (!armed) {
+      alert("Ative o botão R (arm) de uma track de áudio antes de gravar.");
+      return;
+    }
+    // Enumerar entradas (pode retornar labels vazios sem permissão prévia)
+    try {
+      const devs = await navigator.mediaDevices.enumerateDevices();
+      setAudioInputs(devs.filter((d) => d.kind === "audioinput"));
+    } catch {
+      setAudioInputs([]);
+    }
+    setRecPickerOpen(true);
+  };
+
+  const startRecording = async (
+    source: "mic" | "system" = "mic",
+    deviceId?: string,
+  ) => {
     const armed = tracks.find((t) => t.arm && t.type === "audio");
     if (!armed) {
       alert("Ative o botão R (arm) de uma track de áudio antes de gravar.");
       return;
     }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
-      });
+      let stream: MediaStream;
+      if (source === "system") {
+        // Áudio do sistema: em navegadores/Electron requer getDisplayMedia com audio:true
+        // (o usuário deve marcar "Compartilhar áudio da aba/sistema").
+        const gdm = navigator.mediaDevices as MediaDevices & {
+          getDisplayMedia?: (c: DisplayMediaStreamOptions) => Promise<MediaStream>;
+        };
+        if (!gdm.getDisplayMedia) {
+          alert("Este dispositivo não suporta captura de áudio do sistema. Use o microfone.");
+          return;
+        }
+        const ds = await gdm.getDisplayMedia({
+          video: true,
+          audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+        });
+        const audioTracks = ds.getAudioTracks();
+        if (audioTracks.length === 0) {
+          ds.getTracks().forEach((t) => t.stop());
+          alert(
+            'Nenhum áudio do sistema foi compartilhado. Ao aparecer o diálogo, marque "Compartilhar áudio".',
+          );
+          return;
+        }
+        // Descarta o vídeo — só queremos o áudio
+        ds.getVideoTracks().forEach((t) => t.stop());
+        stream = new MediaStream(audioTracks);
+      } else {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            deviceId: deviceId ? { exact: deviceId } : undefined,
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
+          },
+        });
+      }
       recChunksRef.current = [];
       const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? "audio/webm;codecs=opus"
@@ -467,7 +521,7 @@ export default function ReaperStudio() {
           const clip: AudioClip = {
             kind: "audio",
             id: nid(),
-            name: `Rec ${new Date().toLocaleTimeString()}`,
+            name: `${source === "system" ? "Sys" : "Mic"} ${new Date().toLocaleTimeString()}`,
             start: posStartRef.current,
             duration: buf.duration,
             buffer: buf,
@@ -491,7 +545,7 @@ export default function ReaperStudio() {
       posStartRef.current = position;
       await play();
     } catch (err) {
-      alert("Erro ao acessar microfone: " + (err as Error).message);
+      alert("Erro ao acessar entrada de áudio: " + (err as Error).message);
     }
   };
 
@@ -652,7 +706,7 @@ export default function ReaperStudio() {
             { label: "▶ Play", action: () => play() },
             { label: "■ Stop", action: () => stop() },
             { label: "⏮ Rewind", action: rewind },
-            { label: "● Record", action: () => startRecording() },
+            { label: "● Record…", action: () => openRecPicker() },
           ]}
         />
         <MenuDropdown
@@ -707,7 +761,7 @@ export default function ReaperStudio() {
               <Square className="w-4 h-4 fill-current" />
             </TransportBtn>
           ) : (
-            <TransportBtn onClick={startRecording} title="Record" color={R.rec}>
+            <TransportBtn onClick={openRecPicker} title="Record (escolher entrada)" color={R.rec}>
               <Circle className="w-4 h-4 fill-current" />
             </TransportBtn>
           )}
@@ -936,6 +990,86 @@ export default function ReaperStudio() {
           onChange={(p) => updateTrack(openInstrumentTrack, p)}
           onClose={() => setOpenInstrumentTrack(null)}
         />
+      )}
+
+      {/* Rec Source Picker */}
+      {recPickerOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setRecPickerOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-lg border p-5 shadow-xl"
+            style={{ background: R.panel, borderColor: R.border, color: R.text }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center gap-2">
+              <Mic className="h-4 w-4" style={{ color: R.rec }} />
+              <h3 className="text-sm font-semibold">Escolha a entrada de áudio</h3>
+            </div>
+            <p className="mb-4 text-xs opacity-70">
+              Selecione se deseja gravar do microfone (interno/externo) ou capturar o áudio do sistema/aba.
+            </p>
+
+            <div className="mb-4">
+              <div className="mb-2 text-xs font-semibold uppercase opacity-70">Microfone</div>
+              <div className="space-y-1.5">
+                <button
+                  onClick={() => {
+                    setRecPickerOpen(false);
+                    startRecording("mic");
+                  }}
+                  className="w-full rounded border px-3 py-2 text-left text-sm hover:opacity-90"
+                  style={{ borderColor: R.border, background: R.bg }}
+                >
+                  🎙️ Microfone padrão do dispositivo
+                </button>
+                {audioInputs
+                  .filter((d) => d.deviceId && d.deviceId !== "default")
+                  .map((d) => (
+                    <button
+                      key={d.deviceId}
+                      onClick={() => {
+                        setRecPickerOpen(false);
+                        startRecording("mic", d.deviceId);
+                      }}
+                      className="w-full rounded border px-3 py-2 text-left text-xs hover:opacity-90"
+                      style={{ borderColor: R.border, background: R.bg }}
+                    >
+                      🎤 {d.label || `Entrada ${d.deviceId.slice(0, 6)}`}
+                    </button>
+                  ))}
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <div className="mb-2 text-xs font-semibold uppercase opacity-70">Sistema</div>
+              <button
+                onClick={() => {
+                  setRecPickerOpen(false);
+                  startRecording("system");
+                }}
+                className="w-full rounded border px-3 py-2 text-left text-sm hover:opacity-90"
+                style={{ borderColor: R.border, background: R.bg }}
+              >
+                🔊 Áudio do sistema / aba
+                <div className="mt-0.5 text-[10px] opacity-60">
+                  Marque "Compartilhar áudio" no diálogo do navegador.
+                </div>
+              </button>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                onClick={() => setRecPickerOpen(false)}
+                className="rounded border px-3 py-1.5 text-xs hover:opacity-90"
+                style={{ borderColor: R.border }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
