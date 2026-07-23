@@ -156,16 +156,17 @@ function ContaPage() {
             <>
               <StatCard icon={ShieldCheck} label="Perfil" value={isOwner ? "Dono" : "ADM"} hint="Controle administrativo ativo" />
               <StatCard icon={Users} label="Usuários" value="Painel" hint="Gerenciar papéis e acesso" />
-              <button
+              <Button
+                variant="outline"
                 onClick={() => navigate({ to: "/admin" })}
-                className="rounded-2xl border border-primary/40 bg-primary/15 p-4 text-left transition hover:bg-primary/20"
+                className="h-auto justify-start rounded-2xl border-primary/40 bg-primary/15 p-4 text-left transition hover:bg-primary/20"
               >
                 <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-primary">
                   <Settings className="h-3.5 w-3.5" /> Acesso direto
                 </div>
                 <div className="mt-2 font-display text-2xl font-bold">Abrir ADM</div>
                 <div className="mt-0.5 text-xs text-muted-foreground">Entrar no painel agora</div>
-              </button>
+              </Button>
             </>
           ) : isTeacher ? (
             <>
