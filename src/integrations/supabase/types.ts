@@ -14,39 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      announcements: {
-        Row: {
-          active: boolean
-          created_at: string
-          created_by: string | null
-          id: string
-          kind: string
-          message: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          active?: boolean
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          kind?: string
-          message: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          active?: boolean
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          kind?: string
-          message?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null

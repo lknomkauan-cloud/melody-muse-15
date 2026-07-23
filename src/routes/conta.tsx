@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
   GraduationCap, Music, Loader2, Camera, Save, LogOut,
-  BookOpen, Trophy, Users, Sparkles, Mic2, PenLine, Shield,
+  BookOpen, Trophy, Users, Sparkles, Mic2, PenLine,
 } from "lucide-react";
 
 export const Route = createFileRoute("/conta")({
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/conta")({
 
 function ContaPage() {
   const navigate = useNavigate();
-  const { user, role, profile, isAdmin, loading } = useAuth();
+  const { user, role, profile, loading } = useAuth();
   const [saving, setSaving] = useState(false);
   const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
@@ -125,26 +125,8 @@ function ContaPage() {
           </div>
         </div>
 
-        {/* Botão de acesso ao painel ADM */}
-        {isAdmin && (
-          <div className="mb-6">
-            <Link
-              to="/admin"
-              className="flex items-center justify-between gap-4 rounded-2xl border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-5 hover:border-amber-500 hover:from-amber-500/20 transition-all"
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500 text-background shadow-lg">
-                  <Shield className="h-6 w-6" />
-                </div>
-                <div>
-                  <div className="font-display text-lg font-bold text-amber-500">Painel de Administração</div>
-                  <div className="text-xs text-muted-foreground">Controle total: usuários, papéis, anúncios e agentes IA</div>
-                </div>
-              </div>
-              <div className="text-amber-500 text-sm font-semibold">Acessar →</div>
-            </Link>
-          </div>
-        )}
+
+
 
 
 

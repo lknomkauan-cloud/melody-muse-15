@@ -21,7 +21,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Music, Menu, X, LogOut, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { AnnouncementBanner } from "@/components/AnnouncementBanner";
+
 
 function NotFoundComponent() {
   return (
@@ -84,7 +84,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 function Header() {
-  const { user, profile, isAdmin } = useAuth();
+  const { user, profile } = useAuth();
   const navItems = [
     { to: "/", label: "Início" },
     { to: "/estudar", label: "Estudar" },
@@ -150,13 +150,13 @@ function Header() {
             </Link>
           )}
         </nav>
-        <MobileNav navItems={navItems} user={user} onSignOut={handleSignOut} avatarUrl={profile?.avatar_url ?? null} initials={initials} isAdmin={isAdmin} />
+        <MobileNav navItems={navItems} user={user} onSignOut={handleSignOut} avatarUrl={profile?.avatar_url ?? null} initials={initials} />
       </div>
     </header>
   );
 }
 
-function MobileNav({ navItems, user, onSignOut, avatarUrl, initials, isAdmin }: { navItems: { to: string; label: string }[]; user: ReturnType<typeof useAuth>["user"]; onSignOut: () => void; avatarUrl: string | null; initials: string; isAdmin: boolean }) {
+function MobileNav({ navItems, user, onSignOut, avatarUrl, initials }: { navItems: { to: string; label: string }[]; user: ReturnType<typeof useAuth>["user"]; onSignOut: () => void; avatarUrl: string | null; initials: string }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -256,7 +256,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Header />
-      <AnnouncementBanner />
+      
       <div className="pt-16">
         <Outlet />
       </div>
