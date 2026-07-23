@@ -190,6 +190,15 @@ function MobileNav({ navItems, user, onSignOut, avatarUrl, initials, isAdmin }: 
                 {item.label}
               </Link>
             ))}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                onClick={() => setOpen(false)}
+                className="rounded-md px-3 py-2 text-sm font-semibold text-amber-500 hover:bg-muted"
+              >
+                ADM — Painel
+              </Link>
+            )}
             <div className="mt-2 border-t border-border pt-2">
               {user ? (
                 <>
