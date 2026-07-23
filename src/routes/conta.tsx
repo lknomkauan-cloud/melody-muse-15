@@ -24,7 +24,7 @@ export const Route = createFileRoute("/conta")({
 
 function ContaPage() {
   const navigate = useNavigate();
-  const { user, role, profile, loading, isAdmin } = useAuth();
+  const { user, role, profile, loading } = useAuth();
   const [saving, setSaving] = useState(false);
   const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
@@ -76,8 +76,8 @@ function ContaPage() {
   const isTeacher = role === "teacher";
   const displayName = fullName || user.email?.split("@")[0] || "Usuário";
   const initials = displayName.slice(0, 2).toUpperCase();
-  const roleLabel = isAdmin && isTeacher ? "Professor e administrador" : isAdmin ? "Administrador" : isTeacher ? "Professor" : "Aluno";
-  const RoleIcon = isAdmin ? Sparkles : isTeacher ? Music : GraduationCap;
+  const roleLabel = isTeacher ? "Professor" : "Aluno";
+  const RoleIcon = isTeacher ? Music : GraduationCap;
 
   return (
     <div className="min-h-[calc(100vh-4rem)] px-4 py-8">
@@ -117,11 +117,6 @@ function ContaPage() {
             )}
           </div>
           <div className="flex gap-2">
-            {isAdmin && (
-              <Link to="/admin">
-                <Button variant="outline" size="sm"><Sparkles className="h-4 w-4 mr-1" /> Painel do Adm</Button>
-              </Link>
-            )}
             <Button variant="ghost" size="sm" onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-1" /> Sair
             </Button>
