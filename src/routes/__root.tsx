@@ -21,7 +21,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Music, Menu, X, LogOut, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { AnnouncementBanner } from "@/components/AnnouncementBanner";
+
 
 function NotFoundComponent() {
   return (
