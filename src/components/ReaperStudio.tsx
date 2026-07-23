@@ -908,14 +908,14 @@ export default function ReaperStudio() {
           style={{
             background: R.panelDark,
             borderTop: `2px solid ${R.border}`,
-            height: 260,
+            height: isMobile ? 200 : 260,
           }}
         >
           <div className="flex gap-1 p-2 h-full">
             {tracks.map((t) => (
               <MixerStrip key={t.id} track={t} onChange={(p) => updateTrack(t.id, p)} />
             ))}
-            <MasterStrip />
+            <MasterStrip volume={masterVol} onChange={setMasterVol} />
           </div>
         </div>
       )}
