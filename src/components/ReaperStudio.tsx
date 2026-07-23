@@ -761,7 +761,7 @@ export default function ReaperStudio() {
               <Square className="w-4 h-4 fill-current" />
             </TransportBtn>
           ) : (
-            <TransportBtn onClick={startRecording} title="Record" color={R.rec}>
+            <TransportBtn onClick={openRecPicker} title="Record (escolher entrada)" color={R.rec}>
               <Circle className="w-4 h-4 fill-current" />
             </TransportBtn>
           )}
