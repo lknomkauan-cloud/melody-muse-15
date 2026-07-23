@@ -1480,7 +1480,6 @@ function MixerStrip({ track, onChange }: { track: Track; onChange: (p: Partial<T
 }
 
 function MasterStrip({ volume, onChange }: { volume: number; onChange: (v: number) => void }) {
-  const [vol, setVol] = useState(0.9);
   return (
     <div
       style={{
@@ -1513,8 +1512,8 @@ function MasterStrip({ volume, onChange }: { volume: number; onChange: (v: numbe
           min={0}
           max={1.2}
           step={0.01}
-          value={vol}
-          onChange={(e) => setVol(Number(e.target.value))}
+          value={volume}
+          onChange={(e) => onChange(Number(e.target.value))}
           style={{
             position: "absolute",
             width: 100,
@@ -1527,7 +1526,7 @@ function MasterStrip({ volume, onChange }: { volume: number; onChange: (v: numbe
         />
       </div>
       <div className="text-[10px] font-mono text-center" style={{ color: R.text }}>
-        {(20 * Math.log10(vol || 0.0001)).toFixed(1)}dB
+        {(20 * Math.log10(volume || 0.0001)).toFixed(1)}dB
       </div>
     </div>
   );
