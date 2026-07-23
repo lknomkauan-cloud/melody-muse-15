@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, Download, FileText } from "lucide-react";
 import { toast } from "sonner";
-import { exportContentAsPdf, renderApostilaAsHtml } from "./regencia";
+import { exportContentAsPdf, renderApostilaAsHtml } from "@/lib/apostila-export";
 
 export const Route = createFileRoute("/apostilas/$id")({
   head: ({ params }) => ({
