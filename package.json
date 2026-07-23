@@ -49,6 +49,7 @@
     "@tanstack/react-start": "^1.168.26",
     "@tanstack/router-plugin": "^1.168.18",
     "@tombatossals/chords-db": "^0.5.1",
+    "@tonejs/midi": "^2.0.28",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
