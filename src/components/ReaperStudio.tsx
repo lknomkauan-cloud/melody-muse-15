@@ -1843,6 +1843,35 @@ function FxPanel({
     };
     onChange({ fx: [...track.fx, slot] });
   };
+  const addLocalPlugins = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const arr = Array.from(files);
+    const jsEntry =
+      arr.find((f) => /(^|\/)index\.js$/i.test((f as any).webkitRelativePath || f.name)) ||
+      arr.find((f) => /\.m?js$/i.test(f.name));
+    const newSlots: FxSlot[] = [];
+    for (const f of arr) {
+      const lower = f.name.toLowerCase();
+      const isNative = /\.(dll|vst3?|component|so|dylib)$/i.test(lower);
+      const isJs = /\.m?js$/i.test(lower);
+      if (!isNative && !isJs) continue;
+      const isEntry = isJs && f === jsEntry;
+      if (isJs && !isEntry) continue;
+      newSlots.push({
+        id: nid(),
+        type: "wam",
+        bypass: isNative,
+        label: isNative ? `VST nativo: ${f.name}` : `WAM: ${f.name}`,
+        wamUrl: isEntry ? URL.createObjectURL(f) : "",
+        params: {},
+      });
+    }
+    if (newSlots.length === 0) {
+      alert("Selecione um bundle WAM (.js/.mjs — idealmente uma pasta com index.js) ou binários .dll/.vst3.");
+      return;
+    }
+    onChange({ fx: [...track.fx, ...newSlots] });
+  };
   const removeFx = (id: string) => {
     onChange({ fx: track.fx.filter((f) => f.id !== id) });
   };
@@ -1888,7 +1917,7 @@ function FxPanel({
         </div>
 
         <div className="p-3">
-          <div className="flex flex-wrap gap-1 mb-3">
+          <div className="flex flex-wrap gap-1 mb-2">
             {(["eq3", "comp", "reverb", "delay", "wam"] as const).map((t) => (
               <button
                 key={t}
@@ -1900,6 +1929,35 @@ function FxPanel({
               </button>
             ))}
           </div>
+          <div className="flex flex-wrap items-center gap-2 mb-3 p-2 rounded" style={{ background: R.panelDark, border: `1px dashed ${R.borderLight}` }}>
+            <span className="text-[11px] opacity-70">Carregar do PC:</span>
+            <label className="px-2 py-1 text-xs rounded cursor-pointer flex items-center gap-1" style={{ background: R.bg, border: `1px solid ${R.borderLight}` }}>
+              <Plus className="w-3 h-3" /> Arquivo(s) VST/WAM
+              <input
+                type="file"
+                multiple
+                accept=".js,.mjs,.wasm,.dll,.vst,.vst3,.component,.so,.dylib"
+                className="hidden"
+                onChange={(e) => { addLocalPlugins(e.target.files); e.currentTarget.value = ""; }}
+              />
+            </label>
+            <label className="px-2 py-1 text-xs rounded cursor-pointer flex items-center gap-1" style={{ background: R.bg, border: `1px solid ${R.borderLight}` }}>
+              <Plus className="w-3 h-3" /> Pasta de plugins
+              <input
+                type="file"
+                // @ts-expect-error - non-standard directory attributes
+                webkitdirectory=""
+                directory=""
+                multiple
+                className="hidden"
+                onChange={(e) => { addLocalPlugins(e.target.files); e.currentTarget.value = ""; }}
+              />
+            </label>
+            <span className="text-[10px] opacity-60">
+              WAM v2 (.js/.mjs) roda no navegador. VST nativo (.dll/.vst3) só executa em build desktop com host nativo.
+            </span>
+          </div>
+
 
           <div className="space-y-2 overflow-y-auto" style={{ maxHeight: "55vh" }}>
             {track.fx.length === 0 && (
