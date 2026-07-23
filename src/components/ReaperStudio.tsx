@@ -1881,10 +1881,18 @@ function scheduleSynthNote(
   velocity: number,
   when: number,
   dur: number,
+  params?: Record<string, number>,
 ) {
   const freq = 440 * Math.pow(2, (midi - 69) / 12);
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+  filter.type = "lowpass";
+  const cutoff = params?.CUTOFF ?? 0.7; // 0..1
+  const reso = params?.RESO ?? 0.2; // 0..1
+  filter.frequency.value = 80 + Math.pow(cutoff, 2) * 12000;
+  filter.Q.value = reso * 20;
+
   const type: OscillatorType =
     inst === "kontakt-piano"
       ? "triangle"
@@ -1896,16 +1904,26 @@ function scheduleSynthNote(
   osc.type = type;
   osc.frequency.value = inst === "808-drums" ? 60 : freq;
 
-  const peak = Math.min(0.6, velocity * 0.6);
-  gain.gain.setValueAtTime(0, when);
-  gain.gain.linearRampToValueAtTime(peak, when + 0.005);
-  gain.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+  const attack = Math.max(0.002, (params?.ATTACK ?? 0.05) * 1.5);
+  const decay = Math.max(0.01, (params?.DECAY ?? 0.2) * 1.2);
+  const sustain = Math.min(1, params?.SUSTAIN ?? 0.7);
+  const release = Math.max(0.02, (params?.RELEASE ?? 0.2) * 1.5);
 
-  osc.connect(gain);
+  const peak = Math.min(0.6, velocity * 0.6);
+  const susLevel = peak * sustain;
+  gain.gain.setValueAtTime(0, when);
+  gain.gain.linearRampToValueAtTime(peak, when + attack);
+  gain.gain.linearRampToValueAtTime(susLevel, when + attack + decay);
+  gain.gain.setValueAtTime(susLevel, when + dur);
+  gain.gain.exponentialRampToValueAtTime(0.0001, when + dur + release);
+
+  osc.connect(filter);
+  filter.connect(gain);
   gain.connect(dest);
   osc.start(when);
-  osc.stop(when + dur + 0.05);
+  osc.stop(when + dur + release + 0.05);
 }
+
 
 function instrumentLabel(k?: InstrumentKind) {
   const i = INSTRUMENTS.find((x) => x.id === k);
