@@ -18,6 +18,7 @@ import { Route as EscalasRouteImport } from './routes/escalas'
 import { Route as ContaRouteImport } from './routes/conta'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AfinadorRouteImport } from './routes/afinador'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AcordesRouteImport } from './routes/acordes'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
@@ -68,6 +69,11 @@ const AfinadorRoute = AfinadorRouteImport.update({
   path: '/afinador',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AcordesRoute = AcordesRouteImport.update({
   id: '/acordes',
   path: '/acordes',
@@ -92,6 +98,7 @@ const EstudarInstrumentoRoute = EstudarInstrumentoRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/acordes': typeof AcordesRoute
+  '/admin': typeof AdminRoute
   '/afinador': typeof AfinadorRoute
   '/auth': typeof AuthRoute
   '/conta': typeof ContaRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/acordes': typeof AcordesRoute
+  '/admin': typeof AdminRoute
   '/afinador': typeof AfinadorRoute
   '/auth': typeof AuthRoute
   '/conta': typeof ContaRoute
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/acordes': typeof AcordesRoute
+  '/admin': typeof AdminRoute
   '/afinador': typeof AfinadorRoute
   '/auth': typeof AuthRoute
   '/conta': typeof ContaRoute
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/acordes'
+    | '/admin'
     | '/afinador'
     | '/auth'
     | '/conta'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/acordes'
+    | '/admin'
     | '/afinador'
     | '/auth'
     | '/conta'
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/acordes'
+    | '/admin'
     | '/afinador'
     | '/auth'
     | '/conta'
@@ -186,6 +198,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AcordesRoute: typeof AcordesRoute
+  AdminRoute: typeof AdminRoute
   AfinadorRoute: typeof AfinadorRoute
   AuthRoute: typeof AuthRoute
   ContaRoute: typeof ContaRoute
@@ -263,6 +276,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AfinadorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/acordes': {
       id: '/acordes'
       path: '/acordes'
@@ -308,6 +328,7 @@ const EstudarRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcordesRoute: AcordesRoute,
+  AdminRoute: AdminRoute,
   AfinadorRoute: AfinadorRoute,
   AuthRoute: AuthRoute,
   ContaRoute: ContaRoute,
