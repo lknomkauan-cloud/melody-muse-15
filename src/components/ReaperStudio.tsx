@@ -334,6 +334,8 @@ export default function ReaperStudio() {
       }
     });
     activeNodesRef.current = [];
+    metronomeNodesRef.current.forEach((n) => { try { n.stop(); } catch { /* ignore */ } });
+    metronomeNodesRef.current = [];
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     setPlaying(false);
   };
