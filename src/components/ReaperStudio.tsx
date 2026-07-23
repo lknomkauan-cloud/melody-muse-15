@@ -181,6 +181,8 @@ export default function ReaperStudio() {
   const [masterVol, setMasterVol] = useState(0.9);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [showTcp, setShowTcp] = useState(!isMobile);
+  const [recPickerOpen, setRecPickerOpen] = useState(false);
+  const [audioInputs, setAudioInputs] = useState<MediaDeviceInfo[]>([]);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
