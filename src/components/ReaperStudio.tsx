@@ -254,7 +254,7 @@ export default function ReaperStudio() {
         }
       }
       head.connect(panner);
-      panner.connect(ctx.destination);
+      panner.connect(masterGainRef.current ?? ctx.destination);
 
       for (const clip of track.clips) {
         const clipStart = clip.start;
@@ -276,15 +276,39 @@ export default function ReaperStudio() {
             if (noteStart + n.duration < offsetInClip) continue;
             const startAt = now + whenOffset + Math.max(0, noteStart - offsetInClip);
             const dur = Math.max(0.05, n.duration - Math.max(0, offsetInClip - noteStart));
-            scheduleSynthNote(ctx, gain, track.instrument ?? "arturia-mini", n.midi, n.velocity, startAt, dur);
+            scheduleSynthNote(ctx, gain, track.instrument ?? "arturia-mini", n.midi, n.velocity, startAt, dur, track.instParams);
           }
         }
+      }
+    }
+
+    // Metrônomo
+    if (metronome) {
+      const secPerBeat = 60 / bpm;
+      const endT = totalDur;
+      const startBeat = Math.floor((position) / secPerBeat);
+      for (let b = startBeat; b * secPerBeat < endT + 8; b++) {
+        const t = now + (b * secPerBeat - position);
+        if (t < now) continue;
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        const strong = b % 4 === 0;
+        osc.frequency.value = strong ? 1600 : 1000;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(strong ? 0.35 : 0.2, t + 0.001);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+        osc.connect(g);
+        g.connect(masterGainRef.current ?? ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.06);
+        metronomeNodesRef.current.push(osc);
       }
     }
 
     setPlaying(true);
     tick();
   };
+
 
   const tick = () => {
     const ctx = audioCtxRef.current;
