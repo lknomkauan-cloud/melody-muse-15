@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as Tone from "tone";
 import { Midi } from "@tonejs/midi";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Play,
   Square,
@@ -26,6 +27,7 @@ import {
   Upload,
   Sliders,
   Cpu,
+  Download,
 } from "lucide-react";
 
 /* ============================================================
