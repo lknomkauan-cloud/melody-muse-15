@@ -187,7 +187,56 @@ export default function ReaperStudio() {
   const [showFlMixer, setShowFlMixer] = useState(false);
   const [flSelected, setFlSelected] = useState<string | "master">("master");
   const [showPluginLib, setShowPluginLib] = useState(false);
-  const [pluginLib, setPluginLib] = useState<{ id: string; name: string; blobUrl?: string; isNative: boolean }[]>([]);
+  const [pluginBundles, setPluginBundles] = useState<PluginEntry[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  const refreshPluginBundles = React.useCallback(async () => {
+    const { data: auth } = await supabase.auth.getUser();
+    const uid = auth.user?.id ?? null;
+    setUserId(uid);
+    if (!uid) { setPluginBundles([]); return; }
+    const { data } = await supabase
+      .from("plugin_bundles")
+      .select("id, name, entry_path, is_native")
+      .order("created_at", { ascending: false });
+    setPluginBundles(
+      (data ?? []).map((b) => ({
+        id: b.id as string,
+        name: b.name as string,
+        entryPath: (b.entry_path as string | null) ?? null,
+        isNative: Boolean(b.is_native),
+      }))
+    );
+  }, []);
+
+  useEffect(() => { refreshPluginBundles(); }, [refreshPluginBundles]);
+
+  const resolveBundleFx = React.useCallback(async (bundle: PluginEntry) => {
+    if (!userId || bundle.isNative || !bundle.entryPath) {
+      return {
+        id: nid(),
+        type: "wam" as const,
+        bypass: bundle.isNative,
+        label: bundle.isNative ? `VST nativo: ${bundle.name}` : `WAM: ${bundle.name}`,
+        wamUrl: "",
+        params: {},
+      };
+    }
+    const path = `${userId}/${bundle.id}/${bundle.entryPath}`;
+    const { data, error } = await supabase.storage
+      .from("user-plugins")
+      .download(path);
+    let wamUrl = "";
+    if (!error && data) wamUrl = URL.createObjectURL(data);
+    return {
+      id: nid(),
+      type: "wam" as const,
+      bypass: false,
+      label: `WAM: ${bundle.name}`,
+      wamUrl,
+      params: {},
+    };
+  }, [userId]);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
