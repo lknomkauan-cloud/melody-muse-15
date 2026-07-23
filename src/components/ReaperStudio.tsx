@@ -843,6 +843,9 @@ export default function ReaperStudio() {
             </button>
           </div>
         </div>
+        )}
+
+
 
         {/* Arrange view */}
         <div
