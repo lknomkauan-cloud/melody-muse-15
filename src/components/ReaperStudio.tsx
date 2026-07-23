@@ -1655,6 +1655,106 @@ function MixerStrip({ track, onChange }: { track: Track; onChange: (p: Partial<T
   );
 }
 
+function KnobBar({
+  track,
+  onChange,
+}: {
+  track: Track | null;
+  onChange: (p: Partial<Track>) => void;
+}) {
+  const defaults: Record<string, number> = {
+    CUTOFF: 0.7, RESO: 0.2, ATTACK: 0.05, RELEASE: 0.2,
+    LOW: 0.5, MID: 0.5, HIGH: 0.5,
+  };
+  const KEYS = ["CUTOFF", "RESO", "ATTACK", "RELEASE", "LOW", "MID", "HIGH"] as const;
+  const disabled = !track;
+  return (
+    <div
+      style={{
+        background: R.panelDark,
+        borderTop: `2px solid ${R.border}`,
+        padding: "6px 10px",
+        display: "flex",
+        alignItems: "center",
+        gap: 14,
+        overflowX: "auto",
+        flexShrink: 0,
+      }}
+    >
+      <div
+        className="text-[10px] font-bold uppercase tracking-wider"
+        style={{ color: R.accent, minWidth: 90 }}
+      >
+        Timbragem
+        <div className="text-[9px] font-normal opacity-70 truncate" style={{ maxWidth: 120 }}>
+          {track ? track.name : "— nenhuma track MIDI —"}
+        </div>
+      </div>
+      <div className="flex items-center gap-4">
+        {KEYS.map((k) => {
+          const value = track?.instParams?.[k] ?? defaults[k];
+          const angle = -135 + value * 270;
+          return (
+            <div key={k} className="flex flex-col items-center gap-1" style={{ opacity: disabled ? 0.35 : 1 }}>
+              <div
+                className="relative rounded-full"
+                style={{
+                  width: 40,
+                  height: 40,
+                  background: `radial-gradient(circle at 30% 30%, ${R.accent}66, #000)`,
+                  border: `2px solid ${R.accent}88`,
+                  cursor: disabled ? "not-allowed" : "ns-resize",
+                  touchAction: "none",
+                }}
+                onPointerDown={(e) => {
+                  if (!track) return;
+                  e.stopPropagation();
+                  const startY = e.clientY;
+                  const startV = value;
+                  const el = e.currentTarget;
+                  el.setPointerCapture(e.pointerId);
+                  const move = (ev: PointerEvent) => {
+                    const dv = (startY - ev.clientY) / 150;
+                    const nv = Math.max(0, Math.min(1, startV + dv));
+                    onChange({ instParams: { ...(track.instParams ?? {}), [k]: nv } });
+                  };
+                  const up = () => {
+                    el.removeEventListener("pointermove", move);
+                    el.removeEventListener("pointerup", up);
+                  };
+                  el.addEventListener("pointermove", move);
+                  el.addEventListener("pointerup", up);
+                }}
+                onDoubleClick={() =>
+                  track && onChange({ instParams: { ...(track.instParams ?? {}), [k]: defaults[k] } })
+                }
+                title={`${k} — arraste vertical / duplo-clique reseta`}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    left: "50%",
+                    top: 3,
+                    width: 2,
+                    height: 14,
+                    background: R.accent,
+                    transformOrigin: "1px 17px",
+                    transform: `rotate(${angle}deg)`,
+                  }}
+                />
+              </div>
+              <div className="text-[9px] uppercase" style={{ color: R.textDim }}>{k}</div>
+              <div className="text-[9px] font-mono" style={{ color: R.text }}>{value.toFixed(2)}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+
+
 function MasterStrip({ volume, onChange }: { volume: number; onChange: (v: number) => void }) {
   return (
     <div
