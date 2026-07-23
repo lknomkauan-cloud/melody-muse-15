@@ -862,6 +862,14 @@ export default function ReaperStudio() {
           >
             <Sliders className="w-3 h-3" /> FL Mixer
           </button>
+          <button
+            onClick={() => setShowPluginLib(true)}
+            className="px-2 py-1 text-xs rounded flex items-center gap-1"
+            style={{ background: R.panelDark, border: `1px solid ${R.border}`, color: R.text }}
+            title="Carregar VST/WAM do seu PC"
+          >
+            <Cpu className="w-3 h-3" /> Plugins do PC
+          </button>
         </div>
       </div>
 
