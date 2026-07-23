@@ -84,7 +84,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 function Header() {
-  const { user, profile, isAdmin } = useAuth();
+  const { user, profile } = useAuth();
   const navItems = [
     { to: "/", label: "Início" },
     { to: "/estudar", label: "Estudar" },
@@ -95,7 +95,6 @@ function Header() {
     { to: "/metronomo", label: "Metrônomo" },
     { to: "/afinador", label: "Afinador" },
     { to: "/mixagem", label: "Mixagem" },
-    ...(isAdmin ? [{ to: "/admin", label: "ADM" }] : []),
   ];
 
   const handleSignOut = async () => {
