@@ -1033,6 +1033,39 @@ export default function ReaperStudio() {
         />
       )}
 
+      {showPluginLib && (
+        <PluginLibraryModal
+          lib={pluginLib}
+          setLib={setPluginLib}
+          tracks={tracks}
+          selectedTrack={selectedTrack}
+          onAddToTrack={(trackId, entry) => {
+            setTracks((prev) =>
+              prev.map((t) =>
+                t.id === trackId
+                  ? {
+                      ...t,
+                      fx: [
+                        ...t.fx,
+                        {
+                          id: nid(),
+                          type: "wam",
+                          bypass: entry.isNative,
+                          label: entry.isNative ? `VST nativo: ${entry.name}` : `WAM: ${entry.name}`,
+                          wamUrl: entry.blobUrl ?? "",
+                          params: {},
+                        },
+                      ],
+                    }
+                  : t,
+              ),
+            );
+          }}
+          onClose={() => setShowPluginLib(false)}
+        />
+      )}
+
+
 
       {/* Rec Source Picker */}
       {recPickerOpen && (
