@@ -1080,6 +1080,15 @@ export default function ReaperStudio() {
         <FxPanel
           track={tracks.find((t) => t.id === openFxTrack)!}
           onChange={(p) => updateTrack(openFxTrack, p)}
+          savedBundles={pluginBundles}
+          onAddSavedBundle={async (bundle) => {
+            const slot = await resolveBundleFx(bundle);
+            const tid = openFxTrack;
+            setTracks((prev) =>
+              prev.map((t) => (t.id === tid ? { ...t, fx: [...t.fx, slot] } : t)),
+            );
+          }}
+          onOpenLibrary={() => setShowPluginLib(true)}
           onClose={() => setOpenFxTrack(null)}
         />
       )}
