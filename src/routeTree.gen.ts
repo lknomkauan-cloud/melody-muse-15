@@ -9,11 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RegenciaRouteImport } from './routes/regencia'
 import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as ProfessorRouteImport } from './routes/professor'
 import { Route as MixagemRouteImport } from './routes/mixagem'
 import { Route as MetronomoRouteImport } from './routes/metronomo'
 import { Route as EstudarRouteImport } from './routes/estudar'
+import { Route as EscolherProfessorRouteImport } from './routes/escolher-professor'
 import { Route as EscalasRouteImport } from './routes/escalas'
 import { Route as ContaRouteImport } from './routes/conta'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -21,9 +23,16 @@ import { Route as AfinadorRouteImport } from './routes/afinador'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AcordesRouteImport } from './routes/acordes'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApostilasIndexRouteImport } from './routes/apostilas.index'
 import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
 import { Route as EstudarInstrumentoRouteImport } from './routes/estudar.$instrumento'
+import { Route as ApostilasIdRouteImport } from './routes/apostilas.$id'
 
+const RegenciaRoute = RegenciaRouteImport.update({
+  id: '/regencia',
+  path: '/regencia',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QuizRoute = QuizRouteImport.update({
   id: '/quiz',
   path: '/quiz',
@@ -47,6 +56,11 @@ const MetronomoRoute = MetronomoRouteImport.update({
 const EstudarRoute = EstudarRouteImport.update({
   id: '/estudar',
   path: '/estudar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EscolherProfessorRoute = EscolherProfessorRouteImport.update({
+  id: '/escolher-professor',
+  path: '/escolher-professor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EscalasRoute = EscalasRouteImport.update({
@@ -84,6 +98,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApostilasIndexRoute = ApostilasIndexRouteImport.update({
+  id: '/apostilas/',
+  path: '/apostilas/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapXmlRoute = SitemapXmlRouteImport.update({
   id: '/sitemap/xml',
   path: '/sitemap/xml',
@@ -94,6 +113,11 @@ const EstudarInstrumentoRoute = EstudarInstrumentoRouteImport.update({
   path: '/$instrumento',
   getParentRoute: () => EstudarRoute,
 } as any)
+const ApostilasIdRoute = ApostilasIdRouteImport.update({
+  id: '/apostilas/$id',
+  path: '/apostilas/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -103,13 +127,17 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/conta': typeof ContaRoute
   '/escalas': typeof EscalasRoute
+  '/escolher-professor': typeof EscolherProfessorRoute
   '/estudar': typeof EstudarRouteWithChildren
   '/metronomo': typeof MetronomoRoute
   '/mixagem': typeof MixagemRoute
   '/professor': typeof ProfessorRoute
   '/quiz': typeof QuizRoute
+  '/regencia': typeof RegenciaRoute
+  '/apostilas/$id': typeof ApostilasIdRoute
   '/estudar/$instrumento': typeof EstudarInstrumentoRoute
   '/sitemap/xml': typeof SitemapXmlRoute
+  '/apostilas/': typeof ApostilasIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -119,13 +147,17 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/conta': typeof ContaRoute
   '/escalas': typeof EscalasRoute
+  '/escolher-professor': typeof EscolherProfessorRoute
   '/estudar': typeof EstudarRouteWithChildren
   '/metronomo': typeof MetronomoRoute
   '/mixagem': typeof MixagemRoute
   '/professor': typeof ProfessorRoute
   '/quiz': typeof QuizRoute
+  '/regencia': typeof RegenciaRoute
+  '/apostilas/$id': typeof ApostilasIdRoute
   '/estudar/$instrumento': typeof EstudarInstrumentoRoute
   '/sitemap/xml': typeof SitemapXmlRoute
+  '/apostilas': typeof ApostilasIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -136,13 +168,17 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/conta': typeof ContaRoute
   '/escalas': typeof EscalasRoute
+  '/escolher-professor': typeof EscolherProfessorRoute
   '/estudar': typeof EstudarRouteWithChildren
   '/metronomo': typeof MetronomoRoute
   '/mixagem': typeof MixagemRoute
   '/professor': typeof ProfessorRoute
   '/quiz': typeof QuizRoute
+  '/regencia': typeof RegenciaRoute
+  '/apostilas/$id': typeof ApostilasIdRoute
   '/estudar/$instrumento': typeof EstudarInstrumentoRoute
   '/sitemap/xml': typeof SitemapXmlRoute
+  '/apostilas/': typeof ApostilasIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -154,13 +190,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/conta'
     | '/escalas'
+    | '/escolher-professor'
     | '/estudar'
     | '/metronomo'
     | '/mixagem'
     | '/professor'
     | '/quiz'
+    | '/regencia'
+    | '/apostilas/$id'
     | '/estudar/$instrumento'
     | '/sitemap/xml'
+    | '/apostilas/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -170,13 +210,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/conta'
     | '/escalas'
+    | '/escolher-professor'
     | '/estudar'
     | '/metronomo'
     | '/mixagem'
     | '/professor'
     | '/quiz'
+    | '/regencia'
+    | '/apostilas/$id'
     | '/estudar/$instrumento'
     | '/sitemap/xml'
+    | '/apostilas'
   id:
     | '__root__'
     | '/'
@@ -186,13 +230,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/conta'
     | '/escalas'
+    | '/escolher-professor'
     | '/estudar'
     | '/metronomo'
     | '/mixagem'
     | '/professor'
     | '/quiz'
+    | '/regencia'
+    | '/apostilas/$id'
     | '/estudar/$instrumento'
     | '/sitemap/xml'
+    | '/apostilas/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -203,16 +251,27 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ContaRoute: typeof ContaRoute
   EscalasRoute: typeof EscalasRoute
+  EscolherProfessorRoute: typeof EscolherProfessorRoute
   EstudarRoute: typeof EstudarRouteWithChildren
   MetronomoRoute: typeof MetronomoRoute
   MixagemRoute: typeof MixagemRoute
   ProfessorRoute: typeof ProfessorRoute
   QuizRoute: typeof QuizRoute
+  RegenciaRoute: typeof RegenciaRoute
+  ApostilasIdRoute: typeof ApostilasIdRoute
   SitemapXmlRoute: typeof SitemapXmlRoute
+  ApostilasIndexRoute: typeof ApostilasIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/regencia': {
+      id: '/regencia'
+      path: '/regencia'
+      fullPath: '/regencia'
+      preLoaderRoute: typeof RegenciaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/quiz': {
       id: '/quiz'
       path: '/quiz'
@@ -246,6 +305,13 @@ declare module '@tanstack/react-router' {
       path: '/estudar'
       fullPath: '/estudar'
       preLoaderRoute: typeof EstudarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/escolher-professor': {
+      id: '/escolher-professor'
+      path: '/escolher-professor'
+      fullPath: '/escolher-professor'
+      preLoaderRoute: typeof EscolherProfessorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/escalas': {
@@ -297,6 +363,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/apostilas/': {
+      id: '/apostilas/'
+      path: '/apostilas'
+      fullPath: '/apostilas/'
+      preLoaderRoute: typeof ApostilasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap/xml': {
       id: '/sitemap/xml'
       path: '/sitemap/xml'
@@ -310,6 +383,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/estudar/$instrumento'
       preLoaderRoute: typeof EstudarInstrumentoRouteImport
       parentRoute: typeof EstudarRoute
+    }
+    '/apostilas/$id': {
+      id: '/apostilas/$id'
+      path: '/apostilas/$id'
+      fullPath: '/apostilas/$id'
+      preLoaderRoute: typeof ApostilasIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -333,23 +413,17 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ContaRoute: ContaRoute,
   EscalasRoute: EscalasRoute,
+  EscolherProfessorRoute: EscolherProfessorRoute,
   EstudarRoute: EstudarRouteWithChildren,
   MetronomoRoute: MetronomoRoute,
   MixagemRoute: MixagemRoute,
   ProfessorRoute: ProfessorRoute,
   QuizRoute: QuizRoute,
+  RegenciaRoute: RegenciaRoute,
+  ApostilasIdRoute: ApostilasIdRoute,
   SitemapXmlRoute: SitemapXmlRoute,
+  ApostilasIndexRoute: ApostilasIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

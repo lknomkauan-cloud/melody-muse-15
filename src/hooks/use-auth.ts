@@ -10,6 +10,8 @@ export type Profile = {
   avatar_url: string | null;
   bio: string | null;
   instrument: string | null;
+  teacher_id: string | null;
+  unlocked_instruments: string[] | null;
 };
 
 const ADMIN_EMAILS = new Set([
@@ -73,7 +75,7 @@ export function useAuth() {
         const [{ data: roles, error: rolesError }, { data: prof, error: profileError }] = await Promise.race([
           Promise.all([
             supabase.from("user_roles").select("role").eq("user_id", user.id),
-            supabase.from("profiles").select("id, full_name, avatar_url, bio, instrument").eq("id", user.id).maybeSingle(),
+            supabase.from("profiles").select("id, full_name, avatar_url, bio, instrument, teacher_id, unlocked_instruments").eq("id", user.id).maybeSingle(),
           ]),
           new Promise<never>((_, reject) => {
             window.setTimeout(() => reject(new Error("Tempo esgotado ao carregar dados da conta")), 7000);
@@ -85,7 +87,7 @@ export function useAuth() {
         const admin = emailIsAdmin || rs.includes("admin");
         setIsAdmin(admin);
         setRole(admin ? "admin" : rs.includes("teacher") ? "teacher" : rs.includes("student") ? "student" : null);
-        setProfile(prof ?? null);
+        setProfile((prof as Profile | null) ?? null);
         if (rolesError || profileError) {
           console.error("Erro ao carregar dados da conta", rolesError ?? profileError);
         }
@@ -93,7 +95,6 @@ export function useAuth() {
         if (!cancelled) {
           console.error("Erro ao carregar dados da conta", error);
         }
-      } finally {
       }
     };
 
