@@ -150,7 +150,7 @@ function Header() {
             </Link>
           )}
         </nav>
-        <MobileNav navItems={navItems} user={user} onSignOut={handleSignOut} avatarUrl={profile?.avatar_url ?? null} initials={initials} isAdmin={isAdmin} />
+        <MobileNav navItems={navItems} user={user} onSignOut={handleSignOut} avatarUrl={profile?.avatar_url ?? null} initials={initials} />
       </div>
     </header>
   );
