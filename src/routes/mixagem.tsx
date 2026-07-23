@@ -4,6 +4,8 @@ import ReaperStudio from "@/components/ReaperStudio";
 import {
   Sliders,
   BookOpen,
+  Download,
+  ExternalLink,
   Volume2,
   Radio,
   Waves,
