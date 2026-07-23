@@ -165,28 +165,36 @@ function computeWaveform(buffer: AudioBuffer, targetPeaks = 800): number[] {
 ============================================================ */
 
 export default function ReaperStudio() {
+  const isMobile = useIsMobile();
   const [tracks, setTracks] = useState<Track[]>(() => makeDefaultTracks());
   const [playing, setPlaying] = useState(false);
   const [recording, setRecording] = useState(false);
   const [position, setPosition] = useState(0); // seg
   const [bpm, setBpm] = useState(120);
   const [zoom, setZoom] = useState(60); // px por segundo
-  const [showMixer, setShowMixer] = useState(true);
+  const [showMixer, setShowMixer] = useState(!isMobile);
   const [metronome, setMetronome] = useState(false);
   const [loopEnabled, setLoopEnabled] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<string | null>(null);
   const [openFxTrack, setOpenFxTrack] = useState<string | null>(null);
   const [openInstrumentTrack, setOpenInstrumentTrack] = useState<string | null>(null);
+  const [masterVol, setMasterVol] = useState(0.9);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [showTcp, setShowTcp] = useState(!isMobile);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const masterGainRef = useRef<GainNode | null>(null);
   const playStartRef = useRef(0);
   const posStartRef = useRef(0);
   const rafRef = useRef<number | null>(null);
   const activeNodesRef = useRef<AudioBufferSourceNode[]>([]);
+  const metronomeNodesRef = useRef<OscillatorNode[]>([]);
   const mediaRecRef = useRef<MediaRecorder | null>(null);
   const recChunksRef = useRef<BlobPart[]>([]);
   const recTrackIdRef = useRef<string | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const midiInputRef = useRef<HTMLInputElement | null>(null);
 
   const totalDur = Math.max(
     60,
@@ -195,11 +203,22 @@ export default function ReaperStudio() {
 
   const getCtx = () => {
     if (!audioCtxRef.current) {
-      audioCtxRef.current = new (window.AudioContext ||
+      const ctx = new (window.AudioContext ||
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      audioCtxRef.current = ctx;
+      const master = ctx.createGain();
+      master.gain.value = masterVol;
+      master.connect(ctx.destination);
+      masterGainRef.current = master;
     }
     return audioCtxRef.current;
   };
+
+  // Sync master gain
+  useEffect(() => {
+    if (masterGainRef.current) masterGainRef.current.gain.value = masterVol;
+  }, [masterVol]);
+
 
   /* -------- Transport -------- */
 
