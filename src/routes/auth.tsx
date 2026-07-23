@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { GraduationCap, Music, Mail, Lock, Loader2 } from "lucide-react";
 import { z } from "zod";
+import { ALL_INSTRUMENTS } from "@/hooks/use-content-access";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -32,6 +33,7 @@ function AuthPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [instrument, setInstrument] = useState<string>("guitarra");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -65,7 +67,7 @@ function AuthPage() {
       if (err instanceof z.ZodError) return toast.error(err.errors[0].message);
     }
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -73,8 +75,23 @@ function AuthPage() {
         data: { full_name: fullName, role },
       },
     });
+    if (error) {
+      setLoading(false);
+      return toast.error(error.message);
+    }
+    // Se tem sessão imediata (sem confirmação), salvar instrumento no perfil
+    if (data.session && role === "student") {
+      await supabase.from("profiles").upsert({
+        id: data.session.user.id,
+        full_name: fullName,
+        instrument,
+      });
+      setLoading(false);
+      toast.success("Conta criada! Agora escolha seu professor.");
+      navigate({ to: "/escolher-professor", search: { instrumento: instrument } });
+      return;
+    }
     setLoading(false);
-    if (error) return toast.error(error.message);
     toast.success("Conta criada! Verifique seu email se necessário.");
     navigate({ to: "/" });
   };
@@ -153,6 +170,22 @@ function AuthPage() {
                     </button>
                   </div>
                 </div>
+                {role === "student" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-instrument">Instrumento que quer aprender</Label>
+                    <select
+                      id="signup-instrument"
+                      value={instrument}
+                      onChange={(e) => setInstrument(e.target.value)}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    >
+                      {ALL_INSTRUMENTS.map((i) => (
+                        <option key={i.slug} value={i.slug}>{i.label}</option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-muted-foreground">Após criar a conta, você escolhe um professor para desse instrumento.</p>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="signup-name">Nome completo</Label>
                   <Input id="signup-name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome" required maxLength={100} />

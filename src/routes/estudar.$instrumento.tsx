@@ -17,8 +17,10 @@ import {
   Mic2,
   Music4,
   Wind,
+  Lock,
 } from "lucide-react";
 import { HarmonicField } from "@/components/HarmonicField";
+import { useContentAccess } from "@/hooks/use-content-access";
 
 type Section = {
   id: string;
@@ -568,6 +570,7 @@ function ApostilaPage() {
   const { instrumento } = Route.useLoaderData();
   const data = instrumentApplied[instrumento];
   const Icon = data.icon;
+  const { locked } = useContentAccess(instrumento);
 
   const apostila: ApostilaData = {
     name: data.name,
@@ -576,6 +579,28 @@ function ApostilaPage() {
     applied: data.applied,
     sections: baseSections,
   };
+
+  if (locked) {
+    return (
+      <main className="min-h-screen bg-background">
+        <section className="mx-auto max-w-2xl px-4 py-16 text-center">
+          <Link to="/estudar" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary">
+            <ArrowLeft className="h-4 w-4" /> Voltar ao centro de estudos
+          </Link>
+          <div className="mt-8 rounded-2xl border border-border bg-card p-8">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+              <Lock className="h-7 w-7 text-muted-foreground" />
+            </div>
+            <h1 className="mt-4 font-display text-2xl font-bold">Conteúdo bloqueado</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              A apostila de <strong className="text-foreground">{data.name}</strong> não faz parte do seu plano de estudos.
+              Peça ao seu professor para liberar este instrumento na sala Regência.
+            </p>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-background">

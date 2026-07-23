@@ -47,6 +47,53 @@ export type Database = {
         }
         Relationships: []
       }
+      apostilas: {
+        Row: {
+          content: Json
+          created_at: string
+          description: string | null
+          id: string
+          instrument: string | null
+          pdf_url: string | null
+          source: string
+          teacher_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          instrument?: string | null
+          pdf_url?: string | null
+          source: string
+          teacher_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          instrument?: string | null
+          pdf_url?: string | null
+          source?: string
+          teacher_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apostilas_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -55,6 +102,8 @@ export type Database = {
           full_name: string | null
           id: string
           instrument: string | null
+          teacher_id: string | null
+          unlocked_instruments: string[]
           updated_at: string
         }
         Insert: {
@@ -64,6 +113,8 @@ export type Database = {
           full_name?: string | null
           id: string
           instrument?: string | null
+          teacher_id?: string | null
+          unlocked_instruments?: string[]
           updated_at?: string
         }
         Update: {
@@ -73,9 +124,19 @@ export type Database = {
           full_name?: string | null
           id?: string
           instrument?: string | null
+          teacher_id?: string | null
+          unlocked_instruments?: string[]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -109,6 +170,12 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      my_teacher_id: { Args: never; Returns: string }
+      set_my_teacher: { Args: { _teacher_id: string }; Returns: undefined }
+      teacher_set_unlocked: {
+        Args: { _instruments: string[]; _student_id: string }
+        Returns: undefined
       }
     }
     Enums: {
