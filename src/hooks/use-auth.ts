@@ -15,7 +15,6 @@ export type Profile = {
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [role, setRole] = useState<AppRole | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -28,7 +27,6 @@ export function useAuth() {
       const currentLoad = ++loadId;
       if (!u) {
         if (!cancelled) {
-          setIsAdmin(false);
           setRole(null);
           setProfile(null);
           setLoading(false);
@@ -42,8 +40,7 @@ export function useAuth() {
       ]);
       if (cancelled || currentLoad !== loadId) return;
       const rs = (roles ?? []).map((r) => r.role as AppRole);
-      setIsAdmin(rs.includes("admin"));
-      setRole(rs.includes("teacher") ? "teacher" : rs.includes("admin") ? "admin" : rs.includes("student") ? "student" : null);
+      setRole(rs.includes("teacher") ? "teacher" : rs.includes("student") ? "student" : null);
       setProfile(prof ?? null);
       if (rolesError || profileError) {
         console.error("Erro ao carregar dados da conta", rolesError ?? profileError);
@@ -68,6 +65,6 @@ export function useAuth() {
     };
   }, []);
 
-  return { session, user, isAdmin, role, profile, loading };
+  return { session, user, role, profile, loading };
 }
 
