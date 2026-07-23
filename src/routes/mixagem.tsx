@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
+import ReaperStudio from "@/components/ReaperStudio";
 import {
   Sliders,
   BookOpen,
