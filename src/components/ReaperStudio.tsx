@@ -1939,10 +1939,16 @@ function FxPanel({
   track,
   onChange,
   onClose,
+  savedBundles,
+  onAddSavedBundle,
+  onOpenLibrary,
 }: {
   track: Track;
   onChange: (p: Partial<Track>) => void;
   onClose: () => void;
+  savedBundles: PluginEntry[];
+  onAddSavedBundle: (bundle: PluginEntry) => void | Promise<void>;
+  onOpenLibrary: () => void;
 }) {
   const addFx = (type: FxSlot["type"]) => {
     const slot: FxSlot = {
