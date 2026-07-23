@@ -84,10 +84,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 function Header() {
-  const { user, isAdmin, profile } = useAuth();
+  const { user, profile } = useAuth();
   const navItems = [
     { to: "/", label: "Início" },
-    ...(isAdmin ? [{ to: "/admin", label: "Painel do Adm" }] : []),
     { to: "/estudar", label: "Estudar" },
     { to: "/professor", label: "Professor" },
     { to: "/quiz", label: "Quiz" },
