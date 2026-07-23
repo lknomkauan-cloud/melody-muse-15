@@ -1843,6 +1843,35 @@ function FxPanel({
     };
     onChange({ fx: [...track.fx, slot] });
   };
+  const addLocalPlugins = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const arr = Array.from(files);
+    const jsEntry =
+      arr.find((f) => /(^|\/)index\.js$/i.test((f as any).webkitRelativePath || f.name)) ||
+      arr.find((f) => /\.m?js$/i.test(f.name));
+    const newSlots: FxSlot[] = [];
+    for (const f of arr) {
+      const lower = f.name.toLowerCase();
+      const isNative = /\.(dll|vst3?|component|so|dylib)$/i.test(lower);
+      const isJs = /\.m?js$/i.test(lower);
+      if (!isNative && !isJs) continue;
+      const isEntry = isJs && f === jsEntry;
+      if (isJs && !isEntry) continue;
+      newSlots.push({
+        id: nid(),
+        type: "wam",
+        bypass: isNative,
+        label: isNative ? `VST nativo: ${f.name}` : `WAM: ${f.name}`,
+        wamUrl: isEntry ? URL.createObjectURL(f) : "",
+        params: {},
+      });
+    }
+    if (newSlots.length === 0) {
+      alert("Selecione um bundle WAM (.js/.mjs — idealmente uma pasta com index.js) ou binários .dll/.vst3.");
+      return;
+    }
+    onChange({ fx: [...track.fx, ...newSlots] });
+  };
   const removeFx = (id: string) => {
     onChange({ fx: track.fx.filter((f) => f.id !== id) });
   };
