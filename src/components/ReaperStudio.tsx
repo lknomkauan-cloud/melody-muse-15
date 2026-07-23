@@ -534,22 +534,108 @@ export default function ReaperStudio() {
     >
       {/* MENU BAR */}
       <div
-        className="flex items-center gap-4 px-3 py-1 text-[11px]"
+        className="flex flex-wrap items-center gap-1 px-2 sm:px-3 py-1 text-[11px] relative"
         style={{ background: R.panelDark, borderBottom: `1px solid ${R.border}` }}
       >
-        <div className="font-bold text-[13px]" style={{ color: R.accent }}>
+        <div className="font-bold text-[13px] mr-2" style={{ color: R.accent }}>
           SOLANDO DAW
         </div>
-        {["File", "Edit", "View", "Insert", "Track", "Options", "Actions", "Help"].map((m) => (
-          <button
-            key={m}
-            className="px-2 py-0.5 hover:bg-white/10 rounded"
-            style={{ color: R.text }}
-          >
-            {m}
-          </button>
-        ))}
+        <MenuDropdown
+          label="File"
+          open={openMenu === "File"}
+          onOpen={() => setOpenMenu(openMenu === "File" ? null : "File")}
+          onClose={() => setOpenMenu(null)}
+          items={[
+            { label: "Novo projeto", action: () => { stop(); setTracks(makeDefaultTracks()); setPosition(0); } },
+            { label: "Importar áudio…", action: () => fileInputRef.current?.click() },
+            { label: "Importar MIDI…", action: () => midiInputRef.current?.click() },
+            { label: "Exportar mix (WAV)", action: () => exportMix() },
+          ]}
+        />
+        <MenuDropdown
+          label="Edit"
+          open={openMenu === "Edit"}
+          onOpen={() => setOpenMenu(openMenu === "Edit" ? null : "Edit")}
+          onClose={() => setOpenMenu(null)}
+          items={[
+            { label: "Limpar clips da track selecionada", action: () => { if (selectedTrack) updateTrack(selectedTrack, { clips: [] }); } },
+            { label: "Remover track selecionada", action: () => { if (selectedTrack) { removeTrack(selectedTrack); setSelectedTrack(null); } } },
+          ]}
+        />
+        <MenuDropdown
+          label="View"
+          open={openMenu === "View"}
+          onOpen={() => setOpenMenu(openMenu === "View" ? null : "View")}
+          onClose={() => setOpenMenu(null)}
+          items={[
+            { label: (showMixer ? "✓ " : "") + "Mixer", action: () => setShowMixer((v) => !v) },
+            { label: (showTcp ? "✓ " : "") + "Track panels", action: () => setShowTcp((v) => !v) },
+            { label: "Zoom +", action: () => setZoom((z) => Math.min(200, z + 20)) },
+            { label: "Zoom -", action: () => setZoom((z) => Math.max(20, z - 20)) },
+          ]}
+        />
+        <MenuDropdown
+          label="Insert"
+          open={openMenu === "Insert"}
+          onOpen={() => setOpenMenu(openMenu === "Insert" ? null : "Insert")}
+          onClose={() => setOpenMenu(null)}
+          items={[
+            { label: "Nova track de áudio", action: addAudioTrack },
+            { label: "Nova track MIDI (Piano)", action: () => addMidiTrack("kontakt-piano") },
+            { label: "Nova track MIDI (Synth)", action: () => addMidiTrack("arturia-mini") },
+            { label: "Nova track MIDI (Drums)", action: () => addMidiTrack("808-drums") },
+          ]}
+        />
+        <MenuDropdown
+          label="Options"
+          open={openMenu === "Options"}
+          onOpen={() => setOpenMenu(openMenu === "Options" ? null : "Options")}
+          onClose={() => setOpenMenu(null)}
+          items={[
+            { label: (metronome ? "✓ " : "") + "Metrônomo", action: () => setMetronome((v) => !v) },
+            { label: (loopEnabled ? "✓ " : "") + "Loop", action: () => setLoopEnabled((v) => !v) },
+          ]}
+        />
+        <MenuDropdown
+          label="Actions"
+          open={openMenu === "Actions"}
+          onOpen={() => setOpenMenu(openMenu === "Actions" ? null : "Actions")}
+          onClose={() => setOpenMenu(null)}
+          items={[
+            { label: "▶ Play", action: () => play() },
+            { label: "■ Stop", action: () => stop() },
+            { label: "⏮ Rewind", action: rewind },
+            { label: "● Record", action: () => startRecording() },
+          ]}
+        />
+        <MenuDropdown
+          label="Help"
+          open={openMenu === "Help"}
+          onOpen={() => setOpenMenu(openMenu === "Help" ? null : "Help")}
+          onClose={() => setOpenMenu(null)}
+          items={[
+            { label: "Sobre a Solando DAW", action: () => alert("Solando DAW — estúdio multipista integrado ao app.") },
+            { label: "Docs WAM v2 ↗", action: () => window.open("https://www.webaudiomodules.com", "_blank") },
+          ]}
+        />
+        {/* Inputs ocultos para menu File */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="audio/*"
+          multiple
+          className="hidden"
+          onChange={(e) => e.target.files && importAudioFiles(Array.from(e.target.files))}
+        />
+        <input
+          ref={midiInputRef}
+          type="file"
+          accept=".mid,.midi"
+          className="hidden"
+          onChange={(e) => e.target.files?.[0] && importMidiFile(e.target.files[0])}
+        />
       </div>
+
 
       {/* TRANSPORT BAR */}
       <div
