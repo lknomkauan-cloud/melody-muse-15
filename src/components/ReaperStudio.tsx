@@ -1479,7 +1479,7 @@ function MixerStrip({ track, onChange }: { track: Track; onChange: (p: Partial<T
   );
 }
 
-function MasterStrip() {
+function MasterStrip({ volume, onChange }: { volume: number; onChange: (v: number) => void }) {
   const [vol, setVol] = useState(0.9);
   return (
     <div
