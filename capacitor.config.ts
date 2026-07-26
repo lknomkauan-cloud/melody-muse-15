@@ -14,6 +14,9 @@ const config: CapacitorConfig = {
   },
   plugins: {
     // No web permission prompt inside the native WebView — the OS handles it.
+    PushNotifications: {
+      presentationOptions: ["badge", "sound", "alert"],
+    },
   },
 };
 

@@ -12,9 +12,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { toast } from "sonner";
 import {
   Loader2, Users, BookOpen, Plus, Trash2, FileText, Upload, LayoutList, PenSquare,
-  Download, Lock, Unlock, Music, ArrowLeft, Bold, Italic, Heading1, List, Save,
+  Download, Lock, Unlock, Music, ArrowLeft, Bold, Italic, Heading1, List, Save, Bell,
 } from "lucide-react";
 import { exportContentAsPdf } from "@/lib/apostila-export";
+import { PushSender } from "@/components/PushSender";
 
 export const Route = createFileRoute("/regencia")({
   head: () => ({
@@ -104,6 +105,7 @@ function RegenciaPage() {
           <TabsList>
             <TabsTrigger value="alunos"><Users className="h-4 w-4 mr-1.5" /> Meus alunos</TabsTrigger>
             <TabsTrigger value="apostilas"><BookOpen className="h-4 w-4 mr-1.5" /> Apostilas</TabsTrigger>
+            <TabsTrigger value="avisos"><Bell className="h-4 w-4 mr-1.5" /> Avisos push</TabsTrigger>
           </TabsList>
 
           <TabsContent value="alunos" className="mt-6">
@@ -112,6 +114,16 @@ function RegenciaPage() {
 
           <TabsContent value="apostilas" className="mt-6">
             <ApostilasPanel teacherId={user.id} />
+          </TabsContent>
+
+          <TabsContent value="avisos" className="mt-6">
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <h2 className="font-display text-lg font-bold mb-1">Enviar aviso aos meus alunos</h2>
+              <p className="text-sm text-muted-foreground mb-5">
+                A notificação chega no celular e no navegador dos alunos que ativaram os avisos.
+              </p>
+              <PushSender />
+            </div>
           </TabsContent>
         </Tabs>
       </div>

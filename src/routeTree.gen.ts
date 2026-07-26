@@ -27,6 +27,7 @@ import { Route as ApostilasIndexRouteImport } from './routes/apostilas.index'
 import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
 import { Route as EstudarInstrumentoRouteImport } from './routes/estudar.$instrumento'
 import { Route as ApostilasIdRouteImport } from './routes/apostilas.$id'
+import { Route as ApiPublicFirebaseConfigRouteImport } from './routes/api/public/firebase-config'
 
 const RegenciaRoute = RegenciaRouteImport.update({
   id: '/regencia',
@@ -118,6 +119,11 @@ const ApostilasIdRoute = ApostilasIdRouteImport.update({
   path: '/apostilas/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicFirebaseConfigRoute = ApiPublicFirebaseConfigRouteImport.update({
+  id: '/api/public/firebase-config',
+  path: '/api/public/firebase-config',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/estudar/$instrumento': typeof EstudarInstrumentoRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/apostilas/': typeof ApostilasIndexRoute
+  '/api/public/firebase-config': typeof ApiPublicFirebaseConfigRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   '/estudar/$instrumento': typeof EstudarInstrumentoRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/apostilas': typeof ApostilasIndexRoute
+  '/api/public/firebase-config': typeof ApiPublicFirebaseConfigRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -179,6 +187,7 @@ export interface FileRoutesById {
   '/estudar/$instrumento': typeof EstudarInstrumentoRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/apostilas/': typeof ApostilasIndexRoute
+  '/api/public/firebase-config': typeof ApiPublicFirebaseConfigRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/estudar/$instrumento'
     | '/sitemap/xml'
     | '/apostilas/'
+    | '/api/public/firebase-config'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
     | '/estudar/$instrumento'
     | '/sitemap/xml'
     | '/apostilas'
+    | '/api/public/firebase-config'
   id:
     | '__root__'
     | '/'
@@ -241,6 +252,7 @@ export interface FileRouteTypes {
     | '/estudar/$instrumento'
     | '/sitemap/xml'
     | '/apostilas/'
+    | '/api/public/firebase-config'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -261,6 +273,7 @@ export interface RootRouteChildren {
   ApostilasIdRoute: typeof ApostilasIdRoute
   SitemapXmlRoute: typeof SitemapXmlRoute
   ApostilasIndexRoute: typeof ApostilasIndexRoute
+  ApiPublicFirebaseConfigRoute: typeof ApiPublicFirebaseConfigRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -391,6 +404,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApostilasIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/firebase-config': {
+      id: '/api/public/firebase-config'
+      path: '/api/public/firebase-config'
+      fullPath: '/api/public/firebase-config'
+      preLoaderRoute: typeof ApiPublicFirebaseConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -423,17 +443,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApostilasIdRoute: ApostilasIdRoute,
   SitemapXmlRoute: SitemapXmlRoute,
   ApostilasIndexRoute: ApostilasIndexRoute,
+  ApiPublicFirebaseConfigRoute: ApiPublicFirebaseConfigRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
