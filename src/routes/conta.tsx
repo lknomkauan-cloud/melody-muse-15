@@ -11,7 +11,6 @@ import {
   GraduationCap, Music, Loader2, Camera, Save, LogOut,
   BookOpen, Trophy, Users, Sparkles, Mic2, PenLine, ShieldCheck, Settings,
 } from "lucide-react";
-import { PushToggle } from "@/components/PushToggle";
 
 export const Route = createFileRoute("/conta")({
   head: () => ({
@@ -236,15 +235,6 @@ function ContaPage() {
               Salvar alterações
             </Button>
           </div>
-        </div>
-
-        {/* Notificações push */}
-        <div className="mt-6 rounded-2xl border border-border bg-card p-6">
-          <h2 className="font-display text-xl font-bold mb-1">Notificações</h2>
-          <p className="text-sm text-muted-foreground mb-5">
-            Ative os avisos push para receber novidades mesmo com o app fechado.
-          </p>
-          <PushToggle />
         </div>
       </div>
     </div>
