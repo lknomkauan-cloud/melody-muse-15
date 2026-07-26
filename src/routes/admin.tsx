@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Loader2, Shield, Megaphone, Users, Trash2, Plus, Save, ShieldOff, ShieldCheck } from "lucide-react";
+import { Loader2, Shield, Megaphone, Users, Trash2, Plus, Save, ShieldOff, ShieldCheck, Bell } from "lucide-react";
+import { PushSender } from "@/components/PushSender";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "anuncios" | "usuarios";
+type Tab = "anuncios" | "usuarios" | "push";
 
 function AdminPage() {
   const navigate = useNavigate();
@@ -59,6 +60,7 @@ function AdminPage() {
   const tabs: { id: Tab; label: string; icon: typeof Megaphone }[] = [
     { id: "anuncios", label: "Anúncios", icon: Megaphone },
     { id: "usuarios", label: "Usuários", icon: Users },
+    { id: "push", label: "Notificações push", icon: Bell },
   ];
 
   return (
@@ -100,6 +102,15 @@ function AdminPage() {
 
         {tab === "anuncios" && <AnnouncementsManager />}
         {tab === "usuarios" && <UsersManager />}
+        {tab === "push" && (
+          <div className="rounded-2xl border border-border bg-card p-6">
+            <h2 className="font-display text-lg font-bold mb-1">Disparar notificação push</h2>
+            <p className="text-sm text-muted-foreground mb-5">
+              Chega no celular (APK) e no navegador de quem ativou os avisos em Minha conta.
+            </p>
+            <PushSender allowAllAudience />
+          </div>
+        )}
       </div>
     </div>
   );
