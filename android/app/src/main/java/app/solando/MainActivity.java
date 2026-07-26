@@ -5,12 +5,12 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.webkit.PermissionRequest;
-import android.webkit.WebChromeClient;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.getcapacitor.BridgeActivity;
+import com.getcapacitor.BridgeWebChromeClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,7 @@ public class MainActivity extends BridgeActivity {
 
         // Libera o getUserMedia dentro do WebView (sem popup do navegador).
         getBridge().getWebView().getSettings().setMediaPlaybackRequiresUserGesture(false);
-        getBridge().getWebView().setWebChromeClient(new WebChromeClient() {
+        getBridge().getWebView().setWebChromeClient(new BridgeWebChromeClient(getBridge()) {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
                 runOnUiThread(() -> request.grant(request.getResources()));
