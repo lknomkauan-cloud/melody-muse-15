@@ -12,9 +12,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { toast } from "sonner";
 import {
   Loader2, Users, BookOpen, Plus, Trash2, FileText, Upload, LayoutList, PenSquare,
-  Download, Lock, Unlock, Music, ArrowLeft, Bold, Italic, Heading1, List, Save,
+  Download, Lock, Unlock, Music, ArrowLeft, Bold, Italic, Heading1, List, Save, Bell,
 } from "lucide-react";
 import { exportContentAsPdf } from "@/lib/apostila-export";
+import { PushSender } from "@/components/PushSender";
 
 export const Route = createFileRoute("/regencia")({
   head: () => ({

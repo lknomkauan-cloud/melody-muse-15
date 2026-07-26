@@ -11,6 +11,7 @@ import {
   GraduationCap, Music, Loader2, Camera, Save, LogOut,
   BookOpen, Trophy, Users, Sparkles, Mic2, PenLine, ShieldCheck, Settings,
 } from "lucide-react";
+import { PushToggle } from "@/components/PushToggle";
 
 export const Route = createFileRoute("/conta")({
   head: () => ({
