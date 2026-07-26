@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "989541390460",
+    "project_id": "solando-2b5d5",
+    "storage_bucket": "solando-2b5d5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:989541390460:android:bcdc7620a52ab57c0691f9",
+        "android_client_info": {
+          "package_name": "melodymuse15.lovable.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyGTyKnJ3V3bYLvrh0g1JF3hsN37FL-T8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
