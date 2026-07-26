@@ -1,0 +1,18 @@
+{
+  "appId": "app.solando",
+  "appName": "Solando",
+  "webDir": "dist",
+  "server": {
+    "url": "https://melody-muse-15.lovable.app",
+    "cleartext": false,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    }
+  }
+}
