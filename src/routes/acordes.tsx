@@ -241,8 +241,15 @@ function AcordesPage() {
 
           </div>
         )}
+          </TabsContent>
+
+          <TabsContent value="treino">
+            <MusicalTraining />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
 }
+
 
