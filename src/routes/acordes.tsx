@@ -75,13 +75,28 @@ function AcordesPage() {
         <div className="mb-8">
           <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
             <BookOpen className="h-4 w-4" />
-            Referência
+            Estudo de Acordes
           </div>
-          <h1 className="font-display text-3xl font-bold sm:text-4xl">Acordes</h1>
+          <h1 className="font-display text-3xl font-bold sm:text-4xl">Dicionário & Treino</h1>
           <p className="mt-2 text-muted-foreground">
-            Escolha a tônica e o tipo de acorde. O diagrama mostra onde tocar cada nota no instrumento escolhido.
+            Aprenda a montar acordes em diversos instrumentos ou treine diretamente com suas músicas favoritas.
           </p>
         </div>
+
+        <Tabs defaultValue="dicionario" className="w-full">
+          <TabsList className="mb-8 grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="dicionario" className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              Dicionário
+            </TabsTrigger>
+            <TabsTrigger value="treino" className="flex items-center gap-2">
+              <PlayCircle className="h-4 w-4" />
+              Treino Musical
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="dicionario" className="space-y-6">
+
 
         {/* Seletor de tônica */}
         <div className="mb-4 rounded-2xl border border-border bg-card p-4">
