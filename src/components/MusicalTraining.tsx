@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { Youtube, Search, Music, Play, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Youtube, Search, Music, Play, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
 interface SongChord {
@@ -14,6 +15,8 @@ export function MusicalTraining() {
   const [url, setUrl] = useState("");
   const [videoId, setVideoId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
   
   // Mock data for demonstration - in a real app this would come from an API or database
   const mockChords: SongChord[] = [
@@ -32,8 +35,24 @@ export function MusicalTraining() {
   const handleLoadVideo = () => {
     const id = extractVideoId(url);
     if (id) {
-      setVideoId(id);
-      setIsPlaying(true);
+      setIsProcessing(true);
+      setProgress(0);
+      setVideoId(null);
+      
+      // Simulate progress for chord recognition
+      const interval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setIsProcessing(false);
+            setVideoId(id);
+            setIsPlaying(true);
+            return 100;
+          }
+          const next = prev + Math.floor(Math.random() * 15) + 5;
+          return next > 100 ? 100 : next;
+        });
+      }, 500);
     }
   };
 
@@ -57,15 +76,34 @@ export function MusicalTraining() {
               onChange={(e) => setUrl(e.target.value)}
               className="flex-1"
             />
-            <Button onClick={handleLoadVideo} disabled={!url}>
-              <Play className="mr-2 h-4 w-4" />
-              Carregar
+            <Button onClick={handleLoadVideo} disabled={!url || isProcessing}>
+              {isProcessing ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Play className="mr-2 h-4 w-4" />
+              )}
+              {isProcessing ? "Processando..." : "Carregar"}
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {videoId ? (
+      {isProcessing ? (
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-primary/20 bg-primary/5 py-16 text-center shadow-inner">
+          <Loader2 className="mb-4 h-12 w-12 animate-spin text-primary" />
+          <h3 className="text-xl font-bold">Analisando Cifras via IA...</h3>
+          <p className="mb-6 max-w-xs text-sm text-muted-foreground">
+            Estamos processando o áudio do vídeo para extrair a harmonia automaticamente.
+          </p>
+          <div className="w-full max-w-sm px-6">
+            <div className="mb-2 flex justify-between text-xs font-medium">
+              <span>Status: Extraindo acordes</span>
+              <span>{progress}%</span>
+            </div>
+            <Progress value={progress} className="h-2" />
+          </div>
+        </div>
+      ) : videoId ? (
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="overflow-hidden rounded-xl border border-border bg-black shadow-lg">
             <div className="aspect-video">
