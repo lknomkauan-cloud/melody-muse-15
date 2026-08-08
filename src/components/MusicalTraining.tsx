@@ -76,10 +76,15 @@ export function MusicalTraining() {
               onChange={(e) => setUrl(e.target.value)}
               className="flex-1"
             />
-            <Button onClick={handleLoadVideo} disabled={!url}>
-              <Play className="mr-2 h-4 w-4" />
-              Carregar
+            <Button onClick={handleLoadVideo} disabled={!url || isProcessing}>
+              {isProcessing ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Play className="mr-2 h-4 w-4" />
+              )}
+              {isProcessing ? "Processando..." : "Carregar"}
             </Button>
+
           </div>
         </CardContent>
       </Card>
