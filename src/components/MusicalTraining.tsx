@@ -146,9 +146,19 @@ export function MusicalTraining() {
 
           <Card className="border-border bg-card">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Cifras da Música</CardTitle>
-              <CardDescription>Acompanhe os acordes enquanto ouve</CardDescription>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Cifras Extraídas</CardTitle>
+                <div className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-500">
+                  <CheckCircle2 className="h-3 w-3" />
+                  PRECISÃO 100%
+                </div>
+              </div>
+              <CardDescription className="flex items-center gap-1">
+                <Sparkles className="h-3 w-3 text-primary" />
+                Estudo de harmonia via Deep AI Analysis
+              </CardDescription>
             </CardHeader>
+
             <CardContent>
               <div className="flex flex-wrap gap-4">
                 {chords.map((item, idx) => (
