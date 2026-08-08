@@ -51,7 +51,8 @@ export function MusicalTraining() {
       }, 300);
 
       try {
-        const result = await analyzeFn({ url, videoId: id });
+        const result = await analyzeFn({ data: { url, videoId: id } });
+
         clearInterval(interval);
         setProgress(100);
         
@@ -143,7 +144,8 @@ export function MusicalTraining() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-4">
-                {mockChords.map((item, idx) => (
+                {chords.map((item, idx) => (
+
                   <div 
                     key={idx} 
                     className={cn(
