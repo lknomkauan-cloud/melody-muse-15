@@ -100,9 +100,16 @@ export function MusicalTraining() {
               ) : (
                 <Play className="mr-2 h-4 w-4" />
               )}
-              {isProcessing ? "Processando..." : "Carregar"}
+              {isProcessing ? "Analisando..." : "Carregar"}
             </Button>
           </div>
+          {error && (
+            <div className="mt-3 flex items-center gap-2 text-xs text-rose-500">
+              <AlertCircle className="h-4 w-4" />
+              {error}
+            </div>
+          )}
+
         </CardContent>
       </Card>
 
