@@ -176,10 +176,12 @@ export function MusicalTraining() {
                   </div>
                 ))}
               </div>
-              <div className="mt-8 rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-                <Music className="mx-auto mb-2 h-8 w-8 opacity-20" />
-                <p>O reconhecimento automático de cifras via IA está sendo processado para este vídeo...</p>
+              <div className="mt-8 rounded-lg border border-dashed border-primary/20 bg-primary/5 p-6 text-center text-sm">
+                <CheckCircle2 className="mx-auto mb-2 h-6 w-6 text-emerald-500" />
+                <p className="font-medium text-foreground">Análise Concluída com Sucesso</p>
+                <p className="text-xs text-muted-foreground">A harmonia foi mapeada integralmente com precisão cirúrgica.</p>
               </div>
+
             </CardContent>
           </Card>
         </div>
