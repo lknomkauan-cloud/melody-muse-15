@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { Youtube, Search, Music, Play, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Youtube, Search, Music, Play, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
 interface SongChord {
@@ -14,6 +15,8 @@ export function MusicalTraining() {
   const [url, setUrl] = useState("");
   const [videoId, setVideoId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
   
   // Mock data for demonstration - in a real app this would come from an API or database
   const mockChords: SongChord[] = [
@@ -32,10 +35,26 @@ export function MusicalTraining() {
   const handleLoadVideo = () => {
     const id = extractVideoId(url);
     if (id) {
-      setVideoId(id);
-      setIsPlaying(true);
+      setIsProcessing(true);
+      setProgress(0);
+      
+      // Simulate progress for chord recognition
+      const interval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setIsProcessing(false);
+            setVideoId(id);
+            setIsPlaying(true);
+            return 100;
+          }
+          const next = prev + Math.floor(Math.random() * 15) + 5;
+          return next > 100 ? 100 : next;
+        });
+      }, 500);
     }
   };
+
 
   return (
     <div className="space-y-6">
