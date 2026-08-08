@@ -1,0 +1,122 @@
+import { useState } from "react";
+import { Youtube, Search, Music, Play, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+
+interface SongChord {
+  time: number;
+  chord: string;
+}
+
+export function MusicalTraining() {
+  const [url, setUrl] = useState("");
+  const [videoId, setVideoId] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  
+  // Mock data for demonstration - in a real app this would come from an API or database
+  const mockChords: SongChord[] = [
+    { time: 0, chord: "C" },
+    { time: 4, chord: "G" },
+    { time: 8, chord: "Am" },
+    { time: 12, chord: "F" },
+  ];
+
+  const extractVideoId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  const handleLoadVideo = () => {
+    const id = extractVideoId(url);
+    if (id) {
+      setVideoId(id);
+      setIsPlaying(true);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card className="border-primary/20 bg-primary/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Youtube className="h-5 w-5 text-red-500" />
+            Treino Musical com YouTube
+          </CardTitle>
+          <CardDescription>
+            Insira o link de uma música para treinar as cifras em tempo real.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Cole o link do YouTube aqui..."
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              className="flex-1"
+            />
+            <Button onClick={handleLoadVideo} disabled={!url}>
+              <Play className="mr-2 h-4 w-4" />
+              Carregar
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {videoId ? (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="overflow-hidden rounded-xl border border-border bg-black shadow-lg">
+            <div className="aspect-video">
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
+          </div>
+
+          <Card className="border-border bg-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Cifras da Música</CardTitle>
+              <CardDescription>Acompanhe os acordes enquanto ouve</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-4">
+                {mockChords.map((item, idx) => (
+                  <div 
+                    key={idx} 
+                    className={cn(
+                      "flex flex-col items-center rounded-lg border p-4 transition-all",
+                      idx === 0 ? "border-primary bg-primary/10 scale-110 shadow-md" : "border-border bg-muted/30 opacity-60"
+                    )}
+                  >
+                    <span className="text-2xl font-bold">{item.chord}</span>
+                    <span className="text-[10px] text-muted-foreground">{item.time}s</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-8 rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
+                <Music className="mx-auto mb-2 h-8 w-8 opacity-20" />
+                <p>O reconhecimento automático de cifras via IA está sendo processado para este vídeo...</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-16 text-center">
+          <Search className="mb-4 h-12 w-12 text-muted-foreground opacity-20" />
+          <h3 className="text-lg font-medium">Nenhum vídeo carregado</h3>
+          <p className="max-w-xs text-sm text-muted-foreground">
+            Cole um link do YouTube acima para começar seu treino musical com acompanhamento de cifras.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}

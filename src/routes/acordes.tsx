@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { BookOpen, Guitar, Piano as PianoIcon, Music2 } from "lucide-react";
+import { BookOpen, Guitar, Piano as PianoIcon, Music2, PlayCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { InstrumentDiagram, type InstrumentId } from "@/components/InstrumentDiagram";
 import { ChordDiagramCifra, hasCifraData } from "@/components/ChordDiagramCifra";
+import { MusicalTraining } from "@/components/MusicalTraining";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 
 
 
