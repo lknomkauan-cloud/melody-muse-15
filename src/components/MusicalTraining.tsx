@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
-import { Youtube, Search, Music, Play, Loader2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Youtube, Search, Music, Play, Loader2, CheckCircle2, AlertCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { useServerFn } from "@tanstack/react-start";
+import { analyzeChords } from "@/lib/analyze-chords.functions";
 
 interface SongChord {
   time: number;
@@ -17,14 +19,10 @@ export function MusicalTraining() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [chords, setChords] = useState<SongChord[]>([]);
+  const [error, setError] = useState<string | null>(null);
   
-  // Mock data for demonstration - in a real app this would come from an API or database
-  const mockChords: SongChord[] = [
-    { time: 0, chord: "C" },
-    { time: 4, chord: "G" },
-    { time: 8, chord: "Am" },
-    { time: 12, chord: "F" },
-  ];
+  const analyzeFn = useServerFn(analyzeChords);
 
   const extractVideoId = (url: string) => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -32,29 +30,48 @@ export function MusicalTraining() {
     return (match && match[2].length === 11) ? match[2] : null;
   };
 
-  const handleLoadVideo = () => {
+  const handleLoadVideo = async () => {
     const id = extractVideoId(url);
     if (id) {
+      setError(null);
       setIsProcessing(true);
       setProgress(0);
       setVideoId(null);
+      setChords([]);
       
-      // Simulate progress for chord recognition
+      // Phase 1: Meta-data extraction
       const interval = setInterval(() => {
         setProgress((prev) => {
-          if (prev >= 100) {
+          if (prev >= 90) {
             clearInterval(interval);
-            setIsProcessing(false);
-            setVideoId(id);
-            setIsPlaying(true);
-            return 100;
+            return 90;
           }
-          const next = prev + Math.floor(Math.random() * 15) + 5;
-          return next > 100 ? 100 : next;
+          return prev + Math.floor(Math.random() * 10) + 2;
         });
-      }, 500);
+      }, 300);
+
+      try {
+        const result = await analyzeFn({ url, videoId: id });
+        clearInterval(interval);
+        setProgress(100);
+        
+        // Wait a moment at 100% for the effect
+        setTimeout(() => {
+          setChords(result);
+          setIsProcessing(false);
+          setVideoId(id);
+          setIsPlaying(true);
+        }, 800);
+      } catch (err) {
+        clearInterval(interval);
+        setIsProcessing(false);
+        setError("Não foi possível analisar esta música com precisão. Verifique o link e tente novamente.");
+      }
+    } else {
+      setError("Link do YouTube inválido.");
     }
   };
+
 
   return (
     <div className="space-y-6">
