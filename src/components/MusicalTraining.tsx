@@ -115,11 +115,12 @@ export function MusicalTraining() {
 
       {isProcessing ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-primary/20 bg-primary/5 py-16 text-center shadow-inner">
-          <Loader2 className="mb-4 h-12 w-12 animate-spin text-primary" />
-          <h3 className="text-xl font-bold">Analisando Cifras via IA...</h3>
+          <Sparkles className="mb-4 h-12 w-12 animate-pulse text-primary" />
+          <h3 className="text-xl font-bold italic">"Estudando a música..."</h3>
           <p className="mb-6 max-w-xs text-sm text-muted-foreground">
-            Estamos processando o áudio do vídeo para extrair a harmonia automaticamente.
+            Nossa IA está realizando uma varredura completa na harmonia para garantir 100% de precisão nas cifras.
           </p>
+
           <div className="w-full max-w-sm px-6">
             <div className="mb-2 flex justify-between text-xs font-medium">
               <span>Status: Extraindo acordes</span>
