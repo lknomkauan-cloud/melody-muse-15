@@ -21,7 +21,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Music, Menu, X, LogOut, User as UserIcon, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-
+import { registerPushNotifications } from "@/lib/push-notifications";
 
 function NotFoundComponent() {
   return (
@@ -271,6 +271,13 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      void registerPushNotifications(user.id);
+    }
+  }, [user]);
 
   return (
     <QueryClientProvider client={queryClient}>
