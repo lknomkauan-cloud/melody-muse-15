@@ -94,6 +94,38 @@ export type Database = {
           },
         ]
       }
+      device_tokens: {
+        Row: {
+          created_at: string | null
+          id: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          platform?: string
+          token?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "device_tokens_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plugin_bundles: {
         Row: {
           created_at: string
@@ -128,6 +160,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          birthday: string | null
           created_at: string
           full_name: string | null
           id: string
@@ -139,6 +172,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          birthday?: string | null
           created_at?: string
           full_name?: string | null
           id: string
@@ -150,6 +184,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          birthday?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
@@ -162,6 +197,44 @@ export type Database = {
           {
             foreignKeyName: "profiles_teacher_id_fkey"
             columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_notifications: {
+        Row: {
+          body: string
+          created_at: string | null
+          data: Json | null
+          id: string
+          sender_id: string | null
+          status: string | null
+          title: string
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          data?: Json | null
+          id?: string
+          sender_id?: string | null
+          status?: string | null
+          title: string
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          data?: Json | null
+          id?: string
+          sender_id?: string | null
+          status?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_notifications_sender_id_fkey"
+            columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -232,6 +305,7 @@ export type Database = {
         Returns: boolean
       }
       my_teacher_id: { Args: never; Returns: string }
+      notify_birthdays: { Args: never; Returns: undefined }
       set_my_teacher: { Args: { _teacher_id: string }; Returns: undefined }
       teacher_set_unlocked: {
         Args: { _instruments: string[]; _student_id: string }
