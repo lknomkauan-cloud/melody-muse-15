@@ -99,13 +99,13 @@ const ROOTS = ["C", "D", "E", "F", "G", "A", "B"];
 const INSTRUMENTS: { id: InstrumentId; label: string; beginnerTip: string; startingNotes: string[] }[] = [
   { id: "violao", label: "Violão", beginnerTip: "Comece com acordes abertos (dedos livres). Foque em pressionar firme e perto do traste.", startingNotes: ["E", "A", "D", "G", "B", "E"] },
   { id: "guitarra", label: "Guitarra", beginnerTip: "Postura relaxada, palheta com pouca força. Treine trocas de acorde antes de solar.", startingNotes: ["E", "A", "D", "G", "B", "E"] },
-  { id: "baixo", label: "Baixo", beginnerTip: "Alterne indicador e médio. Toque uma nota por tempo com o metrônomo.", startingNotes: ["E", "A", "D", "G"] },
+  { id: "baixo", label: "Baixo", beginnerTip: "Alterne indicador e médio. Treine escalas cromáticas para precisão rítmica.", startingNotes: ["E", "A", "D", "G"] },
   { id: "piano", label: "Piano", beginnerTip: "Postura das mãos redondas, pulsos soltos. Comece pela dedilhação 1-2-3-1-2-3-4-5 em C.", startingNotes: ["C", "D", "E", "F", "G", "A", "B"] },
   { id: "teclado", label: "Teclado", beginnerTip: "Explore os timbres, mas estude sempre com som de piano acústico primeiro.", startingNotes: ["C", "D", "E", "F", "G", "A", "B"] },
-  { id: "violino", label: "Violino", beginnerTip: "Cordas soltas primeiro. Arco reto, próximo do cavalete, peso do braço no arco.", startingNotes: ["G", "D", "A", "E"] },
-  { id: "sax", label: "Saxofone", beginnerTip: "Embocadura firme mas relaxada. Comece por notas longas no registro médio.", startingNotes: ["D", "G", "C", "F"] },
+  { id: "violino", label: "Violino", beginnerTip: "Segure o arco corretamente. Treine notas longas, uma de cada vez, mantendo o som limpo.", startingNotes: ["G", "D", "A", "E"] },
+  { id: "sax", label: "Saxofone", beginnerTip: "Foque na embocadura e na respiração diafragmática. Toque notas longas com estabilidade.", startingNotes: ["C", "D", "E", "F", "G"] },
   { id: "banjo", label: "Banjo", beginnerTip: "Use dedeiras. Comece com o rolo alternado (T-I-M-T-I-M).", startingNotes: ["D", "G", "B", "D"] },
-  { id: "flauta", label: "Flauta Doce", beginnerTip: "Sopro fraco e constante. Feche bem os buracos com a polpa dos dedos.", startingNotes: ["C", "D", "E", "F", "G", "A", "B"] },
+  { id: "flauta", label: "Flauta Doce", beginnerTip: "Sopro leve e constante para evitar ruídos. Cubra os furos totalmente com as polpas dos dedos.", startingNotes: ["C", "D", "E", "F", "G"] },
 ];
 
 /* ---------- Detecção de altura (autocorrelação simples) ---------- */
@@ -276,6 +276,35 @@ async function playChord(pcs: number[], root: string, instrument: InstrumentId =
   } catch (e) { console.error("playChord", e); }
 }
 
+async function playMelodySequence(pcs: number[], root: string, instrument: InstrumentId = "piano", durationMs = 600) {
+  try {
+    await Tone.start();
+    const sampler = await getSampler(instrument);
+    const octBase = INSTRUMENT_OCTAVE[instrument] ?? 4;
+    const rootPc = pcOf(root);
+    const now = Tone.now();
+
+    let prevPc = -1;
+    let oct = octBase;
+    
+    pcs.forEach((semi, i) => {
+      const pc = (rootPc + semi) % 12;
+      if (prevPc !== -1 && pc <= prevPc) oct++;
+      prevPc = pc;
+      const noteName = `${nameOfPc(pc)}${oct}`;
+      
+      if (sampler) {
+        sampler.triggerAttackRelease(noteName, durationMs / 1000, now + i * 0.5);
+      } else {
+        const synth = new Tone.Synth({ oscillator: { type: "triangle" } }).toDestination();
+        synth.triggerAttackRelease(noteName, durationMs / 1000, now + i * 0.5);
+        setTimeout(() => synth.dispose(), (i * 500) + durationMs + 400);
+      }
+    });
+  } catch (e) { console.error("playMelodySequence", e); }
+}
+
+
 
 /* ---------- Página ---------- */
 
@@ -285,6 +314,8 @@ function ProfessorPage() {
   const [chord, setChord] = useState<ChordKind>(TRIADS[0]);
 
   const instrument = INSTRUMENTS.find((i) => i.id === instrumentId)!;
+  const isMelodic = instrumentId === "sax" || instrumentId === "violino" || instrumentId === "flauta" || instrumentId === "baixo";
+
   const chordPcs = useMemo(() => new Set(chord.intervals.map((s) => (pcOf(root) + s + 120) % 12)), [chord, root]);
   const chordNoteNames = useMemo(() => chord.intervals.map((s) => nameOfPc(pcOf(root) + s)), [chord, root]);
 
@@ -298,7 +329,7 @@ function ProfessorPage() {
           <div>
             <h1 className="font-display text-3xl font-bold">Professor Iniciante</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Aula do zero em todos os instrumentos: notas básicas, tríades e tétrades — com um professor de IA que ouve seu microfone e corrige em tempo real.
+              Aula do zero em todos os instrumentos: notas básicas e fundamentos musicais com correção por IA em tempo real.
             </p>
           </div>
         </header>
@@ -346,15 +377,19 @@ function ProfessorPage() {
           <NoteListener notes={instrument.startingNotes} />
         </section>
 
-        {/* Construção dos acordes */}
+        {/* Construção dos acordes / Sequências Melódicas */}
         <section className="mb-5 rounded-xl border border-border bg-card p-4">
-          <h2 className="mb-1 font-display text-lg font-semibold">2. Construção de acordes</h2>
+          <h2 className="mb-1 font-display text-lg font-semibold">
+            {isMelodic ? "2. Sequências e Arpejos" : "2. Construção de acordes"}
+          </h2>
           <p className="mb-3 text-xs text-muted-foreground">
-            Escolha a nota fundamental e o tipo do acorde. O diagrama mostra onde cada nota fica no seu instrumento.
+            {isMelodic 
+              ? "Para instrumentos melódicos, praticamos as notas de uma harmonia uma por vez. O diagrama mostra a posição de cada nota no seu instrumento."
+              : "Escolha a nota fundamental e o tipo do acorde. O diagrama mostra onde cada nota fica no seu instrumento."}
           </p>
 
           <div className="mb-3">
-            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Fundamental</div>
+            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Fundamental / Tom</div>
             <div className="flex flex-wrap gap-1.5">
               {ROOTS.map((r) => (
                 <button
@@ -408,7 +443,7 @@ function ProfessorPage() {
           <div className="rounded-lg border border-primary/30 bg-background/40 p-3">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <div>
-                <span className="text-xs text-muted-foreground">Acorde selecionado</span>
+                <span className="text-xs text-muted-foreground">{isMelodic ? "Sequência selecionada" : "Acorde selecionado"}</span>
                 <div className="font-display text-2xl font-bold text-primary">
                   {root}{chord.suffix} <span className="text-sm font-normal text-muted-foreground">({chord.label})</span>
                 </div>
@@ -421,10 +456,10 @@ function ProfessorPage() {
                 </div>
               </div>
               <button
-                onClick={() => playChord(chord.intervals, root, instrumentId)}
+                onClick={() => isMelodic ? playMelodySequence(chord.intervals, root, instrumentId) : playChord(chord.intervals, root, instrumentId)}
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
               >
-                <Volume2 className="h-4 w-4" /> Ouvir o acorde
+                <Volume2 className="h-4 w-4" /> {isMelodic ? "Ouvir sequência" : "Ouvir o acorde"}
               </button>
             </div>
 
@@ -440,7 +475,9 @@ function ProfessorPage() {
             <Mic className="h-5 w-5 text-primary" /> 3. Professor IA — ouça, toque e receba correção
           </h2>
           <p className="mb-3 text-xs text-muted-foreground">
-            Toque as notas do acorde <span className="font-semibold text-foreground">{root}{chord.suffix}</span> uma por uma. O Professor marca cada nota conforme você acerta e mostra a direção certa quando erra.
+            {isMelodic
+              ? `Toque as notas da sequência de ${root}${chord.suffix} uma por uma. O Professor confere sua afinação e precisão.`
+              : `Toque as notas do acorde ${root}${chord.suffix} uma por uma. O Professor marca cada nota conforme você acerta.`}
           </p>
           <ChordListener chord={chord} root={root} instrument={instrumentId} />
         </section>
