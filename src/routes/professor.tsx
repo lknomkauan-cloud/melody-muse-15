@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { GraduationCap, Mic, Square, Volume2, RotateCcw, CheckCircle2, Circle } from "lucide-react";
+import { GraduationCap, Mic, Square, Volume2, RotateCcw, CheckCircle2, Circle, Info, Lightbulb, Music } from "lucide-react";
 import * as Tone from "tone";
 import { InstrumentDiagram, type InstrumentId } from "@/components/InstrumentDiagram";
 import { cn } from "@/lib/utils";
