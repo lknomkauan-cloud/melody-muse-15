@@ -639,8 +639,37 @@ function ProfessorPage() {
           </div>
         </section>
 
-        {/* Professor IA — escuta e corrige */}
-        {!isMelodic && (
+        {/* Professor IA — Complemento para Instrumentos Melódicos ou Feedback para Harmônicos */}
+        {isMelodic ? (
+          <section className="rounded-xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 to-transparent p-4">
+            <h2 className="mb-1 flex items-center gap-2 font-display text-lg font-semibold">
+              <Lightbulb className="h-5 w-5 text-primary" /> 3. Dicas de Performance e Expressão
+            </h2>
+            <div className="mt-3 space-y-4">
+              <div className="rounded-lg bg-background/60 p-3 border border-border">
+                <h4 className="text-sm font-bold text-primary mb-1">Foco na Articulação</h4>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Para instrumentos de sopro e cordas friccionadas, a forma como você inicia e termina a nota é fundamental. 
+                  Experimente ataques suaves e use o vibrato apenas no final de notas longas para dar mais emoção.
+                </p>
+              </div>
+              <div className="rounded-lg bg-background/60 p-3 border border-border">
+                <h4 className="text-sm font-bold text-primary mb-1">Controle de Dinâmica</h4>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Tente tocar a mesma escala crescendo (aumentando o volume) ao subir e diminuindo ao descer. 
+                  O domínio do volume é o que separa um iniciante de um músico expressivo.
+                </p>
+              </div>
+              <div className="rounded-lg bg-background/60 p-3 border border-border">
+                <h4 className="text-sm font-bold text-primary mb-1">Prática Sugerida</h4>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Use o metrônomo do app para garantir que cada nota da sequência tenha exatamente a mesma duração. 
+                  A precisão rítmica é o alicerce para qualquer melodia.
+                </p>
+              </div>
+            </div>
+          </section>
+        ) : (
           <section className="rounded-xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 to-transparent p-4">
             <h2 className="mb-1 flex items-center gap-2 font-display text-lg font-semibold">
               <Mic className="h-5 w-5 text-primary" /> 3. Feedback e Análise em Tempo Real
