@@ -112,7 +112,7 @@ export const sendPushNotification = createServerFn({ method: "POST" })
         title: data.title,
         body: data.body,
         status: "sent",
-        payload: data.data || {}
+        payload: (data.data || {}) as any
       });
 
       return { success: true, results };

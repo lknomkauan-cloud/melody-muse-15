@@ -345,8 +345,10 @@ function NotificationsManager() {
       toast.info("Enviando notificações...");
       
       const result = await sendPush({
-        title: title.trim(),
-        body: body.trim(),
+        data: {
+          title: title.trim(),
+          body: body.trim(),
+        }
       });
 
       if (result.success) {
