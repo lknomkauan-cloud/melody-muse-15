@@ -620,12 +620,12 @@ function ProfessorPage() {
         {/* Professor IA — escuta e corrige */}
         <section className="rounded-xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 to-transparent p-4">
           <h2 className="mb-1 flex items-center gap-2 font-display text-lg font-semibold">
-            <Mic className="h-5 w-5 text-primary" /> 3. Professor IA — Escala e Correção
+            <Mic className="h-5 w-5 text-primary" /> 3. Feedback e Análise em Tempo Real
           </h2>
           <p className="mb-3 text-xs text-muted-foreground">
             {isMelodic
-              ? `Toque a escala completa de ${root}${chord.suffix}. O Professor confere sua afinação e precisão nota a nota.`
-              : `Toque as notas do acorde ${root}${chord.suffix} uma por uma. O Professor marca cada nota conforme você acerta.`}
+              ? `Toque as notas da sequência de ${root}${chord.suffix}. O Professor analisa a precisão e estabilidade de cada nota.`
+              : `Toque as notas do acorde ${root}${chord.suffix} individualmente. O Professor valida a execução correta da harmonia.`}
           </p>
           <ChordListener chord={chord} root={root} instrument={instrumentId} />
         </section>
