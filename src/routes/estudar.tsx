@@ -196,6 +196,22 @@ const instruments: Instrument[] = [
       { title: "Acordes e arpejos para sax — referência", type: "Acordes", url: "https://www.saxstation.com/saxophone-scales.html", source: "Sax Station" },
     ],
   },
+  {
+    id: "sanfona",
+    name: "Sanfona",
+    icon: Piano,
+    description: "Coordenação tripla — fole, teclado e baixos.",
+    specifics: [
+      "Controle do fole: abertura, fechamento e dinâmica",
+      "Coordenação entre as mãos (melodia e baixos)",
+      "Sistema Stradella de baixos",
+      "Dedilhado de escalas no teclado",
+      "Registros e timbres do instrumento",
+    ],
+    resources: [
+      { title: "Iniciação ao Acordeon (PDF)", type: "Apostila PDF", url: "https://www.cliqueapostilas.com.br/instrumentos/iniciacao-ao-acordeon", source: "Clique Apostilas" },
+    ],
+  },
 ];
 
 

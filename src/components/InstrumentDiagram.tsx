@@ -16,7 +16,7 @@ const C = {
   fgSoft: "#00000026",
 };
 
-export type InstrumentId = "violao" | "guitarra" | "baixo" | "piano" | "teclado" | "sax" | "violino" | "bateria" | "banjo" | "flauta";
+export type InstrumentId = "violao" | "guitarra" | "baixo" | "piano" | "teclado" | "sax" | "violino" | "bateria" | "banjo" | "flauta" | "sanfona";
 
 type Props = {
   instrument: InstrumentId;
@@ -41,7 +41,8 @@ export function InstrumentDiagram({ instrument, root, pentSemis }: Props) {
       return <Fretboard tuning={[7, 2, 11, 7, 2]} labels={["g*", "D", "B", "G", "D"]} frets={13} rootPc={rootPc} pentPcs={pentPcs} />;
     case "piano":
     case "teclado":
-      return <Piano rootPc={rootPc} pentPcs={pentPcs} />;
+    case "sanfona":
+      return <Piano rootPc={rootPc} pentPcs={pentPcs} isAccordion={instrument === "sanfona"} />;
     case "sax":
       return <Sax rootPc={rootPc} pentPcs={pentPcs} />;
     case "flauta":
@@ -174,21 +175,21 @@ function Fretboard({
 
 /* ---------- Piano ---------- */
 
-function Piano({ rootPc, pentPcs }: { rootPc: number; pentPcs: Set<number> }) {
+function Piano({ rootPc, pentPcs, isAccordion = false }: { rootPc: number; pentPcs: Set<number>; isAccordion?: boolean }) {
   const whiteOrder = [0, 2, 4, 5, 7, 9, 11];
   const blackAfter: Record<number, number> = { 0: 1, 2: 3, 5: 6, 7: 8, 9: 10 };
   const whiteW = 34;
   const whiteH = 130;
   const blackW = 22;
   const blackH = 82;
-  const octaves = 2;
+  const octaves = isAccordion ? 3 : 2; // Acordeon geralmente tem mais extensão visível no diagrama
   const totalWhites = 7 * octaves + 1;
-  const w = totalWhites * whiteW + 4;
+  const w = totalWhites * whiteW + (isAccordion ? 120 : 4); // Espaço extra para o fole/baixos se for sanfona
   const h = whiteH + 20;
 
   const whites: { x: number; pc: number }[] = [];
   const blacks: { x: number; pc: number }[] = [];
-  let x = 2;
+  let x = isAccordion ? 110 : 2; // Offset se for acordeon para mostrar o corpo
   for (let o = 0; o < octaves; o++) {
     for (const pcW of whiteOrder) {
       whites.push({ x, pc: pcW });
@@ -202,7 +203,20 @@ function Piano({ rootPc, pentPcs }: { rootPc: number; pentPcs: Set<number> }) {
 
   return (
     <div className="overflow-x-auto">
-      <svg viewBox={`0 0 ${w} ${h}`} className="w-full min-w-[520px]" role="img" aria-label="Teclado do piano">
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full min-w-[520px]" role="img" aria-label={isAccordion ? "Teclado da sanfona" : "Teclado do piano"}>
+        {isAccordion && (
+          <g opacity={0.3}>
+            {/* Desenho simplificado do fole da sanfona */}
+            {Array.from({ length: 10 }).map((_, i) => (
+              <path key={i} d={`M ${10 + i * 8} 10 L ${14 + i * 8} ${h - 10} L ${18 + i * 8} 10`} fill="none" stroke={C.fg} strokeWidth={2} />
+            ))}
+            {/* Lado dos baixos */}
+            <rect x={2} y={15} width={40} height={h - 30} rx={4} fill={C.muted} stroke={C.fg} />
+            {Array.from({ length: 12 }).map((_, i) => (
+              <circle key={i} cx={12 + (i % 3) * 10} cy={25 + Math.floor(i / 3) * 25} r={3} fill={C.fg} />
+            ))}
+          </g>
+        )}
         {whites.map((k, i) => {
           const on = pentPcs.has(k.pc);
           const isRoot = k.pc === rootPc;

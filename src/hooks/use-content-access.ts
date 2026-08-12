@@ -22,6 +22,7 @@ const ALIASES: Record<string, string[]> = {
   flautadoce: ["flautadoce", "flauta", "recorder"],
   banjo: ["banjo"],
   ukulele: ["ukulele", "uke"],
+  sanfona: ["sanfona", "acordeon", "accordion"],
 };
 
 function slugMatchesAlias(slug: string, value: string): boolean {
@@ -69,4 +70,5 @@ export const ALL_INSTRUMENTS = [
   { slug: "flautadoce", label: "Flauta doce" },
   { slug: "banjo", label: "Banjo" },
   { slug: "ukulele", label: "Ukulele" },
+  { slug: "sanfona", label: "Sanfona" },
 ] as const;

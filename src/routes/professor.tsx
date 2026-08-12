@@ -18,10 +18,11 @@ const SAMPLER_CONFIG: Record<InstrumentId, { baseUrl: string; urls: Record<strin
   banjo: { baseUrl: `${GM}/banjo-mp3/`, urls: { G3:"G3.mp3", C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3" } },
   flauta: { baseUrl: `${GM}/recorder-mp3/`, urls: { C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3", G5:"G5.mp3", C6:"C6.mp3" } },
   bateria: { baseUrl: `${GM}/xylophone-mp3/`, urls: { C4:"C4.mp3", G4:"G4.mp3", C5:"C5.mp3", G5:"G5.mp3", C6:"C6.mp3" } },
+  sanfona: { baseUrl: `${GM}/accordion-mp3/`, urls: { C3:"C3.mp3", C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3", C6:"C6.mp3" } },
 };
 
 const INSTRUMENT_OCTAVE: Record<InstrumentId, number> = {
-  violao: 3, guitarra: 3, baixo: 2, piano: 4, teclado: 4, violino: 4, sax: 4, banjo: 4, flauta: 5, bateria: 4,
+  violao: 3, guitarra: 3, baixo: 2, piano: 4, teclado: 4, violino: 4, sax: 4, banjo: 4, flauta: 5, bateria: 4, sanfona: 4,
 };
 
 const samplerCache = new Map<InstrumentId, { sampler: Tone.Sampler; ready: Promise<void> }>();
@@ -175,6 +176,14 @@ const INSTRUMENTS: { id: InstrumentId; label: string; beginnerTip: string; start
     startingNotes: ["C", "D", "E", "F", "G"],
     curio: "A flauta doce era um dos instrumentos mais populares na era Barroca, sendo usada por compositores como Bach e Vivaldi.",
     challenge: "Toque a nota C grave soprando o mais suavemente possível para que ela não 'suba' de oitava."
+  },
+  {
+    id: "sanfona",
+    label: "Sanfona",
+    beginnerTip: "Trabalhe a coordenação entre o fole, o teclado e os baixos. Comece com ritmos simples como valsa ou xote.",
+    startingNotes: ["C", "D", "E", "F", "G"],
+    curio: "A sanfona (ou acordeon) é um instrumento de palheta livre, onde o som é produzido pela passagem do ar pelo fole.",
+    challenge: "Tente manter uma nota no teclado enquanto abre e fecha o fole de forma suave, sem variar o volume bruscamente."
   },
 ];
 
@@ -365,7 +374,7 @@ async function playMelodySequence(pcs: number[], root: string, instrument: Instr
     let oct = octBase;
     
     // Para instrumentos melódicos, garantimos que cada nota pare antes da próxima
-    const isMelodic = instrument === "sax" || instrument === "violino" || instrument === "flauta" || instrument === "baixo";
+    const isMelodic = instrument === "sax" || instrument === "violino" || instrument === "flauta" || instrument === "baixo" || instrument === "sanfona";
 
     pcs.forEach((semi, i) => {
       const pc = (rootPc + semi) % 12;
@@ -377,10 +386,7 @@ async function playMelodySequence(pcs: number[], root: string, instrument: Instr
       
       if (sampler) {
         if (isMelodic) {
-          // Agenda o corte da nota anterior no momento em que a nova começa
           sampler.triggerAttackRelease(noteName, durationMs / 1000, startTime);
-          // O Tone.Sampler.triggerAttackRelease com tempo agendado já cuida da duração,
-          // mas para instrumentos monofônicos reais, garantir que não sobreponha:
           if (i > 0) {
             sampler.triggerRelease(now + (i - 0.05) * 0.5);
           }

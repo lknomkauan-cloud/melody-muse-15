@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 type InstrumentId =
   | "violao" | "guitarra" | "baixo" | "banjo"
   | "piano" | "teclado" | "sax" | "violino"
-  | "flauta" | "bateria";
+  | "flauta" | "bateria" | "sanfona";
 
 // Samples: FluidR3_GM soundfont (gravado de instrumentos reais, licença livre)
 // via CDN gleitz/midi-js-soundfonts. Todas as notas cromáticas existem —
@@ -65,6 +65,11 @@ const SAMPLER_CONFIG: Partial<Record<InstrumentId, { baseUrl: string; urls: Reco
     // xilofone afinado para representar melodicamente escalas na bateria
     baseUrl: `${GM}/xylophone-mp3/`,
     urls: { C4:"C4.mp3", G4:"G4.mp3", C5:"C5.mp3", G5:"G5.mp3", C6:"C6.mp3", G6:"G6.mp3", C7:"C7.mp3" },
+    octave: 4,
+  },
+  sanfona: {
+    baseUrl: `${GM}/accordion-mp3/`,
+    urls: { C3:"C3.mp3", C4:"C4.mp3", E4:"E4.mp3", G4:"G4.mp3", C5:"C5.mp3", E5:"E5.mp3", C6:"C6.mp3" },
     octave: 4,
   },
 };

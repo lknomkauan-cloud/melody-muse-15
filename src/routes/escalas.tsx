@@ -228,6 +228,7 @@ const INSTRUMENTS = [
   { id: "banjo", label: "Banjo" },
   { id: "piano", label: "Piano" },
   { id: "teclado", label: "Teclado" },
+  { id: "sanfona", label: "Sanfona" },
   { id: "sax", label: "Sax" },
   { id: "violino", label: "Violino" },
   { id: "flauta", label: "Flauta Doce" },
@@ -265,6 +266,10 @@ function instrumentTip(inst: InstrumentId, modeRoot: string, pentSemis: number[]
     case "flauta": {
       const notas = pentSemis.map((s) => transpose(modeRoot, s)).join(" – ");
       return `Flauta doce soprano (dedilhado barroco). Notas: ${notas}. Cubra o polegar (T) e os furos frontais conforme o diagrama. Use ar leve nas notas graves (dó/ré) e vent o polegar (◐) para subir de oitava. Ataque com "tu" nas separações e "du" nas ligaduras.`;
+    }
+    case "sanfona": {
+      const notas = pentSemis.map((s) => transpose(modeRoot, s)).join(" – ");
+      return `Sanfona/Acordeon: As notas da direita (${notas}) seguem o teclado. Mão direita: 1-2-3-1-2. Mão esquerda (baixos): A tônica ${modeRoot} geralmente fica na 2ª ou 3ª fileira (Stradella). Explore o sistema de baixos para fazer o acompanhamento enquanto sola no teclado.`;
     }
   }
 }
