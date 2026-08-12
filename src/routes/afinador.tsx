@@ -38,8 +38,44 @@ const INSTRUMENTOS: Instrumento[] = [
   {
     id: "violao",
     label: "Violão",
-    descricao: "E A D G B E",
+    descricao: "E A D G B E (Padrão)",
     notas: [n("E2"), n("A2"), n("D3"), n("G3"), n("B3"), n("E4")],
+  },
+  {
+    id: "guitarra",
+    label: "Guitarra",
+    descricao: "E A D G B E (Padrão)",
+    notas: [n("E2"), n("A2"), n("D3"), n("G3"), n("B3"), n("E4")],
+  },
+  {
+    id: "baixo",
+    label: "Baixo",
+    descricao: "E A D G (4 Cordas)",
+    notas: [n("E1"), n("A1"), n("D2"), n("G2")],
+  },
+  {
+    id: "violino",
+    label: "Violino",
+    descricao: "G D A E",
+    notas: [n("G3"), n("D4"), n("A4"), n("E5")],
+  },
+  {
+    id: "sax",
+    label: "Saxofone",
+    descricao: "Bb (Tenor/Soprano) ou Eb (Alto/Barítono)",
+    notas: [n("Bb3"), n("D4"), n("G4"), n("C5")], // Notas de referência comuns
+  },
+  {
+    id: "flauta",
+    label: "Flauta Doce",
+    descricao: "Soprano (Dó)",
+    notas: [n("C4"), n("D4"), n("E4"), n("F4"), n("G4"), n("A4"), n("B4"), n("C5")],
+  },
+  {
+    id: "banjo",
+    label: "Banjo",
+    descricao: "G D G B D (5 Cordas)",
+    notas: [n("G4"), n("D3"), n("G3"), n("B3"), n("D4")],
   },
   {
     id: "sanfona",
