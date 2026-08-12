@@ -59,6 +59,7 @@ const INSTRUMENTS: { id: InstId; label: string }[] = [
   { id: "sax", label: "Saxofone" },
   { id: "banjo", label: "Banjo" },
   { id: "flauta", label: "Flauta Doce" },
+  { id: "sanfona", label: "Sanfona" },
 ];
 
 
