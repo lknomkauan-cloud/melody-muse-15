@@ -160,6 +160,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          birthday: string | null
           created_at: string
           full_name: string | null
           id: string
@@ -171,6 +172,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          birthday?: string | null
           created_at?: string
           full_name?: string | null
           id: string
@@ -182,6 +184,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          birthday?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
@@ -302,6 +305,7 @@ export type Database = {
         Returns: boolean
       }
       my_teacher_id: { Args: never; Returns: string }
+      notify_birthdays: { Args: never; Returns: undefined }
       set_my_teacher: { Args: { _teacher_id: string }; Returns: undefined }
       teacher_set_unlocked: {
         Args: { _instruments: string[]; _student_id: string }
