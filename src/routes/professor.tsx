@@ -74,7 +74,7 @@ const NOTE_TO_SEMITONE: Record<string, number> = {
 const pcOf = (n: string) => NOTE_TO_SEMITONE[n] ?? 0;
 const nameOfPc = (pc: number) => NOTE_NAMES[((pc % 12) + 12) % 12];
 
-type ChordKind = { id: string; label: string; suffix: string; intervals: number[]; family: "triad" | "tetrad" };
+type ChordKind = { id: string; label: string; suffix: string; intervals: number[]; family: "triad" | "tetrad" | "scale" };
 
 const TRIADS: ChordKind[] = [
   { id: "maj", label: "Maior", suffix: "", intervals: [0, 4, 7], family: "triad" },
@@ -92,6 +92,13 @@ const TETRADS: ChordKind[] = [
   { id: "m7b5", label: "Meio-diminuto", suffix: "m7b5", intervals: [0, 3, 6, 10], family: "tetrad" },
   { id: "dim7", label: "Diminuto 7", suffix: "°7", intervals: [0, 3, 6, 9], family: "tetrad" },
   { id: "mMaj7", label: "Menor Maior 7", suffix: "mMaj7", intervals: [0, 3, 7, 11], family: "tetrad" },
+];
+
+const SCALES: ChordKind[] = [
+  { id: "maj_scale", label: "Maior", suffix: " (Escala)", intervals: [0, 2, 4, 5, 7, 9, 11, 12], family: "scale" },
+  { id: "min_scale", label: "Menor Natural", suffix: "m (Escala)", intervals: [0, 2, 3, 5, 7, 8, 10, 12], family: "scale" },
+  { id: "min_mel_scale", label: "Menor Melódica", suffix: "m (Melódica)", intervals: [0, 2, 3, 5, 7, 9, 11, 12], family: "scale" },
+  { id: "min_harm_scale", label: "Menor Harmônica", suffix: "m (Harmônica)", intervals: [0, 2, 3, 5, 7, 8, 11, 12], family: "scale" },
 ];
 
 const ROOTS = ["C", "D", "E", "F", "G", "A", "B"];
@@ -377,14 +384,14 @@ function ProfessorPage() {
           <NoteListener notes={instrument.startingNotes} />
         </section>
 
-        {/* Construção dos acordes / Sequências Melódicas */}
+        {/* Construção dos acordes / Escala Completa / Sequências Melódicas */}
         <section className="mb-5 rounded-xl border border-border bg-card p-4">
           <h2 className="mb-1 font-display text-lg font-semibold">
-            {isMelodic ? "2. Sequências e Arpejos" : "2. Construção de acordes"}
+            {isMelodic ? "2. Escala e Arpejos" : "2. Construção de acordes"}
           </h2>
           <p className="mb-3 text-xs text-muted-foreground">
             {isMelodic 
-              ? "Para instrumentos melódicos, praticamos as notas de uma harmonia uma por vez. O diagrama mostra a posição de cada nota no seu instrumento."
+              ? "Para instrumentos melódicos, praticamos a escala completa e os arpejos. O diagrama mostra a posição de cada nota no seu instrumento."
               : "Escolha a nota fundamental e o tipo do acorde. O diagrama mostra onde cada nota fica no seu instrumento."}
           </p>
 
@@ -403,6 +410,26 @@ function ProfessorPage() {
               ))}
             </div>
           </div>
+
+          {isMelodic && (
+            <div className="mb-3">
+              <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Escalas Completas</div>
+              <div className="flex flex-wrap gap-1.5">
+                {SCALES.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => setChord(c)}
+                    className={cn(
+                      "rounded-md border px-3 py-1.5 text-xs font-medium transition-all",
+                      c.id === chord.id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background hover:bg-secondary",
+                    )}
+                  >
+                    {root}{c.suffix}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="mb-3">
             <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tríades (3 notas)</div>
@@ -472,11 +499,11 @@ function ProfessorPage() {
         {/* Professor IA — escuta e corrige */}
         <section className="rounded-xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 to-transparent p-4">
           <h2 className="mb-1 flex items-center gap-2 font-display text-lg font-semibold">
-            <Mic className="h-5 w-5 text-primary" /> 3. Professor IA — ouça, toque e receba correção
+            <Mic className="h-5 w-5 text-primary" /> 3. Professor IA — Escala e Correção
           </h2>
           <p className="mb-3 text-xs text-muted-foreground">
             {isMelodic
-              ? `Toque as notas da sequência de ${root}${chord.suffix} uma por uma. O Professor confere sua afinação e precisão.`
+              ? `Toque a escala completa de ${root}${chord.suffix}. O Professor confere sua afinação e precisão nota a nota.`
               : `Toque as notas do acorde ${root}${chord.suffix} uma por uma. O Professor marca cada nota conforme você acerta.`}
           </p>
           <ChordListener chord={chord} root={root} instrument={instrumentId} />
