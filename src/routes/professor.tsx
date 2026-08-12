@@ -372,17 +372,9 @@ async function playMelodySequence(pcs: number[], root: string, instrument: Instr
 
     let prevPc = -1;
     let oct = octBase;
-      
-      if (isMelodic) {
-        sampler.triggerRelease(now);
-      }
-      
-      sampler.triggerAttackRelease(noteName, durationMs / 1000, now + i * 0.4);
-    });
-  } catch (e) { console.error("playMelodySequence", e); }
-}
+    
     // Para instrumentos melódicos, garantimos que cada nota pare antes da próxima
-    const isMelodic = instrument === "sax" || instrument === "violino" || instrument === "flauta" || instrument === "baixo";
+    const isMelodic = instrument === "sax" || instrument === "violino" || instrument === "flauta" || instrument === "baixo" || instrument === "sanfona";
 
     pcs.forEach((semi, i) => {
       const pc = (rootPc + semi) % 12;
@@ -394,10 +386,7 @@ async function playMelodySequence(pcs: number[], root: string, instrument: Instr
       
       if (sampler) {
         if (isMelodic) {
-          // Agenda o corte da nota anterior no momento em que a nova começa
           sampler.triggerAttackRelease(noteName, durationMs / 1000, startTime);
-          // O Tone.Sampler.triggerAttackRelease com tempo agendado já cuida da duração,
-          // mas para instrumentos monofônicos reais, garantir que não sobreponha:
           if (i > 0) {
             sampler.triggerRelease(now + (i - 0.05) * 0.5);
           }
