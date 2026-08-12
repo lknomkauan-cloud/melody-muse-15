@@ -348,15 +348,19 @@ function ProfessorPage() {
           <NoteListener notes={instrument.startingNotes} />
         </section>
 
-        {/* Construção dos acordes */}
+        {/* Construção dos acordes / Sequências Melódicas */}
         <section className="mb-5 rounded-xl border border-border bg-card p-4">
-          <h2 className="mb-1 font-display text-lg font-semibold">2. Construção de acordes</h2>
+          <h2 className="mb-1 font-display text-lg font-semibold">
+            {isMelodic ? "2. Sequências e Arpejos" : "2. Construção de acordes"}
+          </h2>
           <p className="mb-3 text-xs text-muted-foreground">
-            Escolha a nota fundamental e o tipo do acorde. O diagrama mostra onde cada nota fica no seu instrumento.
+            {isMelodic 
+              ? "Para instrumentos melódicos, praticamos as notas de uma harmonia uma por vez. O diagrama mostra a posição de cada nota no seu instrumento."
+              : "Escolha a nota fundamental e o tipo do acorde. O diagrama mostra onde cada nota fica no seu instrumento."}
           </p>
 
           <div className="mb-3">
-            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Fundamental</div>
+            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Fundamental / Tom</div>
             <div className="flex flex-wrap gap-1.5">
               {ROOTS.map((r) => (
                 <button
@@ -410,7 +414,7 @@ function ProfessorPage() {
           <div className="rounded-lg border border-primary/30 bg-background/40 p-3">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <div>
-                <span className="text-xs text-muted-foreground">Acorde selecionado</span>
+                <span className="text-xs text-muted-foreground">{isMelodic ? "Sequência selecionada" : "Acorde selecionado"}</span>
                 <div className="font-display text-2xl font-bold text-primary">
                   {root}{chord.suffix} <span className="text-sm font-normal text-muted-foreground">({chord.label})</span>
                 </div>
@@ -423,10 +427,10 @@ function ProfessorPage() {
                 </div>
               </div>
               <button
-                onClick={() => playChord(chord.intervals, root, instrumentId)}
+                onClick={() => isMelodic ? playMelodySequence(chord.intervals, root, instrumentId) : playChord(chord.intervals, root, instrumentId)}
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
               >
-                <Volume2 className="h-4 w-4" /> Ouvir o acorde
+                <Volume2 className="h-4 w-4" /> {isMelodic ? "Ouvir sequência" : "Ouvir o acorde"}
               </button>
             </div>
 
@@ -442,7 +446,9 @@ function ProfessorPage() {
             <Mic className="h-5 w-5 text-primary" /> 3. Professor IA — ouça, toque e receba correção
           </h2>
           <p className="mb-3 text-xs text-muted-foreground">
-            Toque as notas do acorde <span className="font-semibold text-foreground">{root}{chord.suffix}</span> uma por uma. O Professor marca cada nota conforme você acerta e mostra a direção certa quando erra.
+            {isMelodic
+              ? `Toque as notas da sequência de ${root}${chord.suffix} uma por uma. O Professor confere sua afinação e precisão.`
+              : `Toque as notas do acorde ${root}${chord.suffix} uma por uma. O Professor marca cada nota conforme você acerta.`}
           </p>
           <ChordListener chord={chord} root={root} instrument={instrumentId} />
         </section>
