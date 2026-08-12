@@ -47,8 +47,17 @@ const baseSections: Section[] = [
         body: "Toda nota musical possui quatro características fundamentais que definem como a ouvimos.",
         bullets: [
           "Altura (frequência): grave ou agudo — medida em Hertz (Hz).",
-          "Duração: quanto tempo a nota soa.",
-          "Timbre: a cor do som — o que diferencia um violino de uma sanfona.",
+          "Duração: quanto tempo a nota soa (semibreve, mínima, semínima, colcheia…).",
+          "Intensidade: o volume — do pianíssimo (pp) ao fortíssimo (ff).",
+          "Timbre: a cor do som — o que diferencia um violino de uma flauta tocando a mesma nota.",
+        ],
+      },
+      {
+        heading: "Notas e cifras",
+        body: "Usamos 12 notas no sistema temperado: 7 naturais (C D E F G A B) e 5 alteradas por sustenido (#) ou bemol (b).",
+        bullets: [
+          "Semitom: a menor distância (de Mi para Fá, ou de Dó para Dó#).",
+          "Tom: dois semitons (Dó → Ré).",
         ],
       },
     ],
@@ -57,46 +66,74 @@ const baseSections: Section[] = [
     id: "intervalos",
     title: "2. Intervalos",
     icon: Target,
-    intro: "Intervalo é a distância entre duas notas.",
+    intro: "Intervalo é a distância entre duas notas. É a base de toda escala, acorde e melodia.",
     blocks: [
       {
         heading: "Classificação",
-        body: "Cada intervalo tem um número (2ª, 3ª...) e uma qualidade (maior, menor...).",
+        body: "Cada intervalo tem um número (2ª, 3ª, 4ª…) e uma qualidade (justo, maior, menor, aumentado, diminuto).",
       },
     ],
   },
   {
-    id: "escalas",
-    title: "3. Escalas e Modos",
-    icon: Waves,
-    intro: "A base da melodia e improvisação.",
+    id: "modos",
+    title: "3. Modos Gregos",
+    icon: GitBranch,
+    intro: "Cada modo é a escala maior começando de um grau diferente.",
     blocks: [
       {
-        heading: "Escala Maior",
-        body: "T-T-S-T-T-T-S. A base do sistema tonal.",
+        heading: "Os 7 modos",
+        body: "Jônio, Dórico, Frígio, Lídio, Mixolídio, Eólio e Lócrio.",
+      },
+    ],
+  },
+  {
+    id: "acordes",
+    title: "4. Harmonia: Tríades e Tétrades",
+    icon: Layers,
+    intro: "A base da harmonia.",
+    blocks: [
+      {
+        heading: "Tríades",
+        body: "Acordes de 3 notas: Maior, Menor, Diminuta e Aumentada.",
+      },
+      {
+        heading: "Tétrades",
+        body: "Acordes de 4 notas (com sétima).",
+      },
+    ],
+  },
+  {
+    id: "extra",
+    title: "5. Empréstimo Modal e Escalas Menores",
+    icon: Sparkles,
+    intro: "Conceitos avançados para colorir sua música.",
+    blocks: [
+      {
+        heading: "Menores",
+        body: "Natural, Harmônica e Melódica.",
       },
     ],
   },
 ];
 
-const instrumentApplied: Record<string, { name: string; icon: typeof Guitar; tagline: string; applied: string }> = {
+const instrumentApplied: Record<string, { name: string; icon: any; tagline: string; applied: string }> = {
   violao: {
     name: "Violão / Guitarra",
     icon: Guitar,
-    tagline: "Cordas, casas e desenhos.",
-    applied: "Use o sistema CAGED para visualizar acordes e escalas.",
+    tagline: "Cordas, casas e desenhos. Visualize o braço como um mapa de intervalos.",
+    applied: "Use o sistema CAGED para visualizar acordes e escalas em todo o braço.",
   },
   piano: {
     name: "Piano / Teclado",
     icon: Piano,
-    tagline: "Tudo é visível no teclado.",
-    applied: "Dedilhado correto é a chave para a velocidade.",
+    tagline: "Tudo é visível. Use isso a seu favor para enxergar harmonia.",
+    applied: "Dedilhado correto é essencial. Pratique escalas com as duas mãos.",
   },
   sanfona: {
     name: "Sanfona / Acordeon",
     icon: Piano,
-    tagline: "O pulmão do instrumento.",
-    applied: "Coordenação entre fole, teclado e baixos. O fole é a sua expressão.",
+    tagline: "O pulmão do instrumento. Coordenação entre fole, teclado e baixos.",
+    applied: "A sanfona exige coordenação tripla. O fole controla a dinâmica e o sustain; o teclado faz a melodia; e os baixos cuidam do ritmo.",
   },
 };
 
@@ -104,22 +141,28 @@ export const Route = createFileRoute("/estudar/$instrumento")({
   loader: ({ params }) => {
     const data = instrumentApplied[params.instrumento as keyof typeof instrumentApplied];
     if (!data) throw new Error("Instrumento não encontrado");
-    return { ...data, sections: baseSections };
+    return { ...data, sections: baseSections, slug: params.instrumento };
   },
   component: ApostilaPage,
 });
 
 function ApostilaPage() {
   const data = Route.useLoaderData();
-  const { isAllowed, instrument } = useContentAccess();
+  const { locked, ready } = useContentAccess(data.slug);
   const Icon = data.icon;
 
-  if (!isAllowed(instrument as any) && instrument !== "all") {
+  if (!ready) return <div className="p-8 text-center">Carregando...</div>;
+
+  if (locked) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold">Conteúdo Bloqueado</h2>
-          <p>Seu professor ainda não liberou este material para você.</p>
+        <div className="text-center max-w-md">
+          <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+            <Layers className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h2 className="text-2xl font-bold">Conteúdo Restrito</h2>
+          <p className="mt-2 text-muted-foreground">Seu professor ainda não liberou este material de estudo para você. Continue praticando o que já foi passado!</p>
+          <Link to="/estudar" className="mt-6 inline-block text-primary hover:underline">Voltar para a biblioteca</Link>
         </div>
       </div>
     );
@@ -145,7 +188,7 @@ function ApostilaPage() {
           <p className="text-lg text-muted-foreground">{data.tagline}</p>
           <div className="mt-6 rounded-2xl bg-primary/5 p-6 text-left border border-primary/10">
             <h3 className="mb-2 font-bold flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" /> Dicas do Mestre
+              <Sparkles className="h-4 w-4 text-primary" /> Dicas Aplicadas
             </h3>
             <p className="text-sm leading-relaxed">{data.applied}</p>
           </div>
@@ -185,7 +228,8 @@ function ApostilaPage() {
         </div>
 
         <div className="mt-12 border-t pt-12">
-          <HarmonicField />
+          <h2 className="mb-6 font-display text-2xl font-bold">Campo Harmônico</h2>
+          <HarmonicField instrument={data.slug as any} />
         </div>
       </main>
     </div>
