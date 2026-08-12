@@ -567,8 +567,8 @@ export const Route = createFileRoute("/estudar/$instrumento")({
 });
 
 function ApostilaPage() {
-  const { instrumento } = Route.useLoaderData();
-  const data = instrumentApplied[instrumento];
+  const { instrumento } = Route.useLoaderData() as { instrumento: string };
+  const data = instrumentApplied[instrumento as keyof typeof instrumentApplied];
   const Icon = data.icon;
   const { locked } = useContentAccess(instrumento);
 
