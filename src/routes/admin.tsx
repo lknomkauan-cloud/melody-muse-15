@@ -326,10 +326,14 @@ function UsersManager() {
   );
 }
 
+import { useServerFn } from "@tanstack/react-start";
+import { sendPushNotification } from "@/lib/notifications.functions";
+
 function NotificationsManager() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
+  const sendPush = useServerFn(sendPushNotification);
 
   const handleSend = async () => {
     if (!title.trim() || !body.trim()) {
@@ -338,19 +342,24 @@ function NotificationsManager() {
 
     setSending(true);
     try {
-      // In a real scenario, this would call the server function
-      // For now, we simulate the success
       toast.info("Enviando notificações...");
       
-      // Simulate API call
-      setTimeout(() => {
+      const result = await sendPush({
+        title: title.trim(),
+        body: body.trim(),
+      });
+
+      if (result.success) {
         toast.success("Notificações enviadas com sucesso!");
         setTitle("");
         setBody("");
-        setSending(false);
-      }, 1500);
+      } else {
+        toast.error(`Falha no envio: ${result.error}`);
+      }
     } catch (error) {
-      toast.error("Erro ao enviar notificações");
+      toast.error("Erro ao conectar com o servidor");
+      console.error(error);
+    } finally {
       setSending(false);
     }
   };
