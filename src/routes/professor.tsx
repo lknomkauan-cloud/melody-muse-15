@@ -372,7 +372,15 @@ async function playMelodySequence(pcs: number[], root: string, instrument: Instr
 
     let prevPc = -1;
     let oct = octBase;
-    
+      
+      if (isMelodic) {
+        sampler.triggerRelease(now);
+      }
+      
+      sampler.triggerAttackRelease(noteName, durationMs / 1000, now + i * 0.4);
+    });
+  } catch (e) { console.error("playMelodySequence", e); }
+}
     // Para instrumentos melódicos, garantimos que cada nota pare antes da próxima
     const isMelodic = instrument === "sax" || instrument === "violino" || instrument === "flauta" || instrument === "baixo";
 
