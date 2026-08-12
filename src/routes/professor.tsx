@@ -318,10 +318,20 @@ async function playMelodySequence(pcs: number[], root: string, instrument: Instr
 function ProfessorPage() {
   const [instrumentId, setInstrumentId] = useState<InstrumentId>("violao");
   const [root, setRoot] = useState<string>("C");
-  const [chord, setChord] = useState<ChordKind>(TRIADS[0]);
+  const [chord, setChord] = useState<ChordKind>(SCALES[0]);
+
+  // Reset chord to first scale if switching to melodic instrument, or back to triad if harmonic
+  useEffect(() => {
+    const isMelodic = instrumentId === "sax" || instrumentId === "violino" || instrumentId === "flauta" || instrumentId === "baixo" || instrumentId === "bateria";
+    if (isMelodic) {
+      setChord(SCALES[0]);
+    } else {
+      setChord(TRIADS[0]);
+    }
+  }, [instrumentId]);
 
   const instrument = INSTRUMENTS.find((i) => i.id === instrumentId)!;
-  const isMelodic = instrumentId === "sax" || instrumentId === "violino" || instrumentId === "flauta" || instrumentId === "baixo";
+  const isMelodic = instrumentId === "sax" || instrumentId === "violino" || instrumentId === "flauta" || instrumentId === "baixo" || instrumentId === "bateria";
 
   const chordPcs = useMemo(() => new Set(chord.intervals.map((s) => (pcOf(root) + s + 120) % 12)), [chord, root]);
   const chordNoteNames = useMemo(() => chord.intervals.map((s) => nameOfPc(pcOf(root) + s)), [chord, root]);
@@ -431,41 +441,45 @@ function ProfessorPage() {
             </div>
           )}
 
-          <div className="mb-3">
-            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tríades (3 notas)</div>
-            <div className="flex flex-wrap gap-1.5">
-              {TRIADS.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => setChord(c)}
-                  className={cn(
-                    "rounded-md border px-3 py-1.5 text-xs font-medium transition-all",
-                    c.id === chord.id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background hover:bg-secondary",
-                  )}
-                >
-                  {root}{c.suffix} · {c.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          {!isMelodic && (
+            <>
+              <div className="mb-3">
+                <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tríades (3 notas)</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {TRIADS.map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => setChord(c)}
+                      className={cn(
+                        "rounded-md border px-3 py-1.5 text-xs font-medium transition-all",
+                        c.id === chord.id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background hover:bg-secondary",
+                      )}
+                    >
+                      {root}{c.suffix} · {c.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-          <div className="mb-3">
-            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tétrades (4 notas)</div>
-            <div className="flex flex-wrap gap-1.5">
-              {TETRADS.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => setChord(c)}
-                  className={cn(
-                    "rounded-md border px-3 py-1.5 text-xs font-medium transition-all",
-                    c.id === chord.id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background hover:bg-secondary",
-                  )}
-                >
-                  {root}{c.suffix} · {c.label}
-                </button>
-              ))}
-            </div>
-          </div>
+              <div className="mb-3">
+                <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tétrades (4 notas)</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {TETRADS.map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => setChord(c)}
+                      className={cn(
+                        "rounded-md border px-3 py-1.5 text-xs font-medium transition-all",
+                        c.id === chord.id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background hover:bg-secondary",
+                      )}
+                    >
+                      {root}{c.suffix} · {c.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
 
           <div className="rounded-lg border border-primary/30 bg-background/40 p-3">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
