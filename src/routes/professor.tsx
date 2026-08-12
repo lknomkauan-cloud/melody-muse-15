@@ -305,7 +305,14 @@ async function playTone(name: string, octave = 4, durationMs = 900, instrument: 
     await Tone.start();
     const sampler = await getSampler(instrument);
     const noteName = `${name}${octave}`;
+    
+    // Para instrumentos melódicos, garantimos que não haja sobreposição de notas
+    const isMelodic = instrument === "sax" || instrument === "violino" || instrument === "flauta" || instrument === "baixo";
+    
     if (sampler) {
+      if (isMelodic) {
+        sampler.releaseAll();
+      }
       sampler.triggerAttackRelease(noteName, durationMs / 1000);
       return;
     }
@@ -357,17 +364,32 @@ async function playMelodySequence(pcs: number[], root: string, instrument: Instr
     let prevPc = -1;
     let oct = octBase;
     
+    // Para instrumentos melódicos, garantimos que cada nota pare antes da próxima
+    const isMelodic = instrument === "sax" || instrument === "violino" || instrument === "flauta" || instrument === "baixo";
+
     pcs.forEach((semi, i) => {
       const pc = (rootPc + semi) % 12;
       if (prevPc !== -1 && pc <= prevPc) oct++;
       prevPc = pc;
       const noteName = `${nameOfPc(pc)}${oct}`;
       
+      const startTime = now + i * 0.5;
+      
       if (sampler) {
-        sampler.triggerAttackRelease(noteName, durationMs / 1000, now + i * 0.5);
+        if (isMelodic) {
+          // Agenda o corte da nota anterior no momento em que a nova começa
+          sampler.triggerAttackRelease(noteName, durationMs / 1000, startTime);
+          // O Tone.Sampler.triggerAttackRelease com tempo agendado já cuida da duração,
+          // mas para instrumentos monofônicos reais, garantir que não sobreponha:
+          if (i > 0) {
+            sampler.triggerRelease(now + (i - 0.05) * 0.5);
+          }
+        } else {
+          sampler.triggerAttackRelease(noteName, durationMs / 1000, startTime);
+        }
       } else {
         const synth = new Tone.Synth({ oscillator: { type: "triangle" } }).toDestination();
-        synth.triggerAttackRelease(noteName, durationMs / 1000, now + i * 0.5);
+        synth.triggerAttackRelease(noteName, durationMs / 1000, startTime);
         setTimeout(() => synth.dispose(), (i * 500) + durationMs + 400);
       }
     });
