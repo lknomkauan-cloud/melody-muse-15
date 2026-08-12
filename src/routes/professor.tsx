@@ -285,6 +285,8 @@ function ProfessorPage() {
   const [chord, setChord] = useState<ChordKind>(TRIADS[0]);
 
   const instrument = INSTRUMENTS.find((i) => i.id === instrumentId)!;
+  const isMelodic = instrumentId === "sax" || instrumentId === "violino" || instrumentId === "flauta" || instrumentId === "baixo";
+
   const chordPcs = useMemo(() => new Set(chord.intervals.map((s) => (pcOf(root) + s + 120) % 12)), [chord, root]);
   const chordNoteNames = useMemo(() => chord.intervals.map((s) => nameOfPc(pcOf(root) + s)), [chord, root]);
 
@@ -298,7 +300,7 @@ function ProfessorPage() {
           <div>
             <h1 className="font-display text-3xl font-bold">Professor Iniciante</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Aula do zero em todos os instrumentos: notas básicas, tríades e tétrades — com um professor de IA que ouve seu microfone e corrige em tempo real.
+              Aula do zero em todos os instrumentos: notas básicas e fundamentos musicais com correção por IA em tempo real.
             </p>
           </div>
         </header>
