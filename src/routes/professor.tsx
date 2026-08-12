@@ -99,13 +99,13 @@ const ROOTS = ["C", "D", "E", "F", "G", "A", "B"];
 const INSTRUMENTS: { id: InstrumentId; label: string; beginnerTip: string; startingNotes: string[] }[] = [
   { id: "violao", label: "Violão", beginnerTip: "Comece com acordes abertos (dedos livres). Foque em pressionar firme e perto do traste.", startingNotes: ["E", "A", "D", "G", "B", "E"] },
   { id: "guitarra", label: "Guitarra", beginnerTip: "Postura relaxada, palheta com pouca força. Treine trocas de acorde antes de solar.", startingNotes: ["E", "A", "D", "G", "B", "E"] },
-  { id: "baixo", label: "Baixo", beginnerTip: "Alterne indicador e médio. Toque uma nota por tempo com o metrônomo.", startingNotes: ["E", "A", "D", "G"] },
+  { id: "baixo", label: "Baixo", beginnerTip: "Alterne indicador e médio. Treine escalas cromáticas para precisão rítmica.", startingNotes: ["E", "A", "D", "G"] },
   { id: "piano", label: "Piano", beginnerTip: "Postura das mãos redondas, pulsos soltos. Comece pela dedilhação 1-2-3-1-2-3-4-5 em C.", startingNotes: ["C", "D", "E", "F", "G", "A", "B"] },
   { id: "teclado", label: "Teclado", beginnerTip: "Explore os timbres, mas estude sempre com som de piano acústico primeiro.", startingNotes: ["C", "D", "E", "F", "G", "A", "B"] },
-  { id: "violino", label: "Violino", beginnerTip: "Cordas soltas primeiro. Arco reto, próximo do cavalete, peso do braço no arco.", startingNotes: ["G", "D", "A", "E"] },
-  { id: "sax", label: "Saxofone", beginnerTip: "Embocadura firme mas relaxada. Comece por notas longas no registro médio.", startingNotes: ["D", "G", "C", "F"] },
+  { id: "violino", label: "Violino", beginnerTip: "Segure o arco corretamente. Treine notas longas, uma de cada vez, mantendo o som limpo.", startingNotes: ["G", "D", "A", "E"] },
+  { id: "sax", label: "Saxofone", beginnerTip: "Foque na embocadura e na respiração diafragmática. Toque notas longas com estabilidade.", startingNotes: ["C", "D", "E", "F", "G"] },
   { id: "banjo", label: "Banjo", beginnerTip: "Use dedeiras. Comece com o rolo alternado (T-I-M-T-I-M).", startingNotes: ["D", "G", "B", "D"] },
-  { id: "flauta", label: "Flauta Doce", beginnerTip: "Sopro fraco e constante. Feche bem os buracos com a polpa dos dedos.", startingNotes: ["C", "D", "E", "F", "G", "A", "B"] },
+  { id: "flauta", label: "Flauta Doce", beginnerTip: "Sopro leve e constante para evitar ruídos. Cubra os furos totalmente com as polpas dos dedos.", startingNotes: ["C", "D", "E", "F", "G"] },
 ];
 
 /* ---------- Detecção de altura (autocorrelação simples) ---------- */
