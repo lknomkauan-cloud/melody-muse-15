@@ -276,6 +276,35 @@ async function playChord(pcs: number[], root: string, instrument: InstrumentId =
   } catch (e) { console.error("playChord", e); }
 }
 
+async function playMelodySequence(pcs: number[], root: string, instrument: InstrumentId = "piano", durationMs = 600) {
+  try {
+    await Tone.start();
+    const sampler = await getSampler(instrument);
+    const octBase = INSTRUMENT_OCTAVE[instrument] ?? 4;
+    const rootPc = pcOf(root);
+    const now = Tone.now();
+
+    let prevPc = -1;
+    let oct = octBase;
+    
+    pcs.forEach((semi, i) => {
+      const pc = (rootPc + semi) % 12;
+      if (prevPc !== -1 && pc <= prevPc) oct++;
+      prevPc = pc;
+      const noteName = `${nameOfPc(pc)}${oct}`;
+      
+      if (sampler) {
+        sampler.triggerAttackRelease(noteName, durationMs / 1000, now + i * 0.5);
+      } else {
+        const synth = new Tone.Synth({ oscillator: { type: "triangle" } }).toDestination();
+        synth.triggerAttackRelease(noteName, durationMs / 1000, now + i * 0.5);
+        setTimeout(() => synth.dispose(), (i * 500) + durationMs + 400);
+      }
+    });
+  } catch (e) { console.error("playMelodySequence", e); }
+}
+
+
 
 /* ---------- Página ---------- */
 
