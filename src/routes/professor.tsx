@@ -103,16 +103,79 @@ const SCALES: ChordKind[] = [
 
 const ROOTS = ["C", "D", "E", "F", "G", "A", "B"];
 
-const INSTRUMENTS: { id: InstrumentId; label: string; beginnerTip: string; startingNotes: string[] }[] = [
-  { id: "violao", label: "Violão", beginnerTip: "Comece com acordes abertos (dedos livres). Foque em pressionar firme e perto do traste.", startingNotes: ["E", "A", "D", "G", "B", "E"] },
-  { id: "guitarra", label: "Guitarra", beginnerTip: "Postura relaxada, palheta com pouca força. Treine trocas de acorde antes de solar.", startingNotes: ["E", "A", "D", "G", "B", "E"] },
-  { id: "baixo", label: "Baixo", beginnerTip: "Alterne indicador e médio. Treine escalas cromáticas para precisão rítmica.", startingNotes: ["E", "A", "D", "G"] },
-  { id: "piano", label: "Piano", beginnerTip: "Postura das mãos redondas, pulsos soltos. Comece pela dedilhação 1-2-3-1-2-3-4-5 em C.", startingNotes: ["C", "D", "E", "F", "G", "A", "B"] },
-  { id: "teclado", label: "Teclado", beginnerTip: "Explore os timbres, mas estude sempre com som de piano acústico primeiro.", startingNotes: ["C", "D", "E", "F", "G", "A", "B"] },
-  { id: "violino", label: "Violino", beginnerTip: "Segure o arco corretamente. Treine notas longas, uma de cada vez, mantendo o som limpo.", startingNotes: ["G", "D", "A", "E"] },
-  { id: "sax", label: "Saxofone", beginnerTip: "Foque na embocadura e na respiração diafragmática. Toque notas longas com estabilidade.", startingNotes: ["C", "D", "E", "F", "G"] },
-  { id: "banjo", label: "Banjo", beginnerTip: "Use dedeiras. Comece com o rolo alternado (T-I-M-T-I-M).", startingNotes: ["D", "G", "B", "D"] },
-  { id: "flauta", label: "Flauta Doce", beginnerTip: "Sopro leve e constante para evitar ruídos. Cubra os furos totalmente com as polpas dos dedos.", startingNotes: ["C", "D", "E", "F", "G"] },
+const INSTRUMENTS: { id: InstrumentId; label: string; beginnerTip: string; startingNotes: string[]; curio: string; challenge: string }[] = [
+  { 
+    id: "violao", 
+    label: "Violão", 
+    beginnerTip: "Comece com acordes abertos (dedos livres). Foque em pressionar firme e perto do traste.", 
+    startingNotes: ["E", "A", "D", "G", "B", "E"],
+    curio: "O violão moderno evoluiu da vihuela e do alaúde, ganhando sua forma atual na Espanha no século XIX.",
+    challenge: "Tente tocar o acorde de C maior e garantir que todas as cordas soem limpas, sem 'trastejar'."
+  },
+  { 
+    id: "guitarra", 
+    label: "Guitarra", 
+    beginnerTip: "Postura relaxada, palheta com pouca força. Treine trocas de acorde antes de solar.", 
+    startingNotes: ["E", "A", "D", "G", "B", "E"],
+    curio: "A primeira guitarra elétrica de corpo sólido comercialmente bem-sucedida foi a Fender Telecaster, lançada em 1950.",
+    challenge: "Pratique um 'bend' de meio tom na nota G e tente manter a afinação estável."
+  },
+  { 
+    id: "baixo", 
+    label: "Baixo", 
+    beginnerTip: "Alterne indicador e médio. Treine escalas cromáticas para precisão rítmica.", 
+    startingNotes: ["E", "A", "D", "G"],
+    curio: "Antes do baixo elétrico, os músicos usavam o contrabaixo acústico, que era enorme e difícil de transportar em turnês.",
+    challenge: "Mantenha um ritmo de colcheias constante a 80 BPM usando apenas a nota E solta."
+  },
+  { 
+    id: "piano", 
+    label: "Piano", 
+    beginnerTip: "Postura das mãos redondas, pulsos soltos. Comece pela dedilhação 1-2-3-1-2-3-4-5 em C.", 
+    startingNotes: ["C", "D", "E", "F", "G", "A", "B"],
+    curio: "O nome original era 'pianoforte' porque, ao contrário do cravo, ele podia tocar tanto sons suaves quanto fortes.",
+    challenge: "Toque a escala de C maior subindo com a mão direita e descendo com a esquerda simultaneamente."
+  },
+  { 
+    id: "teclado", 
+    label: "Teclado", 
+    beginnerTip: "Explore os timbres, mas estude sempre com som de piano acústico primeiro.", 
+    startingNotes: ["C", "D", "E", "F", "G", "A", "B"],
+    curio: "Sintetizadores revolucionaram a música nos anos 70 e 80, permitindo criar sons que não existem na natureza.",
+    challenge: "Encontre um timbre de 'Pad' e toque uma tríade de C maior mantendo as notas por 4 tempos."
+  },
+  { 
+    id: "violino", 
+    label: "Violino", 
+    beginnerTip: "Segure o arco corretamente. Treine notas longas, uma de cada vez, mantendo o som limpo.", 
+    startingNotes: ["G", "D", "A", "E"],
+    curio: "As cordas do violino eram feitas originalmente de tripas de carneiro. Hoje, a maioria usa metal ou materiais sintéticos.",
+    challenge: "Tente manter o arco perfeitamente perpendicular às cordas durante uma nota longa de 4 segundos."
+  },
+  { 
+    id: "sax", 
+    label: "Saxofone", 
+    beginnerTip: "Foque na embocadura e na respiração diafragmática. Toque notas longas com estabilidade.", 
+    startingNotes: ["C", "D", "E", "F", "G"],
+    curio: "O saxofone foi inventado por Adolphe Sax em 1840, buscando um instrumento que unisse a força dos metais e a agilidade das madeiras.",
+    challenge: "Toque a nota G e tente mantê-la estável sem oscilar a afinação por 5 segundos."
+  },
+  { 
+    id: "banjo", 
+    label: "Banjo", 
+    beginnerTip: "Use dedeiras. Comece com o rolo alternado (T-I-M-T-I-M).", 
+    startingNotes: ["D", "G", "B", "D"],
+    curio: "O banjo tem raízes africanas e foi levado para as Américas por pessoas escravizadas antes de se tornar central no Bluegrass.",
+    challenge: "Pratique o 'forward roll' (polegar-indicador-médio) repetidamente buscando clareza em cada nota."
+  },
+  { 
+    id: "flauta", 
+    label: "Flauta Doce", 
+    beginnerTip: "Sopro leve e constante para evitar ruídos. Cubra os furos totalmente com as polpas dos dedos.", 
+    startingNotes: ["C", "D", "E", "F", "G"],
+    curio: "A flauta doce era um dos instrumentos mais populares na era Barroca, sendo usada por compositores como Bach e Vivaldi.",
+    challenge: "Toque a nota C grave soprando o mais suavemente possível para que ela não 'suba' de oitava."
+  },
 ];
 
 /* ---------- Detecção de altura (autocorrelação simples) ---------- */
