@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { GraduationCap, Mic, Square, Volume2, RotateCcw, CheckCircle2, Circle } from "lucide-react";
+import { GraduationCap, Mic, Square, Volume2, RotateCcw, CheckCircle2, Circle, Info, Lightbulb, Music } from "lucide-react";
 import * as Tone from "tone";
 import { InstrumentDiagram, type InstrumentId } from "@/components/InstrumentDiagram";
 import { cn } from "@/lib/utils";
@@ -103,16 +103,79 @@ const SCALES: ChordKind[] = [
 
 const ROOTS = ["C", "D", "E", "F", "G", "A", "B"];
 
-const INSTRUMENTS: { id: InstrumentId; label: string; beginnerTip: string; startingNotes: string[] }[] = [
-  { id: "violao", label: "Violão", beginnerTip: "Comece com acordes abertos (dedos livres). Foque em pressionar firme e perto do traste.", startingNotes: ["E", "A", "D", "G", "B", "E"] },
-  { id: "guitarra", label: "Guitarra", beginnerTip: "Postura relaxada, palheta com pouca força. Treine trocas de acorde antes de solar.", startingNotes: ["E", "A", "D", "G", "B", "E"] },
-  { id: "baixo", label: "Baixo", beginnerTip: "Alterne indicador e médio. Treine escalas cromáticas para precisão rítmica.", startingNotes: ["E", "A", "D", "G"] },
-  { id: "piano", label: "Piano", beginnerTip: "Postura das mãos redondas, pulsos soltos. Comece pela dedilhação 1-2-3-1-2-3-4-5 em C.", startingNotes: ["C", "D", "E", "F", "G", "A", "B"] },
-  { id: "teclado", label: "Teclado", beginnerTip: "Explore os timbres, mas estude sempre com som de piano acústico primeiro.", startingNotes: ["C", "D", "E", "F", "G", "A", "B"] },
-  { id: "violino", label: "Violino", beginnerTip: "Segure o arco corretamente. Treine notas longas, uma de cada vez, mantendo o som limpo.", startingNotes: ["G", "D", "A", "E"] },
-  { id: "sax", label: "Saxofone", beginnerTip: "Foque na embocadura e na respiração diafragmática. Toque notas longas com estabilidade.", startingNotes: ["C", "D", "E", "F", "G"] },
-  { id: "banjo", label: "Banjo", beginnerTip: "Use dedeiras. Comece com o rolo alternado (T-I-M-T-I-M).", startingNotes: ["D", "G", "B", "D"] },
-  { id: "flauta", label: "Flauta Doce", beginnerTip: "Sopro leve e constante para evitar ruídos. Cubra os furos totalmente com as polpas dos dedos.", startingNotes: ["C", "D", "E", "F", "G"] },
+const INSTRUMENTS: { id: InstrumentId; label: string; beginnerTip: string; startingNotes: string[]; curio: string; challenge: string }[] = [
+  { 
+    id: "violao", 
+    label: "Violão", 
+    beginnerTip: "Comece com acordes abertos (dedos livres). Foque em pressionar firme e perto do traste.", 
+    startingNotes: ["E", "A", "D", "G", "B", "E"],
+    curio: "O violão moderno evoluiu da vihuela e do alaúde, ganhando sua forma atual na Espanha no século XIX.",
+    challenge: "Tente tocar o acorde de C maior e garantir que todas as cordas soem limpas, sem 'trastejar'."
+  },
+  { 
+    id: "guitarra", 
+    label: "Guitarra", 
+    beginnerTip: "Postura relaxada, palheta com pouca força. Treine trocas de acorde antes de solar.", 
+    startingNotes: ["E", "A", "D", "G", "B", "E"],
+    curio: "A primeira guitarra elétrica de corpo sólido comercialmente bem-sucedida foi a Fender Telecaster, lançada em 1950.",
+    challenge: "Pratique um 'bend' de meio tom na nota G e tente manter a afinação estável."
+  },
+  { 
+    id: "baixo", 
+    label: "Baixo", 
+    beginnerTip: "Alterne indicador e médio. Treine escalas cromáticas para precisão rítmica.", 
+    startingNotes: ["E", "A", "D", "G"],
+    curio: "Antes do baixo elétrico, os músicos usavam o contrabaixo acústico, que era enorme e difícil de transportar em turnês.",
+    challenge: "Mantenha um ritmo de colcheias constante a 80 BPM usando apenas a nota E solta."
+  },
+  { 
+    id: "piano", 
+    label: "Piano", 
+    beginnerTip: "Postura das mãos redondas, pulsos soltos. Comece pela dedilhação 1-2-3-1-2-3-4-5 em C.", 
+    startingNotes: ["C", "D", "E", "F", "G", "A", "B"],
+    curio: "O nome original era 'pianoforte' porque, ao contrário do cravo, ele podia tocar tanto sons suaves quanto fortes.",
+    challenge: "Toque a escala de C maior subindo com a mão direita e descendo com a esquerda simultaneamente."
+  },
+  { 
+    id: "teclado", 
+    label: "Teclado", 
+    beginnerTip: "Explore os timbres, mas estude sempre com som de piano acústico primeiro.", 
+    startingNotes: ["C", "D", "E", "F", "G", "A", "B"],
+    curio: "Sintetizadores revolucionaram a música nos anos 70 e 80, permitindo criar sons que não existem na natureza.",
+    challenge: "Encontre um timbre de 'Pad' e toque uma tríade de C maior mantendo as notas por 4 tempos."
+  },
+  { 
+    id: "violino", 
+    label: "Violino", 
+    beginnerTip: "Segure o arco corretamente. Treine notas longas, uma de cada vez, mantendo o som limpo.", 
+    startingNotes: ["G", "D", "A", "E"],
+    curio: "As cordas do violino eram feitas originalmente de tripas de carneiro. Hoje, a maioria usa metal ou materiais sintéticos.",
+    challenge: "Tente manter o arco perfeitamente perpendicular às cordas durante uma nota longa de 4 segundos."
+  },
+  { 
+    id: "sax", 
+    label: "Saxofone", 
+    beginnerTip: "Foque na embocadura e na respiração diafragmática. Toque notas longas com estabilidade.", 
+    startingNotes: ["C", "D", "E", "F", "G"],
+    curio: "O saxofone foi inventado por Adolphe Sax em 1840, buscando um instrumento que unisse a força dos metais e a agilidade das madeiras.",
+    challenge: "Toque a nota G e tente mantê-la estável sem oscilar a afinação por 5 segundos."
+  },
+  { 
+    id: "banjo", 
+    label: "Banjo", 
+    beginnerTip: "Use dedeiras. Comece com o rolo alternado (T-I-M-T-I-M).", 
+    startingNotes: ["D", "G", "B", "D"],
+    curio: "O banjo tem raízes africanas e foi levado para as Américas por pessoas escravizadas antes de se tornar central no Bluegrass.",
+    challenge: "Pratique o 'forward roll' (polegar-indicador-médio) repetidamente buscando clareza em cada nota."
+  },
+  { 
+    id: "flauta", 
+    label: "Flauta Doce", 
+    beginnerTip: "Sopro leve e constante para evitar ruídos. Cubra os furos totalmente com as polpas dos dedos.", 
+    startingNotes: ["C", "D", "E", "F", "G"],
+    curio: "A flauta doce era um dos instrumentos mais populares na era Barroca, sendo usada por compositores como Bach e Vivaldi.",
+    challenge: "Toque a nota C grave soprando o mais suavemente possível para que ela não 'suba' de oitava."
+  },
 ];
 
 /* ---------- Detecção de altura (autocorrelação simples) ---------- */
@@ -459,7 +522,51 @@ function ProfessorPage() {
                     </button>
                   ))}
                 </div>
-              </div>
+        {/* Seção Complementar: Curiosidades e Desafios */}
+        <section className="mt-8 grid gap-4 sm:grid-cols-2">
+          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-5">
+            <div className="mb-3 flex items-center gap-2 text-blue-500">
+              <Info className="h-5 w-5" />
+              <h3 className="font-display font-semibold">Você sabia?</h3>
+            </div>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {instrument.curio}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-5">
+            <div className="mb-3 flex items-center gap-2 text-amber-500">
+              <Lightbulb className="h-5 w-5" />
+              <h3 className="font-display font-semibold">Desafio do Professor</h3>
+            </div>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {instrument.challenge}
+            </p>
+          </div>
+        </section>
+
+        {/* Guia de Próximos Passos */}
+        <section className="mt-6 rounded-xl border border-border bg-card p-5">
+          <div className="mb-4 flex items-center gap-2 text-primary">
+            <Music className="h-5 w-5" />
+            <h3 className="font-display font-semibold">Próximos Passos Sugeridos</h3>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-lg bg-background/50 p-3 text-center">
+              <div className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Teoria</div>
+              <p className="text-xs">Estude o Campo Harmônico em 'Estudar'</p>
+            </div>
+            <div className="rounded-lg bg-background/50 p-3 text-center">
+              <div className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Técnica</div>
+              <p className="text-xs">Pratique Pentatônicas na aba 'Escalas'</p>
+            </div>
+            <div className="rounded-lg bg-background/50 p-3 text-center">
+              <div className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Ouvido</div>
+              <p className="text-xs">Tente tirar uma música simples de 2 acordes</p>
+            </div>
+          </div>
+        </section>
+      </div>
 
               <div className="mb-3">
                 <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tétrades (4 notas)</div>
@@ -513,12 +620,12 @@ function ProfessorPage() {
         {/* Professor IA — escuta e corrige */}
         <section className="rounded-xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 to-transparent p-4">
           <h2 className="mb-1 flex items-center gap-2 font-display text-lg font-semibold">
-            <Mic className="h-5 w-5 text-primary" /> 3. Professor IA — Escala e Correção
+            <Mic className="h-5 w-5 text-primary" /> 3. Feedback e Análise em Tempo Real
           </h2>
           <p className="mb-3 text-xs text-muted-foreground">
             {isMelodic
-              ? `Toque a escala completa de ${root}${chord.suffix}. O Professor confere sua afinação e precisão nota a nota.`
-              : `Toque as notas do acorde ${root}${chord.suffix} uma por uma. O Professor marca cada nota conforme você acerta.`}
+              ? `Toque as notas da sequência de ${root}${chord.suffix}. O Professor analisa a precisão e estabilidade de cada nota.`
+              : `Toque as notas do acorde ${root}${chord.suffix} individualmente. O Professor valida a execução correta da harmonia.`}
           </p>
           <ChordListener chord={chord} root={root} instrument={instrumentId} />
         </section>
