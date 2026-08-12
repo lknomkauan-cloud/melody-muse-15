@@ -305,7 +305,14 @@ async function playTone(name: string, octave = 4, durationMs = 900, instrument: 
     await Tone.start();
     const sampler = await getSampler(instrument);
     const noteName = `${name}${octave}`;
+    
+    // Para instrumentos melódicos, garantimos que não haja sobreposição de notas
+    const isMelodic = instrument === "sax" || instrument === "violino" || instrument === "flauta" || instrument === "baixo";
+    
     if (sampler) {
+      if (isMelodic) {
+        sampler.releaseAll();
+      }
       sampler.triggerAttackRelease(noteName, durationMs / 1000);
       return;
     }
