@@ -579,7 +579,7 @@ function ProfessorPage() {
           <div className="rounded-lg border border-primary/30 bg-background/40 p-3">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <div>
-                <span className="text-xs text-muted-foreground">{isMelodic ? "Sequência selecionada" : "Acorde selecionado"}</span>
+                <span className="text-xs text-muted-foreground">{isScale ? "Escala selecionada" : "Acorde selecionado"}</span>
                 <div className="font-display text-2xl font-bold text-primary">
                   {root}{chord.suffix} <span className="text-sm font-normal text-muted-foreground">({chord.label})</span>
                 </div>
@@ -592,10 +592,10 @@ function ProfessorPage() {
                 </div>
               </div>
               <button
-                onClick={() => isMelodic ? playMelodySequence(chord.intervals, root, instrumentId) : playChord(chord.intervals, root, instrumentId)}
+                onClick={() => (isScale ? playMelodySequence(chord.intervals, root, instrumentId) : playChord(chord.intervals, root, instrumentId))}
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
               >
-                <Volume2 className="h-4 w-4" /> {isMelodic ? "Ouvir sequência" : "Ouvir o acorde"}
+                <Volume2 className="h-4 w-4" /> {isScale ? "Ouvir escala" : "Ouvir o acorde"}
               </button>
             </div>
 
