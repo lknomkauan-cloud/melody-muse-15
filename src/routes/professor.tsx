@@ -102,7 +102,7 @@ const SCALES: ChordKind[] = [
   { id: "min_harm_scale", label: "Menor Harmônica", suffix: "m (Harmônica)", intervals: [0, 2, 3, 5, 7, 8, 11, 12], family: "scale" },
 ];
 
-const ROOTS = ["C", "D", "E", "F", "G", "A", "B"];
+const ROOTS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
 const INSTRUMENTS: { id: InstrumentId; label: string; beginnerTip: string; startingNotes: string[]; curio: string; challenge: string }[] = [
   { 
@@ -423,6 +423,7 @@ function ProfessorPage() {
 
   const instrument = INSTRUMENTS.find((i) => i.id === instrumentId)!;
   const isMelodic = instrumentId === "sax" || instrumentId === "violino" || instrumentId === "flauta" || instrumentId === "baixo" || instrumentId === "bateria";
+  const isScale = chord.family === "scale";
 
   const chordPcs = useMemo(() => new Set(chord.intervals.map((s) => (pcOf(root) + s + 120) % 12)), [chord, root]);
   const chordNoteNames = useMemo(() => chord.intervals.map((s) => nameOfPc(pcOf(root) + s)), [chord, root]);
@@ -512,25 +513,28 @@ function ProfessorPage() {
             </div>
           </div>
 
-          {isMelodic && (
-            <div className="mb-3">
-              <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Escalas Completas</div>
-              <div className="flex flex-wrap gap-1.5">
-                {SCALES.map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => setChord(c)}
-                    className={cn(
-                      "rounded-md border px-3 py-1.5 text-xs font-medium transition-all",
-                      c.id === chord.id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background hover:bg-secondary",
-                    )}
-                  >
-                    {root}{c.suffix}
-                  </button>
-                ))}
-              </div>
+          <div className="mb-3">
+            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Escalas maiores e menores — todos os 12 tons
             </div>
-          )}
+            <div className="flex flex-wrap gap-1.5">
+              {SCALES.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setChord(c)}
+                  className={cn(
+                    "rounded-md border px-3 py-1.5 text-xs font-medium transition-all",
+                    c.id === chord.id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background hover:bg-secondary",
+                  )}
+                >
+                  {root}{c.suffix} · {c.label}
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              Escolha qualquer tom acima e a escala aqui: o diagrama e o áudio mostram a escala completa de {root} no {instrument.label}.
+            </p>
+          </div>
 
           {!isMelodic && (
             <>
@@ -550,51 +554,8 @@ function ProfessorPage() {
                     </button>
                   ))}
                 </div>
-        {/* Seção Complementar: Curiosidades e Desafios */}
-        <section className="mt-8 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-5">
-            <div className="mb-3 flex items-center gap-2 text-blue-500">
-              <Info className="h-5 w-5" />
-              <h3 className="font-display font-semibold">Você sabia?</h3>
-            </div>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {instrument.curio}
-            </p>
-          </div>
+              </div>
 
-          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-5">
-            <div className="mb-3 flex items-center gap-2 text-amber-500">
-              <Lightbulb className="h-5 w-5" />
-              <h3 className="font-display font-semibold">Desafio do Professor</h3>
-            </div>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {instrument.challenge}
-            </p>
-          </div>
-        </section>
-
-        {/* Guia de Próximos Passos */}
-        <section className="mt-6 rounded-xl border border-border bg-card p-5">
-          <div className="mb-4 flex items-center gap-2 text-primary">
-            <Music className="h-5 w-5" />
-            <h3 className="font-display font-semibold">Próximos Passos Sugeridos</h3>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg bg-background/50 p-3 text-center">
-              <div className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Teoria</div>
-              <p className="text-xs">Estude o Campo Harmônico em 'Estudar'</p>
-            </div>
-            <div className="rounded-lg bg-background/50 p-3 text-center">
-              <div className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Técnica</div>
-              <p className="text-xs">Pratique Pentatônicas na aba 'Escalas'</p>
-            </div>
-            <div className="rounded-lg bg-background/50 p-3 text-center">
-              <div className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Ouvido</div>
-              <p className="text-xs">Tente tirar uma música simples de 2 acordes</p>
-            </div>
-          </div>
-        </section>
-      </div>
 
               <div className="mb-3">
                 <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tétrades (4 notas)</div>
@@ -619,7 +580,7 @@ function ProfessorPage() {
           <div className="rounded-lg border border-primary/30 bg-background/40 p-3">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <div>
-                <span className="text-xs text-muted-foreground">{isMelodic ? "Sequência selecionada" : "Acorde selecionado"}</span>
+                <span className="text-xs text-muted-foreground">{isScale ? "Escala selecionada" : "Acorde selecionado"}</span>
                 <div className="font-display text-2xl font-bold text-primary">
                   {root}{chord.suffix} <span className="text-sm font-normal text-muted-foreground">({chord.label})</span>
                 </div>
@@ -632,10 +593,10 @@ function ProfessorPage() {
                 </div>
               </div>
               <button
-                onClick={() => isMelodic ? playMelodySequence(chord.intervals, root, instrumentId) : playChord(chord.intervals, root, instrumentId)}
+                onClick={() => (isScale ? playMelodySequence(chord.intervals, root, instrumentId) : playChord(chord.intervals, root, instrumentId))}
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
               >
-                <Volume2 className="h-4 w-4" /> {isMelodic ? "Ouvir sequência" : "Ouvir o acorde"}
+                <Volume2 className="h-4 w-4" /> {isScale ? "Ouvir escala" : "Ouvir o acorde"}
               </button>
             </div>
 
@@ -686,6 +647,47 @@ function ProfessorPage() {
             <ChordListener chord={chord} root={root} instrument={instrumentId} />
           </section>
         )}
+
+        {/* Seção Complementar: Curiosidades e Desafios */}
+        <section className="mt-8 grid gap-4 sm:grid-cols-2">
+          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-5">
+            <div className="mb-3 flex items-center gap-2 text-blue-500">
+              <Info className="h-5 w-5" />
+              <h3 className="font-display font-semibold">Você sabia?</h3>
+            </div>
+            <p className="text-sm leading-relaxed text-muted-foreground">{instrument.curio}</p>
+          </div>
+
+          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-5">
+            <div className="mb-3 flex items-center gap-2 text-amber-500">
+              <Lightbulb className="h-5 w-5" />
+              <h3 className="font-display font-semibold">Desafio do Professor</h3>
+            </div>
+            <p className="text-sm leading-relaxed text-muted-foreground">{instrument.challenge}</p>
+          </div>
+        </section>
+
+        {/* Guia de Próximos Passos */}
+        <section className="mt-6 rounded-xl border border-border bg-card p-5">
+          <div className="mb-4 flex items-center gap-2 text-primary">
+            <Music className="h-5 w-5" />
+            <h3 className="font-display font-semibold">Próximos Passos Sugeridos</h3>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-lg bg-background/50 p-3 text-center">
+              <div className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Teoria</div>
+              <p className="text-xs">Estude o Campo Harmônico em 'Estudar'</p>
+            </div>
+            <div className="rounded-lg bg-background/50 p-3 text-center">
+              <div className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Técnica</div>
+              <p className="text-xs">Pratique Pentatônicas na aba 'Escalas'</p>
+            </div>
+            <div className="rounded-lg bg-background/50 p-3 text-center">
+              <div className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Ouvido</div>
+              <p className="text-xs">Tente tirar uma música simples de 2 acordes</p>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
