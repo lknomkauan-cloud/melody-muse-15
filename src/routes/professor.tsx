@@ -423,6 +423,7 @@ function ProfessorPage() {
 
   const instrument = INSTRUMENTS.find((i) => i.id === instrumentId)!;
   const isMelodic = instrumentId === "sax" || instrumentId === "violino" || instrumentId === "flauta" || instrumentId === "baixo" || instrumentId === "bateria";
+  const isScale = chord.family === "scale";
 
   const chordPcs = useMemo(() => new Set(chord.intervals.map((s) => (pcOf(root) + s + 120) % 12)), [chord, root]);
   const chordNoteNames = useMemo(() => chord.intervals.map((s) => nameOfPc(pcOf(root) + s)), [chord, root]);
