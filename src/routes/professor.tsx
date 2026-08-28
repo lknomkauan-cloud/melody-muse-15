@@ -404,6 +404,43 @@ async function playMelodySequence(pcs: number[], root: string, instrument: Instr
 
 
 
+/* ---------- Harmonização: campo harmônico da escala em tríades e tétrades ---------- */
+
+const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII"];
+
+function findKind(list: ChordKind[], intervals: number[]): ChordKind | null {
+  const key = intervals.join(",");
+  return list.find((c) => c.intervals.join(",") === key) ?? null;
+}
+
+type Degree = {
+  roman: string;
+  rootName: string;
+  triad: ChordKind;
+  tetrad: ChordKind;
+};
+
+function harmonizeScale(scale: ChordKind, rootNote: string): Degree[] {
+  const pcs = scale.intervals.slice(0, 7);
+  const rootPc = pcOf(rootNote);
+  return pcs.map((base, i) => {
+    const rel = (n: number) => ((n - base) % 12 + 12) % 12;
+    const t3 = rel(pcs[(i + 2) % 7]);
+    const t5 = rel(pcs[(i + 4) % 7]);
+    const t7 = rel(pcs[(i + 6) % 7]);
+    const triadInts = [0, t3, t5];
+    const tetradInts = [0, t3, t5, t7];
+    const degName = nameOfPc(rootPc + base);
+    const triad = findKind(TRIADS, triadInts) ?? { id: `deg${i}-tri`, label: "Alterada", suffix: "alt", intervals: triadInts, family: "triad" as const };
+    const tetrad = findKind(TETRADS, tetradInts) ?? { id: `deg${i}-tet`, label: "Alterada", suffix: "alt7", intervals: tetradInts, family: "tetrad" as const };
+    let roman = ROMAN[i];
+    if (t3 === 3) roman = roman.toLowerCase();
+    if (t5 === 6) roman += "°";
+    if (t5 === 8) roman += "+";
+    return { roman, rootName: degName, triad, tetrad };
+  });
+}
+
 /* ---------- Página ---------- */
 
 function ProfessorPage() {
@@ -424,6 +461,9 @@ function ProfessorPage() {
   const instrument = INSTRUMENTS.find((i) => i.id === instrumentId)!;
   const isMelodic = instrumentId === "sax" || instrumentId === "violino" || instrumentId === "flauta" || instrumentId === "baixo" || instrumentId === "bateria";
   const isScale = chord.family === "scale";
+  const [scaleId, setScaleId] = useState<string>(SCALES[0].id);
+  const scaleForField = SCALES.find((s) => s.id === scaleId) ?? SCALES[0];
+  const degrees = useMemo(() => harmonizeScale(scaleForField, root), [scaleForField, root]);
 
   const chordPcs = useMemo(() => new Set(chord.intervals.map((s) => (pcOf(root) + s + 120) % 12)), [chord, root]);
   const chordNoteNames = useMemo(() => chord.intervals.map((s) => nameOfPc(pcOf(root) + s)), [chord, root]);
@@ -521,7 +561,7 @@ function ProfessorPage() {
               {SCALES.map((c) => (
                 <button
                   key={c.id}
-                  onClick={() => setChord(c)}
+                  onClick={() => { setChord(c); setScaleId(c.id); }}
                   className={cn(
                     "rounded-md border px-3 py-1.5 text-xs font-medium transition-all",
                     c.id === chord.id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background hover:bg-secondary",
@@ -534,6 +574,37 @@ function ProfessorPage() {
             <p className="mt-2 text-[11px] text-muted-foreground">
               Escolha qualquer tom acima e a escala aqui: o diagrama e o áudio mostram a escala completa de {root} no {instrument.label}.
             </p>
+          </div>
+
+          {/* Escala montada em acordes: tríades e tétrades de cada grau */}
+          <div className="mb-4 rounded-lg border border-border bg-background/40 p-3">
+            <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Escala montada em acordes — {root} {scaleForField.label}
+            </div>
+            <p className="mb-3 text-[11px] text-muted-foreground">
+              Cada grau da escala vira um acorde. Clique para ver o desenho no {instrument.label} e ouvir.
+            </p>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+              {degrees.map((d, i) => (
+                <div key={i} className="rounded-lg border border-border bg-card p-2 text-center">
+                  <div className="text-[11px] font-bold text-primary">{d.roman}</div>
+                  <button
+                    onClick={() => { setRoot(d.rootName); setChord(d.triad); playChord(d.triad.intervals, d.rootName, instrumentId); }}
+                    className="mt-1 w-full rounded-md border border-primary/30 bg-primary/10 px-1 py-1 text-xs font-semibold text-primary hover:bg-primary/20"
+                    title="Tríade"
+                  >
+                    {d.rootName}{d.triad.suffix || ""}
+                  </button>
+                  <button
+                    onClick={() => { setRoot(d.rootName); setChord(d.tetrad); playChord(d.tetrad.intervals, d.rootName, instrumentId); }}
+                    className="mt-1 w-full rounded-md border border-border bg-secondary px-1 py-1 text-[11px] font-medium hover:bg-secondary/70"
+                    title="Tétrade"
+                  >
+                    {d.rootName}{d.tetrad.suffix}
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
 
           {!isMelodic && (
