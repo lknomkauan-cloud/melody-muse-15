@@ -573,6 +573,37 @@ function ProfessorPage() {
             </p>
           </div>
 
+          {/* Escala montada em acordes: tríades e tétrades de cada grau */}
+          <div className="mb-4 rounded-lg border border-border bg-background/40 p-3">
+            <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Escala montada em acordes — {root} {scaleForField.label}
+            </div>
+            <p className="mb-3 text-[11px] text-muted-foreground">
+              Cada grau da escala vira um acorde. Clique para ver o desenho no {instrument.label} e ouvir.
+            </p>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+              {degrees.map((d, i) => (
+                <div key={i} className="rounded-lg border border-border bg-card p-2 text-center">
+                  <div className="text-[11px] font-bold text-primary">{d.roman}</div>
+                  <button
+                    onClick={() => { setRoot(d.rootName); setChord(d.triad); playChord(d.triad.intervals, d.rootName, instrumentId); }}
+                    className="mt-1 w-full rounded-md border border-primary/30 bg-primary/10 px-1 py-1 text-xs font-semibold text-primary hover:bg-primary/20"
+                    title="Tríade"
+                  >
+                    {d.rootName}{d.triad.suffix || ""}
+                  </button>
+                  <button
+                    onClick={() => { setRoot(d.rootName); setChord(d.tetrad); playChord(d.tetrad.intervals, d.rootName, instrumentId); }}
+                    className="mt-1 w-full rounded-md border border-border bg-secondary px-1 py-1 text-[11px] font-medium hover:bg-secondary/70"
+                    title="Tétrade"
+                  >
+                    {d.rootName}{d.tetrad.suffix}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {!isMelodic && (
             <>
               <div className="mb-3">
