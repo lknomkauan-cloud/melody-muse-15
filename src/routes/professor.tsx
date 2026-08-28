@@ -647,6 +647,47 @@ function ProfessorPage() {
             <ChordListener chord={chord} root={root} instrument={instrumentId} />
           </section>
         )}
+
+        {/* Seção Complementar: Curiosidades e Desafios */}
+        <section className="mt-8 grid gap-4 sm:grid-cols-2">
+          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-5">
+            <div className="mb-3 flex items-center gap-2 text-blue-500">
+              <Info className="h-5 w-5" />
+              <h3 className="font-display font-semibold">Você sabia?</h3>
+            </div>
+            <p className="text-sm leading-relaxed text-muted-foreground">{instrument.curio}</p>
+          </div>
+
+          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-5">
+            <div className="mb-3 flex items-center gap-2 text-amber-500">
+              <Lightbulb className="h-5 w-5" />
+              <h3 className="font-display font-semibold">Desafio do Professor</h3>
+            </div>
+            <p className="text-sm leading-relaxed text-muted-foreground">{instrument.challenge}</p>
+          </div>
+        </section>
+
+        {/* Guia de Próximos Passos */}
+        <section className="mt-6 rounded-xl border border-border bg-card p-5">
+          <div className="mb-4 flex items-center gap-2 text-primary">
+            <Music className="h-5 w-5" />
+            <h3 className="font-display font-semibold">Próximos Passos Sugeridos</h3>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-lg bg-background/50 p-3 text-center">
+              <div className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Teoria</div>
+              <p className="text-xs">Estude o Campo Harmônico em 'Estudar'</p>
+            </div>
+            <div className="rounded-lg bg-background/50 p-3 text-center">
+              <div className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Técnica</div>
+              <p className="text-xs">Pratique Pentatônicas na aba 'Escalas'</p>
+            </div>
+            <div className="rounded-lg bg-background/50 p-3 text-center">
+              <div className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Ouvido</div>
+              <p className="text-xs">Tente tirar uma música simples de 2 acordes</p>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
