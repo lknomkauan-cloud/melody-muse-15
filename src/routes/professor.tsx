@@ -512,25 +512,28 @@ function ProfessorPage() {
             </div>
           </div>
 
-          {isMelodic && (
-            <div className="mb-3">
-              <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Escalas Completas</div>
-              <div className="flex flex-wrap gap-1.5">
-                {SCALES.map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => setChord(c)}
-                    className={cn(
-                      "rounded-md border px-3 py-1.5 text-xs font-medium transition-all",
-                      c.id === chord.id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background hover:bg-secondary",
-                    )}
-                  >
-                    {root}{c.suffix}
-                  </button>
-                ))}
-              </div>
+          <div className="mb-3">
+            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Escalas maiores e menores — todos os 12 tons
             </div>
-          )}
+            <div className="flex flex-wrap gap-1.5">
+              {SCALES.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setChord(c)}
+                  className={cn(
+                    "rounded-md border px-3 py-1.5 text-xs font-medium transition-all",
+                    c.id === chord.id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background hover:bg-secondary",
+                  )}
+                >
+                  {root}{c.suffix} · {c.label}
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              Escolha qualquer tom acima e a escala aqui: o diagrama e o áudio mostram a escala completa de {root} no {instrument.label}.
+            </p>
+          </div>
 
           {!isMelodic && (
             <>
