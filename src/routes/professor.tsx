@@ -404,6 +404,43 @@ async function playMelodySequence(pcs: number[], root: string, instrument: Instr
 
 
 
+/* ---------- Harmonização: campo harmônico da escala em tríades e tétrades ---------- */
+
+const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII"];
+
+function findKind(list: ChordKind[], intervals: number[]): ChordKind | null {
+  const key = intervals.join(",");
+  return list.find((c) => c.intervals.join(",") === key) ?? null;
+}
+
+type Degree = {
+  roman: string;
+  rootName: string;
+  triad: ChordKind;
+  tetrad: ChordKind;
+};
+
+function harmonizeScale(scale: ChordKind, rootNote: string): Degree[] {
+  const pcs = scale.intervals.slice(0, 7);
+  const rootPc = pcOf(rootNote);
+  return pcs.map((base, i) => {
+    const rel = (n: number) => ((n - base) % 12 + 12) % 12;
+    const t3 = rel(pcs[(i + 2) % 7]);
+    const t5 = rel(pcs[(i + 4) % 7]);
+    const t7 = rel(pcs[(i + 6) % 7]);
+    const triadInts = [0, t3, t5];
+    const tetradInts = [0, t3, t5, t7];
+    const degName = nameOfPc(rootPc + base);
+    const triad = findKind(TRIADS, triadInts) ?? { id: `deg${i}-tri`, label: "Alterada", suffix: "alt", intervals: triadInts, family: "triad" as const };
+    const tetrad = findKind(TETRADS, tetradInts) ?? { id: `deg${i}-tet`, label: "Alterada", suffix: "alt7", intervals: tetradInts, family: "tetrad" as const };
+    let roman = ROMAN[i];
+    if (t3 === 3) roman = roman.toLowerCase();
+    if (t5 === 6) roman += "°";
+    if (t5 === 8) roman += "+";
+    return { roman, rootName: degName, triad, tetrad };
+  });
+}
+
 /* ---------- Página ---------- */
 
 function ProfessorPage() {
