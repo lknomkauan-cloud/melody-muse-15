@@ -561,7 +561,7 @@ function ProfessorPage() {
               {SCALES.map((c) => (
                 <button
                   key={c.id}
-                  onClick={() => setChord(c)}
+                  onClick={() => { setChord(c); setScaleId(c.id); }}
                   className={cn(
                     "rounded-md border px-3 py-1.5 text-xs font-medium transition-all",
                     c.id === chord.id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background hover:bg-secondary",
