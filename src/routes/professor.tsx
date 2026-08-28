@@ -102,7 +102,7 @@ const SCALES: ChordKind[] = [
   { id: "min_harm_scale", label: "Menor Harmônica", suffix: "m (Harmônica)", intervals: [0, 2, 3, 5, 7, 8, 11, 12], family: "scale" },
 ];
 
-const ROOTS = ["C", "D", "E", "F", "G", "A", "B"];
+const ROOTS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
 const INSTRUMENTS: { id: InstrumentId; label: string; beginnerTip: string; startingNotes: string[]; curio: string; challenge: string }[] = [
   { 
