@@ -393,12 +393,34 @@ function AfinadorPage() {
       </div>
 
       <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
-        <div className="mb-4 text-center text-muted-foreground">{selectedInst.descricao}</div>
+        <div className="mb-4">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2 text-center">
+            Variações de afinação
+          </div>
+          <div className="flex justify-center gap-2 flex-wrap">
+            {selectedInst.afinacoes.map((af) => (
+              <button
+                key={af.id}
+                onClick={() => setAfinacaoId(af.id)}
+                className={cn(
+                  "px-3 py-1.5 rounded-full border text-xs transition-colors",
+                  afinacao.id === af.id
+                    ? "bg-primary/15 border-primary text-primary"
+                    : "bg-background border-border hover:bg-accent",
+                )}
+              >
+                {af.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-6 text-center text-muted-foreground">{afinacao.descricao}</div>
 
         <div className="flex justify-center gap-3 flex-wrap mb-8">
-          {selectedInst.notas.map((nota) => (
+          {afinacao.notas.map((nota) => (
             <button
-              key={`${selectedInst.id}-${nota.nome}`}
+              key={`${selectedInst.id}-${afinacao.id}-${nota.nome}-${nota.rotulo ?? ""}`}
               onClick={() => tocarNota(nota)}
               className={cn(
                 "w-20 h-20 rounded-full border-2 px-1 text-center flex flex-col items-center justify-center font-bold transition-colors",
