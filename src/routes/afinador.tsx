@@ -224,6 +224,8 @@ function freqToNota(freq: number) {
 
 function AfinadorPage() {
   const [selectedInst, setSelectedInst] = useState<Instrumento>(INSTRUMENTOS[0]);
+  const [afinacaoId, setAfinacaoId] = useState<string>(INSTRUMENTOS[0].afinacoes[0].id);
+  const afinacao = selectedInst.afinacoes.find((a) => a.id === afinacaoId) ?? selectedInst.afinacoes[0];
   const [ativo, setAtivo] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [freq, setFreq] = useState(0);
