@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Mic, MicOff, Volume2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { playInstrumentNote } from "@/lib/instrument-samples";
+
 
 export const Route = createFileRoute("/afinador")({
   head: () => ({
