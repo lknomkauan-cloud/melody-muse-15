@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Mic, MicOff, Volume2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { playInstrumentNote } from "@/lib/instrument-samples";
+
 
 export const Route = createFileRoute("/afinador")({
   head: () => ({
@@ -211,6 +213,14 @@ function AfinadorPage() {
 
   const tocarNota = useCallback(
     async (nota: Nota) => {
+      setTocando(nota.nome);
+      // 1) tenta o som original do instrumento (soundfont FluidR3_GM)
+      const ok = await playInstrumentNote(selectedInst.id, `${nota.nota}${nota.oitava}`, 1.8);
+      if (ok) {
+        window.setTimeout(() => setTocando((t) => (t === nota.nome ? null : t)), 1900);
+        return;
+      }
+      // 2) fallback: tom sintetizado
       const ctx = await getCtx();
       if (oscRef.current) {
         try {
@@ -231,11 +241,11 @@ function AfinadorPage() {
       osc.start();
       osc.stop(ctx.currentTime + 1.9);
       oscRef.current = { osc, gain };
-      setTocando(nota.nome);
       osc.onended = () => setTocando((t) => (t === nota.nome ? null : t));
     },
-    [getCtx],
+    [getCtx, selectedInst.id],
   );
+
 
   useEffect(() => () => parar(), [parar]);
 
