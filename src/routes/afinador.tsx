@@ -214,6 +214,14 @@ function AfinadorPage() {
   const tocarNota = useCallback(
     async (nota: Nota) => {
       setTocando(nota.nome);
+      // 0) caixa da bateria tem timbre próprio (pele + esteira)
+      if (selectedInst.id === "bateria" && nota.rotulo?.toLowerCase().includes("caixa")) {
+        const okSnare = await playSnare(nota.freq);
+        if (okSnare) {
+          window.setTimeout(() => setTocando((t) => (t === nota.nome ? null : t)), 900);
+          return;
+        }
+      }
       // 1) tenta o som original do instrumento (soundfont FluidR3_GM)
       const ok = await playInstrumentNote(selectedInst.id, `${nota.nota}${nota.oitava}`, 1.8);
       if (ok) {
