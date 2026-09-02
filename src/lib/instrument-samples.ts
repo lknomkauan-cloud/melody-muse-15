@@ -85,6 +85,45 @@ export async function getInstrumentSampler(id: string): Promise<Tone.Sampler | n
   return entry.sampler;
 }
 
+/**
+ * Caixa (snare): membrana afinada + esteira (ruído).
+ * Nenhum soundfont GM tem caixa isolada, então sintetizamos o timbre real.
+ */
+export async function playSnare(freq: number): Promise<boolean> {
+  try {
+    await Tone.start();
+    const now = Tone.now();
+
+    // corpo da pele (duas parciais afinadas na nota alvo)
+    const bodyGain = new Tone.Gain(0.5).toDestination();
+    const body = new Tone.MembraneSynth({
+      pitchDecay: 0.02,
+      octaves: 2,
+      envelope: { attack: 0.001, decay: 0.22, sustain: 0, release: 0.05 },
+    }).connect(bodyGain);
+    body.triggerAttackRelease(freq, 0.2, now);
+
+    // esteira: ruído com banda alta
+    const noiseFilter = new Tone.Filter({ type: "highpass", frequency: 1400, Q: 0.8 }).toDestination();
+    const noise = new Tone.NoiseSynth({
+      noise: { type: "white" },
+      envelope: { attack: 0.001, decay: 0.16, sustain: 0 },
+    }).connect(noiseFilter);
+    noise.triggerAttackRelease(0.15, now);
+
+    window.setTimeout(() => {
+      body.dispose();
+      bodyGain.dispose();
+      noise.dispose();
+      noiseFilter.dispose();
+    }, 1200);
+    return true;
+  } catch (e) {
+    console.error("playSnare", e);
+    return false;
+  }
+}
+
 /** Toca uma nota com o timbre real; retorna false se não deu (para fallback). */
 export async function playInstrumentNote(id: string, note: string, duration = 1.8): Promise<boolean> {
   try {
