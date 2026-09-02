@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import * as Tone from "tone";
 import {
   Play,
@@ -388,7 +388,7 @@ export default function FLStudio() {
         if (prNotes) {
           for (const n of prNotes) {
             if (n.step === step) {
-              voice.trigger(time, n.note, `${Math.max(1, n.len) * 0.25}n`.replace("0.25n", "16n"), 0.85);
+              voice.trigger(time, n.note, Tone.Time("16n").toSeconds() * Math.max(1, n.len), 0.85);
             }
           }
         }
@@ -583,7 +583,7 @@ export default function FLStudio() {
           </button>
         </div>
 
-        <div className="flex items-center gap-2 rounded px-2 py-1" style={{ background: FL.panelDarkFallback ?? FL.bg }}>
+        <div className="flex items-center gap-2 rounded px-2 py-1" style={{ background: FL.bg }}>
           <span className="text-[10px] uppercase tracking-wide" style={{ color: FL.dim }}>BPM</span>
           <input
             type="number"
