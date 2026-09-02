@@ -58,21 +58,22 @@ export async function getInstrumentSampler(id: string): Promise<Tone.Sampler | n
   if (!cfg) return null;
   let entry = cache.get(id);
   if (!entry) {
-    let resolve!: () => void;
-    let reject!: (e: unknown) => void;
+    let resolveReady: () => void = () => {};
+    let rejectReady: (e: unknown) => void = () => {};
     const ready = new Promise<void>((res, rej) => {
-      resolve = res;
-      reject = rej;
+      resolveReady = res;
+      rejectReady = rej;
     });
     const sampler = new Tone.Sampler({
       urls: cfg.urls,
       baseUrl: cfg.baseUrl,
       release: 1,
-      onload: () => resolve(),
-      onerror: (e) => reject(e),
+      onload: () => resolveReady(),
+      onerror: (e) => rejectReady(e),
     }).toDestination();
     entry = { sampler, ready };
     cache.set(id, entry);
+
   }
   try {
     await entry.ready;
