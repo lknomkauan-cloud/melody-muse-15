@@ -118,7 +118,7 @@ function AfinadorPage() {
   const streamRef = useRef<MediaStream | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const rafRef = useRef<number | null>(null);
-  const bufRef = useRef<Float32Array | null>(null);
+  const bufRef = useRef<Float32Array<ArrayBuffer> | null>(null);
   const oscRef = useRef<{ osc: OscillatorNode; gain: GainNode } | null>(null);
   const centsSmooth = useRef<number | null>(null);
 
@@ -167,7 +167,7 @@ function AfinadorPage() {
       analyser.smoothingTimeConstant = 0;
       src.connect(analyser);
       analyserRef.current = analyser;
-      bufRef.current = new Float32Array(analyser.fftSize);
+      bufRef.current = new Float32Array(new ArrayBuffer(analyser.fftSize * 4));
       setAtivo(true);
 
       const loop = () => {
