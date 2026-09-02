@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import React, { useState } from "react";
-import ReaperStudio from "@/components/ReaperStudio";
+import FLStudio from "@/components/FLStudio";
 import {
   Sliders,
   BookOpen,
@@ -54,7 +54,7 @@ function MixagemPage() {
             <div>
               <h1 className="font-display text-3xl font-bold text-foreground">Mixagem</h1>
               <p className="text-sm text-muted-foreground">
-                Aprenda a mixar e produza no estúdio estilo Reaper com plugins Web (WAM).
+                Aprenda a mixar e produza no estúdio estilo FL Studio: Channel Rack, Piano Roll, Playlist e Mixer.
               </p>
             </div>
           </div>
@@ -65,11 +65,11 @@ function MixagemPage() {
             Teoria & Guia
           </TabButton>
           <TabButton active={tab === "estudio"} onClick={() => setTab("estudio")} icon={<Layers className="h-4 w-4" />}>
-            Estúdio (DAW)
+            Estúdio (FL Style)
           </TabButton>
         </div>
 
-        {tab === "teoria" ? <TeoriaPanel /> : <ReaperStudio />}
+        {tab === "teoria" ? <TeoriaPanel /> : <FLStudio />}
       </div>
     </div>
   );
