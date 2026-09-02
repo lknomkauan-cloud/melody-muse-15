@@ -363,8 +363,8 @@ function AfinadorPage() {
   const cents = detectada?.cents ?? 0;
   const afinado = detectada && Math.abs(cents) <= 5;
   const alvo = detectada
-    ? selectedInst.notas.find((x) => x.nota === detectada.nome && x.oitava === detectada.oitava) ??
-      selectedInst.notas.find((x) => x.nota === detectada.nome)
+    ? afinacao.notas.find((x) => x.nota === detectada.nome && x.oitava === detectada.oitava) ??
+      afinacao.notas.find((x) => x.nota === detectada.nome)
     : undefined;
 
   return (
