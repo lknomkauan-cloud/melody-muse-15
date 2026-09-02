@@ -22,7 +22,8 @@ export const Route = createFileRoute("/afinador")({
 });
 
 type Nota = { nome: string; freq: number; nota: string; oitava: number; rotulo?: string };
-type Instrumento = { id: string; label: string; descricao: string; notas: Nota[] };
+type Afinacao = { id: string; label: string; descricao: string; notas: Nota[] };
+type Instrumento = { id: string; label: string; afinacoes: Afinacao[] };
 
 const A4 = 440;
 const NOTAS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -42,28 +43,128 @@ function n(nome: string, rotulo?: string): Nota {
 }
 
 const INSTRUMENTOS: Instrumento[] = [
-  { id: "violao", label: "Violão", descricao: "E A D G B E (padrão)", notas: [n("E2"), n("A2"), n("D3"), n("G3"), n("B3"), n("E4")] },
-  { id: "guitarra", label: "Guitarra", descricao: "E A D G B E (padrão)", notas: [n("E2"), n("A2"), n("D3"), n("G3"), n("B3"), n("E4")] },
-  { id: "baixo", label: "Baixo", descricao: "E A D G (4 cordas)", notas: [n("E1"), n("A1"), n("D2"), n("G2")] },
-  { id: "violino", label: "Violino", descricao: "G D A E (quintas)", notas: [n("G3"), n("D4"), n("A4"), n("E5")] },
-  { id: "sax", label: "Saxofone", descricao: "Notas de referência (Bb / Eb)", notas: [n("Bb3"), n("D4"), n("G4"), n("C5")] },
-  { id: "flauta", label: "Flauta Doce", descricao: "Soprano em Dó", notas: [n("C5"), n("D5"), n("E5"), n("F5"), n("G5"), n("A5"), n("B5"), n("C6")] },
-  { id: "banjo", label: "Banjo", descricao: "G D G B D (5 cordas)", notas: [n("G4"), n("D3"), n("G3"), n("B3"), n("D4")] },
-  { id: "sanfona", label: "Sanfona", descricao: "Notas de referência", notas: [n("C3"), n("C4"), n("G4"), n("C5")] },
+  {
+    id: "violao",
+    label: "Violão",
+    afinacoes: [
+      { id: "padrao", label: "Padrão (E A D G B E)", descricao: "Afinação standard 440 Hz", notas: [n("E2"), n("A2"), n("D3"), n("G3"), n("B3"), n("E4")] },
+      { id: "meio-tom", label: "Meio tom abaixo (Eb)", descricao: "Eb Ab Db Gb Bb Eb — mais grave e macia", notas: [n("Eb2"), n("Ab2"), n("Db3"), n("Gb3"), n("Bb3"), n("Eb4")] },
+      { id: "drop-d", label: "Drop D", descricao: "D A D G B E — 6ª corda em Ré", notas: [n("D2"), n("A2"), n("D3"), n("G3"), n("B3"), n("E4")] },
+      { id: "dadgad", label: "DADGAD (celta)", descricao: "D A D G A D — sonoridade modal", notas: [n("D2"), n("A2"), n("D3"), n("G3"), n("A3"), n("D4")] },
+      { id: "open-g", label: "Open G", descricao: "D G D G B D — blues e slide", notas: [n("D2"), n("G2"), n("D3"), n("G3"), n("B3"), n("D4")] },
+      { id: "open-d", label: "Open D", descricao: "D A D F# A D — slide e fingerstyle", notas: [n("D2"), n("A2"), n("D3"), n("F#3"), n("A3"), n("D4")] },
+      { id: "nashville", label: "Tom inteiro abaixo (D)", descricao: "D G C F A D — som pesado", notas: [n("D2"), n("G2"), n("C3"), n("F3"), n("A3"), n("D4")] },
+    ],
+  },
+  {
+    id: "guitarra",
+    label: "Guitarra",
+    afinacoes: [
+      { id: "padrao", label: "Padrão (E A D G B E)", descricao: "Afinação standard 440 Hz", notas: [n("E2"), n("A2"), n("D3"), n("G3"), n("B3"), n("E4")] },
+      { id: "eb", label: "Meio tom abaixo (Eb)", descricao: "Eb Ab Db Gb Bb Eb — rock/blues", notas: [n("Eb2"), n("Ab2"), n("Db3"), n("Gb3"), n("Bb3"), n("Eb4")] },
+      { id: "d-std", label: "Tom abaixo (D)", descricao: "D G C F A D — hard rock", notas: [n("D2"), n("G2"), n("C3"), n("F3"), n("A3"), n("D4")] },
+      { id: "drop-d", label: "Drop D", descricao: "D A D G B E — riffs com power chord", notas: [n("D2"), n("A2"), n("D3"), n("G3"), n("B3"), n("E4")] },
+      { id: "drop-c", label: "Drop C", descricao: "C G C F A D — metal moderno", notas: [n("C2"), n("G2"), n("C3"), n("F3"), n("A3"), n("D4")] },
+      { id: "drop-b", label: "Drop B", descricao: "B F# B E G# C# — metal pesado", notas: [n("B1"), n("F#2"), n("B2"), n("E3"), n("G#3"), n("C#4")] },
+      { id: "sete", label: "7 cordas (B padrão)", descricao: "B E A D G B E", notas: [n("B1"), n("E2"), n("A2"), n("D3"), n("G3"), n("B3"), n("E4")] },
+      { id: "open-g", label: "Open G", descricao: "D G D G B D — slide", notas: [n("D2"), n("G2"), n("D3"), n("G3"), n("B3"), n("D4")] },
+    ],
+  },
+  {
+    id: "baixo",
+    label: "Baixo",
+    afinacoes: [
+      { id: "4c", label: "4 cordas padrão", descricao: "E A D G", notas: [n("E1"), n("A1"), n("D2"), n("G2")] },
+      { id: "4c-eb", label: "4 cordas meio tom abaixo", descricao: "Eb Ab Db Gb", notas: [n("Eb1"), n("Ab1"), n("Db2"), n("Gb2")] },
+      { id: "4c-drop-d", label: "4 cordas Drop D", descricao: "D A D G", notas: [n("D1"), n("A1"), n("D2"), n("G2")] },
+      { id: "5c", label: "5 cordas", descricao: "B E A D G", notas: [n("B0"), n("E1"), n("A1"), n("D2"), n("G2")] },
+      { id: "6c", label: "6 cordas", descricao: "B E A D G C", notas: [n("B0"), n("E1"), n("A1"), n("D2"), n("G2"), n("C3")] },
+    ],
+  },
+  {
+    id: "violino",
+    label: "Violino",
+    afinacoes: [
+      { id: "padrao", label: "Padrão (quintas)", descricao: "G D A E — A4 = 440 Hz", notas: [n("G3"), n("D4"), n("A4"), n("E5")] },
+      { id: "barroca", label: "Barroca (A = 415)", descricao: "Diapasão barroco, meio tom abaixo", notas: [n("Gb3"), n("Db4"), n("Ab4"), n("Eb5")] },
+      { id: "fiddle-aeae", label: "Fiddle AEAE", descricao: "A E A E — country/old-time", notas: [n("A3"), n("E4"), n("A4"), n("E5")] },
+      { id: "fiddle-gdgd", label: "Fiddle GDGD", descricao: "G D G D — sonoridade modal", notas: [n("G3"), n("D4"), n("G4"), n("D5")] },
+      { id: "viola", label: "Viola (C G D A)", descricao: "Para quem toca viola de arco", notas: [n("C3"), n("G3"), n("D4"), n("A4")] },
+    ],
+  },
+  {
+    id: "sax",
+    label: "Saxofone",
+    afinacoes: [
+      { id: "alto", label: "Alto (Eb)", descricao: "Notas escritas F#, C, A, D — confira o Lá de concerto", notas: [n("Db4"), n("Eb4"), n("Ab4"), n("Bb4")] },
+      { id: "tenor", label: "Tenor (Bb)", descricao: "Referências de aquecimento", notas: [n("Bb3"), n("D4"), n("F4"), n("Bb4")] },
+      { id: "soprano", label: "Soprano (Bb)", descricao: "Registro mais agudo", notas: [n("Bb4"), n("D5"), n("F5"), n("Bb5")] },
+      { id: "baritono", label: "Barítono (Eb)", descricao: "Registro grave", notas: [n("Db3"), n("Eb3"), n("Ab3"), n("Bb3")] },
+    ],
+  },
+  {
+    id: "flauta",
+    label: "Flauta Doce",
+    afinacoes: [
+      { id: "soprano", label: "Soprano em Dó", descricao: "Escala de Dó — dedilhado barroco ou germânico", notas: [n("C5"), n("D5"), n("E5"), n("F5"), n("G5"), n("A5"), n("B5"), n("C6")] },
+      { id: "contralto", label: "Contralto em Fá", descricao: "Escala de Fá", notas: [n("F4"), n("G4"), n("A4"), n("Bb4"), n("C5"), n("D5"), n("E5"), n("F5")] },
+      { id: "tenor", label: "Tenor em Dó", descricao: "Uma oitava abaixo da soprano", notas: [n("C4"), n("D4"), n("E4"), n("F4"), n("G4"), n("A4"), n("B4"), n("C5")] },
+      { id: "baixo", label: "Baixo em Fá", descricao: "Registro grave", notas: [n("F3"), n("G3"), n("A3"), n("Bb3"), n("C4"), n("D4"), n("E4"), n("F4")] },
+    ],
+  },
+  {
+    id: "banjo",
+    label: "Banjo",
+    afinacoes: [
+      { id: "open-g", label: "Open G (5 cordas)", descricao: "G D G B D — bluegrass", notas: [n("G4"), n("D3"), n("G3"), n("B3"), n("D4")] },
+      { id: "double-c", label: "Double C", descricao: "G C G C D — old-time", notas: [n("G4"), n("C3"), n("G3"), n("C4"), n("D4")] },
+      { id: "sawmill", label: "Sawmill (G modal)", descricao: "G D G C D — sonoridade modal", notas: [n("G4"), n("D3"), n("G3"), n("C4"), n("D4")] },
+      { id: "open-d", label: "Open D", descricao: "F# D F# A D", notas: [n("F#4"), n("D3"), n("F#3"), n("A3"), n("D4")] },
+      { id: "tenor", label: "Tenor (4 cordas)", descricao: "C G D A — quintas", notas: [n("C3"), n("G3"), n("D4"), n("A4")] },
+    ],
+  },
+  {
+    id: "sanfona",
+    label: "Sanfona",
+    afinacoes: [
+      { id: "referencia", label: "Referência (440 Hz)", descricao: "Compare palheta por palheta", notas: [n("C3"), n("C4"), n("G4"), n("C5")] },
+      { id: "sol-do", label: "8 baixos Sol/Dó", descricao: "Tons de G e C", notas: [n("G3"), n("C4"), n("G4"), n("C5")] },
+      { id: "gcf", label: "Diatônica G C F", descricao: "Três fileiras — forró", notas: [n("G3"), n("C4"), n("F4"), n("G4")] },
+      { id: "musette", label: "Musette (afinação batida)", descricao: "Palhetas levemente desafinadas: ±12 cents propositais", notas: [n("A4"), n("C5"), n("E5"), n("A5")] },
+    ],
+  },
   {
     id: "bateria",
     label: "Bateria",
-    descricao: "Afinação de peles — bata no centro da pele e compare a nota fundamental de cada peça",
-    notas: [
-      n("F1", "Bumbo 22\""),
-      n("A1", "Surdo 16\""),
-      n("C2", "Tom 3 (14\")"),
-      n("F2", "Tom 2 (12\")"),
-      n("A2", "Tom 1 (10\")"),
-      n("D3", "Caixa 14\""),
+    afinacoes: [
+      {
+        id: "rock",
+        label: "Rock (médio)",
+        descricao: "Bata no centro da pele e compare a nota fundamental de cada peça",
+        notas: [n("F1", 'Bumbo 22"'), n("A1", 'Surdo 16"'), n("C2", 'Tom 3 (14")'), n("F2", 'Tom 2 (12")'), n("A2", 'Tom 1 (10")'), n("D3", 'Caixa 14"')],
+      },
+      {
+        id: "grave",
+        label: "Grave (aberta)",
+        descricao: "Peles mais soltas — som profundo, ideal para gospel/pop",
+        notas: [n("D1", 'Bumbo 22"'), n("G1", 'Surdo 16"'), n("A1", 'Tom 3 (14")'), n("D2", 'Tom 2 (12")'), n("G2", 'Tom 1 (10")'), n("C3", 'Caixa 14"')],
+      },
+      {
+        id: "aguda",
+        label: "Aguda (jazz/fusion)",
+        descricao: "Peles esticadas — ataque curto e cantante",
+        notas: [n("G1", 'Bumbo 20"'), n("C2", 'Surdo 14"'), n("E2", 'Tom 3 (13")'), n("A2", 'Tom 2 (12")'), n("C3", 'Tom 1 (10")'), n("F3", 'Caixa 14"')],
+      },
     ],
   },
-  { id: "cromatico", label: "Cromático", descricao: "Qualquer nota (A4 = 440 Hz)", notas: [n("C3"), n("E3"), n("G3"), n("C4"), n("E4"), n("G4"), n("C5")] },
+  {
+    id: "cromatico",
+    label: "Cromático",
+    afinacoes: [
+      { id: "a440", label: "A4 = 440 Hz", descricao: "Qualquer nota, referência padrão", notas: [n("C3"), n("E3"), n("G3"), n("C4"), n("E4"), n("G4"), n("C5")] },
+      { id: "cromatica", label: "Cromática completa", descricao: "Todas as 12 notas na oitava 4", notas: [n("C4"), n("C#4"), n("D4"), n("D#4"), n("E4"), n("F4"), n("F#4"), n("G4"), n("G#4"), n("A4"), n("A#4"), n("B4")] },
+    ],
+  },
 ];
 
 /* ---------- detecção de pitch (autocorrelação normalizada) ---------- */
@@ -123,6 +224,8 @@ function freqToNota(freq: number) {
 
 function AfinadorPage() {
   const [selectedInst, setSelectedInst] = useState<Instrumento>(INSTRUMENTOS[0]);
+  const [afinacaoId, setAfinacaoId] = useState<string>(INSTRUMENTOS[0].afinacoes[0].id);
+  const afinacao = selectedInst.afinacoes.find((a) => a.id === afinacaoId) ?? selectedInst.afinacoes[0];
   const [ativo, setAtivo] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [freq, setFreq] = useState(0);
@@ -260,8 +363,8 @@ function AfinadorPage() {
   const cents = detectada?.cents ?? 0;
   const afinado = detectada && Math.abs(cents) <= 5;
   const alvo = detectada
-    ? selectedInst.notas.find((x) => x.nota === detectada.nome && x.oitava === detectada.oitava) ??
-      selectedInst.notas.find((x) => x.nota === detectada.nome)
+    ? afinacao.notas.find((x) => x.nota === detectada.nome && x.oitava === detectada.oitava) ??
+      afinacao.notas.find((x) => x.nota === detectada.nome)
     : undefined;
 
   return (
@@ -273,7 +376,10 @@ function AfinadorPage() {
         {INSTRUMENTOS.map((inst) => (
           <button
             key={inst.id}
-            onClick={() => setSelectedInst(inst)}
+            onClick={() => {
+              setSelectedInst(inst);
+              setAfinacaoId(inst.afinacoes[0].id);
+            }}
             className={cn(
               "px-4 py-2 rounded-lg border text-sm transition-all",
               selectedInst.id === inst.id
@@ -287,12 +393,34 @@ function AfinadorPage() {
       </div>
 
       <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
-        <div className="mb-4 text-center text-muted-foreground">{selectedInst.descricao}</div>
+        <div className="mb-4">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2 text-center">
+            Variações de afinação
+          </div>
+          <div className="flex justify-center gap-2 flex-wrap">
+            {selectedInst.afinacoes.map((af) => (
+              <button
+                key={af.id}
+                onClick={() => setAfinacaoId(af.id)}
+                className={cn(
+                  "px-3 py-1.5 rounded-full border text-xs transition-colors",
+                  afinacao.id === af.id
+                    ? "bg-primary/15 border-primary text-primary"
+                    : "bg-background border-border hover:bg-accent",
+                )}
+              >
+                {af.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-6 text-center text-muted-foreground">{afinacao.descricao}</div>
 
         <div className="flex justify-center gap-3 flex-wrap mb-8">
-          {selectedInst.notas.map((nota) => (
+          {afinacao.notas.map((nota) => (
             <button
-              key={`${selectedInst.id}-${nota.nome}`}
+              key={`${selectedInst.id}-${afinacao.id}-${nota.nome}-${nota.rotulo ?? ""}`}
               onClick={() => tocarNota(nota)}
               className={cn(
                 "w-20 h-20 rounded-full border-2 px-1 text-center flex flex-col items-center justify-center font-bold transition-colors",
