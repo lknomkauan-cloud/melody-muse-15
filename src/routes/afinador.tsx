@@ -19,7 +19,7 @@ export const Route = createFileRoute("/afinador")({
   component: AfinadorPage,
 });
 
-type Nota = { nome: string; freq: number; nota: string; oitava: number };
+type Nota = { nome: string; freq: number; nota: string; oitava: number; rotulo?: string };
 type Instrumento = { id: string; label: string; descricao: string; notas: Nota[] };
 
 const A4 = 440;
@@ -28,7 +28,7 @@ const ENARMONICOS: Record<string, string> = {
   Db: "C#", Eb: "D#", Gb: "F#", Ab: "G#", Bb: "A#",
 };
 
-function n(nome: string): Nota {
+function n(nome: string, rotulo?: string): Nota {
   const match = nome.match(/^([A-G][#b]?)(-?\d+)$/);
   if (!match) throw new Error(`nota inválida: ${nome}`);
   const [, rawPitch, octStr] = match;
@@ -36,7 +36,7 @@ function n(nome: string): Nota {
   const idx = NOTAS.indexOf(pitch);
   const oct = parseInt(octStr, 10);
   const midi = (oct + 1) * 12 + idx;
-  return { nome, freq: A4 * Math.pow(2, (midi - 69) / 12), nota: pitch, oitava: oct };
+  return { nome, freq: A4 * Math.pow(2, (midi - 69) / 12), nota: pitch, oitava: oct, rotulo };
 }
 
 const INSTRUMENTOS: Instrumento[] = [
@@ -48,6 +48,19 @@ const INSTRUMENTOS: Instrumento[] = [
   { id: "flauta", label: "Flauta Doce", descricao: "Soprano em Dó", notas: [n("C5"), n("D5"), n("E5"), n("F5"), n("G5"), n("A5"), n("B5"), n("C6")] },
   { id: "banjo", label: "Banjo", descricao: "G D G B D (5 cordas)", notas: [n("G4"), n("D3"), n("G3"), n("B3"), n("D4")] },
   { id: "sanfona", label: "Sanfona", descricao: "Notas de referência", notas: [n("C3"), n("C4"), n("G4"), n("C5")] },
+  {
+    id: "bateria",
+    label: "Bateria",
+    descricao: "Afinação de peles — bata no centro da pele e compare a nota fundamental de cada peça",
+    notas: [
+      n("F1", "Bumbo 22\""),
+      n("A1", "Surdo 16\""),
+      n("C2", "Tom 3 (14\")"),
+      n("F2", "Tom 2 (12\")"),
+      n("A2", "Tom 1 (10\")"),
+      n("D3", "Caixa 14\""),
+    ],
+  },
   { id: "cromatico", label: "Cromático", descricao: "Qualquer nota (A4 = 440 Hz)", notas: [n("C3"), n("E3"), n("G3"), n("C4"), n("E4"), n("G4"), n("C5")] },
 ];
 
@@ -264,13 +277,16 @@ function AfinadorPage() {
               key={`${selectedInst.id}-${nota.nome}`}
               onClick={() => tocarNota(nota)}
               className={cn(
-                "w-16 h-16 rounded-full border-2 flex flex-col items-center justify-center font-bold transition-colors",
+                "w-20 h-20 rounded-full border-2 px-1 text-center flex flex-col items-center justify-center font-bold transition-colors",
                 tocando === nota.nome ? "border-primary bg-primary/15" : "border-primary/25 hover:bg-primary/5",
                 alvo?.nome === nota.nome && afinado && "border-emerald-500 bg-emerald-500/15",
               )}
             >
               <span className="text-lg">{nota.nome}</span>
               <span className="text-[10px] text-muted-foreground">{nota.freq.toFixed(1)}Hz</span>
+              {nota.rotulo && (
+                <span className="text-[9px] leading-tight text-muted-foreground">{nota.rotulo}</span>
+              )}
             </button>
           ))}
         </div>
