@@ -376,7 +376,10 @@ function AfinadorPage() {
         {INSTRUMENTOS.map((inst) => (
           <button
             key={inst.id}
-            onClick={() => setSelectedInst(inst)}
+            onClick={() => {
+              setSelectedInst(inst);
+              setAfinacaoId(inst.afinacoes[0].id);
+            }}
             className={cn(
               "px-4 py-2 rounded-lg border text-sm transition-all",
               selectedInst.id === inst.id
