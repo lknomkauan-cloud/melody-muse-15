@@ -22,7 +22,8 @@ export const Route = createFileRoute("/afinador")({
 });
 
 type Nota = { nome: string; freq: number; nota: string; oitava: number; rotulo?: string };
-type Instrumento = { id: string; label: string; descricao: string; notas: Nota[] };
+type Afinacao = { id: string; label: string; descricao: string; notas: Nota[] };
+type Instrumento = { id: string; label: string; afinacoes: Afinacao[] };
 
 const A4 = 440;
 const NOTAS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
